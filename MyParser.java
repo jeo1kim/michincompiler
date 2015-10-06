@@ -6,6 +6,8 @@
 
 import java_cup.runtime.*;
 import java.util.Vector;
+import java.lang.*;
+
 
 class MyParser extends parser
 {
@@ -369,4 +371,5 @@ class MyParser extends parser
 
 		return sto.getType();
 	}
+
 }

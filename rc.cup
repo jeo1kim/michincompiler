@@ -80,8 +80,10 @@ terminal
     T_TRUE,
     T_WHILE,
     T_VOID,
+
     T_NEW,
     T_DELETE
+
     ;
 
 terminal String
@@ -151,6 +153,7 @@ non terminal
     OptArrayList,
     ArrayList,
     Array,
+
     NewStmt,
     DeleteStmt
     ;
@@ -498,8 +501,8 @@ Stmt ::=            VarDecl
     |               ReturnStmt
     |               ReadStmt
     |               WriteStmt
-    |               NewStmt
-    |               DeleteStmt
+    |               NewStmt                 // added
+    |               DeleteStmt              // added
     ;
 
 
@@ -532,6 +535,16 @@ OptRef ::=          T_AMPERSAND
 
 OptInit ::=         T_ASSIGN Expr
     |               /* empty */
+    ;
+
+//============ TOP DOWN LANG. ADDED here
+
+NewStmt ::=     T_NEW Designator OptCtorCall T_SEMI
+
+    ;
+
+DeleteStmt ::=  T_DELETE Designator T_SEMI
+
     ;
 
 
@@ -776,6 +789,18 @@ IncDecOp ::=        T_PLUSPLUS
                     :}
     ;
 
+// Add Unary Sign
+
+UnarySign ::=       T_PLUS
+                    {:
+                        RESULT = "+";
+                    :}
+    |               T_MINUS
+                    {:
+                        RESULT = "-";
+                    :}
+    ;
+
 
 Designator ::=      T_STAR Designator:_1
                     {:
@@ -850,8 +875,10 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_INT_LITERAL:_1
                     {:
-                        RESULT = new ConstSTO (_1, null  , 4);
-                        //RESULT = new ConstSTO (_1, null, 0);    // fix me!
+
+                        RESULT = new ConstSTO (_1, null , 4 );    // fix me!
+                        //RESULT = new ConstSTO (_1, null, 0);
+
                     :}
     |               T_FLOAT_LITERAL:_1
                     {:
@@ -887,18 +914,3 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     ;
 
-//follwing rules added below
-//Phase 0 (1st Week)
-NewStmt ::=         T_NEW Designator OptCtorCall T_SEMI;
-
-DeleteStmt ::=      T_DELETE Designator T_SEMI;
-
-UnarySign ::=        T_PLUS
-                    {:
-                        RESULT = "+";
-                    :}
-    |               T_MINUS
-                    {:
-                        RESULT = "-";
-                    :}
-    ;
