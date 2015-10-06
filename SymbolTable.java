@@ -37,6 +37,8 @@ class SymbolTable
 	//----------------------------------------------------------------
 	public STO accessGlobal(String strName)
 	{
+
+		System.out.println("From global scope " + " " + strName);
 		return m_scopeGlobal.access(strName);
 	}
 
