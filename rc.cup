@@ -799,6 +799,10 @@ UnarySign ::=       T_PLUS
                     {:
                         RESULT = "-";
                     :}
+    |               T_NOT
+                    {:
+                        RESULT = "!";
+                    :}
     ;
 
 
