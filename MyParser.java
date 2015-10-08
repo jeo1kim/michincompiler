@@ -390,4 +390,11 @@ class MyParser extends parser
 		return sto;
 	}
 
+	STO DoAddOp (STO a, Operator o,  STO b)
+	{
+
+
+
+	}
+
 }

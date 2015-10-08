@@ -157,11 +157,15 @@ non terminal
     DeleteStmt
     ;
 
-non terminal String    
-    AddOp,
-    MulOp,
+non terminal String
+
     IncDecOp,
     ParamDecl
+    ;
+
+non terminal Operator
+    AddOp,
+    MulOp
     ;
 
 non terminal STO
@@ -721,7 +725,7 @@ Expr6 ::=           Expr6:_1 Relation Expr7
 
 Expr7 ::=           Expr7:_1 AddOp:_2 Expr8:_3
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoAddOp (_1, _2 ,_3); //add Op
                     :}
     |               Expr8:_1
                     {:
@@ -755,26 +759,26 @@ Relation ::=        T_LT
 
 AddOp ::=           T_PLUS
                     {:
-                        RESULT = "+";
+                        RESULT = new AddOp("+");
                     :}
     |               T_MINUS
                     {:
-                        RESULT = "-";
+                        RESULT = new MinusOp("-");
                     :}
     ;
 
 
 MulOp ::=           T_STAR
                     {:
-                        RESULT = "*";
+                        RESULT = new MulOp("+");
                     :}
     |               T_SLASH
                     {:
-                        RESULT = "/";
+                        RESULT = new DivideOp("/");
                     :}
     |               T_MOD
                     {:
-                        RESULT = "%";
+                        RESULT = new ModulOp("%");
                     :}
     ;
 
