@@ -1,4 +1,3 @@
-
 import java_cup.runtime.*;
 import java.util.Vector;
 
@@ -913,4 +912,3 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                         RESULT = ((MyParser) parser).DoDesignator3_ID (_1);
                     :}
     ;
-
