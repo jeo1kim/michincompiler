@@ -76,4 +76,5 @@ abstract class Type
 	public boolean isVoid() 	{ return false; } // where is this used?
 	public boolean isBasic()	{ return false; }
 	public boolean isComposite(){ return false; }
+	public boolean isNumeric()	{ return false; }
 }
