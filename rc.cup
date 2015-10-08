@@ -182,7 +182,7 @@ non terminal STO
     ;
 
 non terminal Type
-    BasicType,
+    TypecType,
     DecoratedBasicType,
     StructType,
     Type,
@@ -254,7 +254,7 @@ VarDecl ::=         OptStatic:_1 DecoratedType:_2 T_ID:_3 OptArrayList:_4 OptIni
     ;
 
 
-ConstDecl ::=       OptStatic:_1 T_CONST BasicType:_2 T_ID:_3 T_ASSIGN ConstExpr:_5
+ConstDecl ::=       OptStatic:_1 T_CONST TypecType:_2 T_ID:_3 T_ASSIGN ConstExpr:_5
                     {:
                         ((MyParser) parser).DoConstDecl (_3);
                     :}
@@ -408,14 +408,14 @@ DecoratedType ::=   DecoratedBasicType:_1
     ;
 
 
-DecoratedBasicType ::= BasicType:_1 OptPointerList:_2
+DecoratedBasicType ::= TypecType:_1 OptPointerList:_2
                     {:
                         RESULT = _1;    // gotta do something here!
                     :}
     ;
 
 
-BasicType ::=       T_INT
+TypecType ::=       T_INT
                     {:
                         RESULT = null;  // gotta do something here!
                     :}
