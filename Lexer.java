@@ -433,7 +433,7 @@ class Lexer
 
 		}
         //Check conversion HEX, and Octal
-		
+
 		if (bError)
 		{
 			if (token.GetCode () == sym.T_FLOAT_LITERAL)

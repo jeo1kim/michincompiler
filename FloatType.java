@@ -56,6 +56,17 @@ public class FloatType extends NumericType {
     //	change this around.
     //----------------------------------------------------------------
     public boolean  isError()   { return false; }
-    public boolean  isInt()	    { return false; }
+    public boolean  isInt()	    { return false; }// added checks for All types
+    public boolean	isBool()	{ return false; }
+    public boolean 	isArray()	{ return false;	}
+    public boolean 	isStruct()	{ return false;	}
+    public boolean 	isNullPointer() { return false; }
+    public boolean	isPointer()	{ return false; }
+    public boolean isVoid() 	{ return false; } // where is this used?
+    public boolean isComposite(){ return false; }
+
+    public boolean isNumeric()  { return true; }
+    public boolean	isFloat() 	{ return true; }
+    public boolean isBasic()	{ return false; }
 
 }

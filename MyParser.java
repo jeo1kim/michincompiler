@@ -170,7 +170,6 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	void DoVarDecl(String id)
 	{
-
 		if (m_symtab.accessLocal(id) != null)
 		{
 			m_nNumErrors++;

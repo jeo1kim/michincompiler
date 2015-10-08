@@ -537,6 +537,7 @@ OptInit ::=         T_ASSIGN Expr
     |               /* empty */
     ;
 
+
 //============ TOP DOWN LANG. ADDED here
 
 NewStmt ::=     T_NEW Designator OptCtorCall T_SEMI
@@ -789,6 +790,7 @@ IncDecOp ::=        T_PLUSPLUS
                     :}
     ;
 
+
 // Add Unary Sign
 
 UnarySign ::=       T_PLUS
@@ -879,14 +881,12 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_INT_LITERAL:_1
                     {:
-
-                        RESULT = new ConstSTO (_1, null , 4 );    // fix me!
-                        //RESULT = new ConstSTO (_1, null, 0);
+                        RESULT = new ConstSTO (_1, new intType(_1, 4) , 4 );    // fix me!
 
                     :}
     |               T_FLOAT_LITERAL:_1
                     {:
-                        RESULT = new ConstSTO (_1, null, 0.00);  // fix me!
+                        RESULT = new ConstSTO (_1, new FloatType(_1, 4), 4.00);  // fix me!
                     :}
     |               T_STR_LITERAL:_1
                     {:

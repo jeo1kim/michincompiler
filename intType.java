@@ -57,6 +57,18 @@ public class intType extends NumericType {
     //	change this around.
     //----------------------------------------------------------------
     public boolean  isError()   { return false; }
-    public boolean  isInt()	    { return false; }
+    public boolean	isFloat() 	{ return false; }	// added checks for All types
+    public boolean	isBool()	{ return false; }
+    public boolean 	isArray()	{ return false;	}
+    public boolean 	isStruct()	{ return false;	}
+    public boolean 	isNullPointer() { return false; }
+    public boolean	isPointer()	{ return false; }
+    public boolean isVoid() 	{ return false; } // where is this used?
+    public boolean isComposite(){ return false; }
+
+    // these tpyes are true for this type class
+    public boolean isNumeric()	{ return true; }
+    public boolean isBasic()	{ return true; }
+    public boolean  isInt()	    { return true; }
 
 }
