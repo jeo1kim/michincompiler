@@ -6,6 +6,8 @@
 
 import java_cup.runtime.*;
 import java.util.Vector;
+import java.lang.*;
+
 
 class MyParser extends parser
 {
@@ -330,24 +332,31 @@ class MyParser extends parser
 	}
 
 	//----------------------------------------------------------------
-	//
+	//	CASE: when there is no :: for assigning value to left
 	//----------------------------------------------------------------
 	STO DoDesignator3_ID(String strID)
 	{
 		STO sto;
 
-		if ((sto = m_symtab.access(strID)) == null)
+		//check variable name in local scope
+		if ((sto = m_symtab.accessLocal(strID)) == null)
 		{
-			m_nNumErrors++;
-		 	m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
-			sto = new ErrorSTO(strID);
+			//if there is not variable name in local scope
+			//	then check the same name in global scope thus if u find
+			//	then return the global scope
+			if ((sto = m_symtab.accessGlobal(strID)) == null) {
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
+				sto = new ErrorSTO(strID);
+			}
+
 		}
 
 		return sto;
 	}
 
 	//----------------------------------------------------------------
-	//
+	// CASE: when there is :: for accessing global scope
 	//----------------------------------------------------------------
 	Type DoStructType_ID(String strID)
 	{
@@ -369,4 +378,16 @@ class MyParser extends parser
 
 		return sto.getType();
 	}
+
+	STO CheckGlobalColonColon(String strID)
+	{
+		STO sto;
+		if ((sto = m_symtab.accessGlobal(strID)) == null)
+		{
+			m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
+			sto = new ErrorSTO(strID);
+		}
+		return sto;
+	}
+
 }

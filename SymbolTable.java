@@ -37,6 +37,8 @@ class SymbolTable
 	//----------------------------------------------------------------
 	public STO accessGlobal(String strName)
 	{
+
+		System.out.println("From global scope " + " " + strName);
 		return m_scopeGlobal.access(strName);
 	}
 
@@ -56,14 +58,21 @@ class SymbolTable
 	{
 		Stack stk = new Stack();
 		Scope scope;
-		STO stoReturn = null;	
+		STO stoReturn = null;
 
 		for (Enumeration<Scope> e = m_stkScopes.elements(); e.hasMoreElements();)
 		{
+
 			scope = e.nextElement();
 			if ((stoReturn = scope.access(strName)) != null)
-				return stoReturn;
+				stk.push(stoReturn);  //add all elements to stack.
+				//return stoReturn;
+
 		}
+
+		while (!stk.empty())  // while stack has elements, pop the top LIFO
+			return (STO) stk.pop();
+
 
 		return null;
 	}

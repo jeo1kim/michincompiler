@@ -241,7 +241,7 @@ class Lexer
 
       if (switchThisChar)
       {
-			  switch (nState)
+          switch (nState)
         {
           case S_DIGITS:
 
@@ -255,9 +255,16 @@ class Lexer
             }
             else
             {
+
+                ///////
               ungetChar (c);
-              token = new Token (sym.T_INT_LITERAL, 
-                  new String (buffer));
+
+                String buf = new String(buffer);
+                buf = Integer.toString(Integer.decode(buf));
+
+              token = new Token (sym.T_INT_LITERAL, buf);
+
+
             }
             break;
 
@@ -291,8 +298,11 @@ class Lexer
             else
             {
               ungetChar (c);
-              token = new Token (sym.T_INT_LITERAL,
-                  new String (buffer));
+
+                String buf = new String(buffer);
+                buf = Integer.toString(Integer.decode(buf));
+
+              token = new Token (sym.T_INT_LITERAL, buf);
             }
             break;
 
@@ -306,8 +316,11 @@ class Lexer
             else
             {
               ungetChar (c);
-              token = new Token (sym.T_INT_LITERAL,
-                  new String (buffer));
+
+                String buf = new String(buffer);
+                buf = Integer.toString(Integer.decode(buf));
+
+              token = new Token (sym.T_INT_LITERAL, buf);
             }
             break;
 
@@ -417,9 +430,10 @@ class Lexer
 				}
 				nCount++;
 			}
-		}
 
-		
+		}
+        //Check conversion HEX, and Octal
+
 		if (bError)
 		{
 			if (token.GetCode () == sym.T_FLOAT_LITERAL)
@@ -849,6 +863,8 @@ class Lexer
 		m_htKeywords.put ("true", new Integer (sym.T_TRUE));
 		m_htKeywords.put ("void", new Integer (sym.T_VOID));
 		m_htKeywords.put ("while", new Integer (sym.T_WHILE));
+		m_htKeywords.put ("new", new Integer (sym.T_NEW));
+		m_htKeywords.put ("delete", new Integer (sym.T_DELETE));
 	}
 
 
