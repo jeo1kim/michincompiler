@@ -157,16 +157,16 @@ non terminal
     DeleteStmt
     ;
 
-non terminal String    
-    IncDecOp,
-    ParamDecl,
-    MulOp
+
+non terminal String
+    ParamDecl
     ;
 
 non terminal Operator
-    AddOp
+    AddOp,
+    IncDecOp,
+    MulOp
     ;
-
 
 non terminal STO
     Expr,
@@ -773,15 +773,15 @@ AddOp ::=           T_PLUS
 
 MulOp ::=           T_STAR
                     {:
-                        RESULT = "*";
+                        RESULT = new MulOp("+");
                     :}
     |               T_SLASH
                     {:
-                        RESULT = "/";
+                        RESULT = new DivideOp("/");
                     :}
     |               T_MOD
                     {:
-                        RESULT = "%";
+                        RESULT = new ModulOp("%");
                     :}
     ;
 
