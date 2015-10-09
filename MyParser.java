@@ -6,6 +6,8 @@
 
 
 import java_cup.runtime.*;
+
+import java.text.Format;
 import java.util.Vector;
 import java.lang.*;
 
@@ -421,6 +423,31 @@ class MyParser extends parser
 		return result;
 	}
 
+	STO DoRelationOpExpr(STO a, Operator o, STO b)
+	{
+		STO result = o.checkOperands(a, b);
+		if( result.isError())
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
+			return new ErrorSTO(result.getName());
+		}
+		return result;
+	}
 
+	STO DoEqualityOp(STO a, Operator o, STO b)
+	{
+
+		STO result = o.checkOperands(a, b);
+		if (result.isError())
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
+			return new ErrorSTO(result.getName());
+		}
+		return result;
+
+
+	}
 
 }

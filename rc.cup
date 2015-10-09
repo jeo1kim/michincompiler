@@ -705,7 +705,7 @@ Expr4 ::=           Expr4:_1 T_AMPERSAND Expr5
 
 Expr5 ::=           Expr5:_1 Equality Expr6
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoEqualityOp(_1, _2, _3);   //DoEqualityOp;
                     :}
     |               Expr6:_1
                     {:
@@ -713,10 +713,9 @@ Expr5 ::=           Expr5:_1 Equality Expr6
                     :}
     ;
 
-
-Expr6 ::=           Expr6:_1 Relation Expr7
+Expr6 ::=           Expr6:_1 Relation:_2 Expr7:_3
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoRelationOpExpr(_1, _2, _3); //DoRelationOpExpr
                     :}
     |               Expr7:_1
                     {:

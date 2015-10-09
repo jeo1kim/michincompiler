@@ -36,8 +36,8 @@ public class MulOp extends ArithmeticOp {
         }
 
         else if ( aType.isInt() && bType.isInt()){
-            System.out.println(a.getName()+""+b.getName() +" has typ: "+ a.getType().toString());
-            return new ExprSTO(a.getName()+""+b.getName(), a.getType());
+            System.out.println(a.getName()+" * "+b.getName() +" has typ: "+ a.getType().toString());
+            return new ExprSTO(a.getName()+" * "+b.getName(), a.getType());
         }
 
         else{

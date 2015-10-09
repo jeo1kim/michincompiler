@@ -32,12 +32,12 @@ public class MinusOp extends ArithmeticOp {
             // should increment m_nNumErrors++; in MyParser
             return new ErrorSTO(err.getName());
         } else if (aType.isInt() && bType.isInt()) {
-            System.out.println(a.getName() + "" + b.getName() + " has typ: " + a.getType().toString());
-            return new ExprSTO(a.getName() + "" + b.getName(), a.getType());
+            System.out.println(a.getName() + " - " + b.getName() + " has typ: " + a.getType().toString());
+            return new ExprSTO(a.getName() + " - " + b.getName(), a.getType());
         } else {
             STO c = !(aType.isInt()) ? b : a;
             System.out.println("A val: " + a.getName() + " B val: " + b.getName());
-            return new ExprSTO(a.getName() + " * " + b.getName(), c.getType());
+            return new ExprSTO(a.getName() + " - " + b.getName(), c.getType());
         }
     }
 
