@@ -141,8 +141,8 @@ non terminal
     ConstExpr,
     ExprList,
     UnarySign,
-    Equality,
-    Relation,
+    //Equality, moved To Operator
+    //Relation, moved To Operator
     OptInit,
     OptCtorCall,
     CtorCall,
@@ -164,7 +164,9 @@ non terminal String
 non terminal Operator
     AddOp,
     IncDecOp,
-    MulOp
+    MulOp,
+    Equality,       //moved
+    Relation        //moved
     ;
 
 non terminal STO
@@ -703,7 +705,7 @@ Expr4 ::=           Expr4:_1 T_AMPERSAND Expr5
     ;
 
 
-Expr5 ::=           Expr5:_1 Equality Expr6
+Expr5 ::=           Expr5:_1 Equality:_2 Expr6:_3
                     {:
                         RESULT = ((MyParser) parser).DoEqualityOp(_1, _2, _3);   //DoEqualityOp;
                     :}
@@ -715,7 +717,7 @@ Expr5 ::=           Expr5:_1 Equality Expr6
 
 Expr6 ::=           Expr6:_1 Relation:_2 Expr7:_3
                     {:
-                        RESULT = ((MyParser) parser).DoRelationOpExpr(_1, _2, _3); //DoRelationOpExpr
+                        RESULT = ((MyParser) parser).DoRelationOpExpr(_1, _2, _3);
                     :}
     |               Expr7:_1
                     {:
@@ -752,9 +754,21 @@ Equality ::=        T_EQU
 
 
 Relation ::=        T_LT
+                    {:
+                        RESULT = new LTOp("<");
+                    :}
     |               T_GT
+                    {:
+                        RESULT = new GTOp(">");
+                    :}
     |               T_LTE
+                    {:
+                        RESULT = new LTEOp("<=");
+                    :}
     |               T_GTE
+                    {:
+                        RESULT = new GTEOp(">=");
+                    :}
     ;
 
 
