@@ -30,7 +30,7 @@ public class GTEOp extends ComparisonOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
-        if ((aType.isNumeric()) || (bType.isNumeric())) {
+        if ((aType.isNumeric()) && (bType.isNumeric())) {
 
             return new ExprSTO(a.getName() + " >= " + b.getName(), new BoolType("newBool" ,1));
 

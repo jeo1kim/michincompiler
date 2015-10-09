@@ -447,8 +447,6 @@ class MyParser extends parser
 			return new ErrorSTO(result.getName());
 		}
 		return result;
-
-
 	}
 
 }
