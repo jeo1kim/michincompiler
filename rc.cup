@@ -166,7 +166,9 @@ non terminal Operator
     IncDecOp,
     MulOp,
     Equality,       //moved
-    Relation        //moved
+    Relation,       //moved
+    AndOp,          //newly added
+    OrOp            //newly added
     ;
 
 non terminal STO
@@ -650,9 +652,9 @@ Expr ::=            Designator:_1 T_ASSIGN Expr
     ;
 
 
-Expr0 ::=           Expr0:_1 T_OR Expr1
+Expr0 ::=           Expr0:_1 OrOp:_2 Expr1:_3       //fixed to OrOp from T_OR
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoOrOp (_1, _2, _3);    //fixed
                     :}
     |               Expr1:_1
                     {:
@@ -661,9 +663,9 @@ Expr0 ::=           Expr0:_1 T_OR Expr1
     ;
 
 
-Expr1 ::=           Expr1:_1 T_AND Expr2
+Expr1 ::=           Expr1:_1 AndOp:_2 Expr2:_3      //fixed to AndOrOp from T_AND
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoAndOp (_1, _2, _3);    //fixed
                     :}
     |               Expr2:_1
                     {:
@@ -749,7 +751,13 @@ Expr8 ::=           Expr8:_1 MulOp:_2 Designator:_3
 
 
 Equality ::=        T_EQU
+                    {:
+                        RESULT = new EqualOp("=");
+                    :}
     |               T_NEQ
+                    {:
+                        RESULT = new NotEqualOp("!=");
+                    :}
     ;
 
 
@@ -808,6 +816,17 @@ IncDecOp ::=        T_PLUSPLUS
                     :}
     ;
 
+AndOp ::=           T_AND                               //new Gramer added
+                    {:
+                        RESULT = new AndOp("&&");
+                    :}
+    ;
+
+OrOp ::=            T_OR                                //new Gramer added
+                    {:
+                        RESULT = new OrOp("||");
+                    :}
+    ;
 
 // Add Unary Sign
 
