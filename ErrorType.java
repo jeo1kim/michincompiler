@@ -1,4 +1,3 @@
-//---------------------------------------------------------------------
 // CSE 131 Reduced-C Compiler Project
 // Copyright (C) 2008-2015 Garo Bournoutian and Rick Ord
 // University of California, San Diego
@@ -15,7 +14,7 @@ class ErrorType extends Type
 	}
 
 	//----------------------------------------------------------------
-	//	There are times where it is an error if the Type is not a 
+	//	There are times where it is an error if the Type is not a
 	//	assignable, equivalent,  or something else. However, if
 	//	the Type is already an error, nothing should be said. To
 	//	supress that error, we would have to check if the Type is

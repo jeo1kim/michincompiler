@@ -98,10 +98,10 @@ class ErrorMsg
       "Return in function requires a result expression, none found.";
 
     public static final String error6a_Return_type =
-      "Type of return expression (%T), not assignment compatible with function's return type (%T).";
+      "Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
 
     public static final String error6b_Return_equiv =
-      "Type of return expression (%T) is not equivalent to the function's return type (%T).";
+      "Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
 
     // NOTE!  You don't need to use the formatter with this message
     public static final String error6b_Return_modlval =
@@ -150,10 +150,10 @@ class ErrorMsg
 
     // Check 11 //
     public static final String error11t_ArrExp =
-      "Type of expression referenced by array subscript (%T) is not of array or pointer type.";
+      "Type.Type of expression referenced by array subscript (%T) is not of array or pointer type.";
 
     public static final String error11i_ArrExp =
-      "Type of index expression in array reference (%T) not equivalent to int.";
+      "Type.Type of index expression in array reference (%T) not equivalent to int.";
 
     // NOTE: The notation '[' means up to and including, ')' means up to and NOT including
     public static final String error11b_ArrExp =
@@ -162,7 +162,7 @@ class ErrorMsg
     // Check 12 //
     // NOTE!  You don't need to use the formatter with this message
     public static final String error12a_Foreach =
-      "Type of expression referenced in foreach is not of array type.";
+      "Type.Type of expression referenced in foreach is not of array type.";
 
     public static final String error12v_Foreach = 
       "Foreach array element of type %T not assignable to value iteration variable %S, of type %T.";
@@ -192,7 +192,7 @@ class ErrorMsg
 
     // Check 14 //
     public static final String error14t_StructExp =
-      "Type of expression referenced by \".\" (%T) is not a struct.";
+      "Type.Type of expression referenced by \".\" (%T) is not a struct.";
 
     // NOTE!  For printing a struct function call, only the name without
     //        parentheses should be provided to %S
@@ -223,14 +223,14 @@ class ErrorMsg
       "Operand to \"new\" is not a modifiable L-value.";
 
     public static final String error16_New =
-      "Type of new's operand must be of pointer type, %T found.";
+      "Type.Type of new's operand must be of pointer type, %T found.";
 
     // NOTE!  You don't need to use the formatter with this message
     public static final String error16_Delete_var =
       "Operand to \"delete\" is not a modifiable L-value.";
 
     public static final String error16_Delete =
-      "Type of delete's operand must be of pointer type, %T found.";
+      "Type.Type of delete's operand must be of pointer type, %T found.";
 
     public static final String error16b_NonStructCtorCall =
       "Operand to \"new\" with constructor call is not of pointer to struct type, %T found.";
@@ -253,5 +253,5 @@ class ErrorMsg
 
     // Check 20 //
     public static final String error20_Cast = 
-      "Invalid type cast. Type %T to type %T is not supported.";
+      "Invalid type cast. Type.Type %T to type %T is not supported.";
 }

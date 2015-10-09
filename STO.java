@@ -4,6 +4,7 @@
 // University of California, San Diego
 //---------------------------------------------------------------------
 
+
 abstract class STO
 {
 	private String m_strName;

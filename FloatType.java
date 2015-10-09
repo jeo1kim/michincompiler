@@ -67,6 +67,6 @@ public class FloatType extends NumericType {
 
     public boolean isNumeric()  { return true; }
     public boolean	isFloat() 	{ return true; }
-    public boolean isBasic()	{ return false; }
+    public boolean isBasic()	{ return true; }
 
 }

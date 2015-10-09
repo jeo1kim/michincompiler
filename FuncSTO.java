@@ -4,6 +4,7 @@
 // University of California, San Diego
 //---------------------------------------------------------------------
 
+
 class FuncSTO extends STO
 {
 	private Type m_returnType;
