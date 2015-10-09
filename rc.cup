@@ -158,12 +158,12 @@ non terminal
     ;
 
 non terminal String
-
     ParamDecl
     ;
 
 non terminal Operator
     AddOp,
+    IncDecOp,
     MulOp
     ;
 
@@ -184,7 +184,7 @@ non terminal STO
     ;
 
 non terminal Type
-    BasicType,
+    TypecType,
     DecoratedBasicType,
     StructType,
     Type,
@@ -196,6 +196,9 @@ non terminal Vector
     OptParamList,
     ParamList
     ;
+
+
+
 
 //--------------------------------------------------------------------
 //
@@ -256,7 +259,7 @@ VarDecl ::=         OptStatic:_1 DecoratedType:_2 T_ID:_3 OptArrayList:_4 OptIni
     ;
 
 
-ConstDecl ::=       OptStatic:_1 T_CONST BasicType:_2 T_ID:_3 T_ASSIGN ConstExpr:_5
+ConstDecl ::=       OptStatic:_1 T_CONST TypecType:_2 T_ID:_3 T_ASSIGN ConstExpr:_5
                     {:
                         ((MyParser) parser).DoConstDecl (_3);
                     :}
@@ -410,14 +413,14 @@ DecoratedType ::=   DecoratedBasicType:_1
     ;
 
 
-DecoratedBasicType ::= BasicType:_1 OptPointerList:_2
+DecoratedBasicType ::= TypecType:_1 OptPointerList:_2
                     {:
                         RESULT = _1;    // gotta do something here!
                     :}
     ;
 
 
-BasicType ::=       T_INT
+TypecType ::=       T_INT
                     {:
                         RESULT = null;  // gotta do something here!
                     :}
@@ -724,7 +727,7 @@ Expr6 ::=           Expr6:_1 Relation Expr7
 
 Expr7 ::=           Expr7:_1 AddOp:_2 Expr8:_3
                     {:
-                        RESULT = ((MyParser) parser).DoAddOp (_1, _2 ,_3); //add Op
+                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, _2, _3);
                     :}
     |               Expr8:_1
                     {:
