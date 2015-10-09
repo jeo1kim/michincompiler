@@ -727,7 +727,7 @@ Expr6 ::=           Expr6:_1 Relation Expr7
 
 Expr7 ::=           Expr7:_1 AddOp:_2 Expr8:_3
                     {:
-                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, _2, _3);
+                        RESULT = ((MyParser) parser).DoAddOpExpr(_1, _2, _3);
                     :}
     |               Expr8:_1
                     {:
@@ -738,7 +738,7 @@ Expr7 ::=           Expr7:_1 AddOp:_2 Expr8:_3
 
 Expr8 ::=           Expr8:_1 MulOp:_2 Designator:_3
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoMulOpExpr(_1, _2, _3);
                     :}
     |               Designator:_1
                     {:
@@ -787,11 +787,11 @@ MulOp ::=           T_STAR
 
 IncDecOp ::=        T_PLUSPLUS
                     {:
-                        RESULT = "++";
+                        RESULT = new IncOp("++");
                     :}
     |               T_MINUSMINUS
                     {:
-                        RESULT = "--";
+                        RESULT = new DecOp("--");
                     :}
     ;
 

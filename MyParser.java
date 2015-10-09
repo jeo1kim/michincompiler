@@ -391,9 +391,11 @@ class MyParser extends parser
 		return sto;
 	}
 
-	STO DoBinaryExpr(STO a, Operator o, STO b)
+	STO DoAddOpExpr(STO a, Operator o, STO b)
 	{
 		STO result = o.checkOperands(a, b);
+
+		//System.out.println("result : " + result.getName());
 		if ( result.isError())
 		{
 			m_nNumErrors++;
@@ -403,6 +405,22 @@ class MyParser extends parser
 
 		return result;
 	}
+
+	STO DoMulOpExpr(STO a, Operator o, STO b)
+	{
+		STO result = o.checkOperands(a, b);
+
+		System.out.println("result : " + result.getName());
+		if ( result.isError())
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
+			return new ErrorSTO(result.getName());
+		}
+
+		return result;
+	}
+
 
 
 }
