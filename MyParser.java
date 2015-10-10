@@ -386,7 +386,7 @@ class MyParser extends parser
 		STO sto;
 		if ((sto = m_symtab.accessGlobal(strID)) == null)
 		{
-			m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
+			m_errors.print(Formatter.toString(ErrorMsg.error0g_Scope, strID));
 			sto = new ErrorSTO(strID);
 		}
 		return sto;
@@ -448,7 +448,7 @@ class MyParser extends parser
 		return result;
 	}
 
-	STO DoIncDecOp(STO a, UnaryOp o) {
+	/*STO DoIncDecOp(STO a, UnaryOp o) {
 		STO result = o.checkOperands(a);
 		if (result.isError()) {
 			m_nNumErrors++;
@@ -456,7 +456,8 @@ class MyParser extends parser
 			return new ErrorSTO(result.getName());
 		}
 
-		return result;
+		return ;
 	}
+	*/
 
 }
