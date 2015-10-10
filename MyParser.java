@@ -7,7 +7,6 @@
 
 import java_cup.runtime.*;
 
-import java.text.Format;
 import java.util.Vector;
 import java.lang.*;
 
@@ -410,6 +409,59 @@ class MyParser extends parser
 		return o.checkOperands(a, b);
 	}
 
+
+
+	STO DoEqualityOp(STO a, Operator o, STO b)
+	{
+
+		STO result = o.checkOperands(a, b);
+		if (result.isError())
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
+			return new ErrorSTO(result.getName());
+		}
+		return result;
+	}
+
+	STO DoAndOp(STO a, Operator o, STO b)
+	{
+
+		STO result = o.checkOperands(a, b);
+		if (result.isError())
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
+			return new ErrorSTO(result.getName());
+		}
+		return result;
+	}
+
+	STO DoOrOp(STO a, Operator o, STO b)
+	{
+
+		STO result = o.checkOperands(a, b);
+		if (result.isError())
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
+			return new ErrorSTO(result.getName());
+		}
+		return result;
+	}
+
+	STO DoIncDecOp(STO a, UnaryOp o)
+	{
+		STO result = o.checkOperands(a);
+		if (result.isError())
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
+			return new ErrorSTO(result.getName());
+		}
+
+		return result;
+	}
 
 
 }

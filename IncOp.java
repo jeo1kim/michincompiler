@@ -23,6 +23,23 @@ public class IncOp extends UnaryOp {
         return m_OpName;
     }
 
+    STO checkOperands(STO a) {
+        Type aType = a.getType();
+
+
+        if (aType.isInt() || aType.isFloat()) {
+
+            return new ExprSTO(a.getName(), aType);
+
+        } else {
+            //if it's not both integer then return error STO
+
+            // should increment m_nNumErrors++; in MyParser
+            return new ErrorSTO(a.getName());
+        }
+    }
+
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
