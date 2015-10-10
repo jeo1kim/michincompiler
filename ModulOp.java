@@ -28,17 +28,22 @@ public class ModulOp extends ArithmeticOp {
     STO checkOperands(STO a, STO b) {
 
 
-        if (a.getType().isInt() && b.getType().isInt()) {
+        Type aType = a.getType();
+        Type bType = b.getType();
+
+        if (aType instanceof intType && bType instanceof intType) {
             //System.out.println(a.getName() + b.getName() + " has typ: " + a.getType().toString());
-            if (a.isConst() && b.isConst())
-            {
-                return new ConstSTO( a.getName()+b.getName() , b.getType());
-            }
-            return new ExprSTO(a.getName() + b.getName(), a.getType());
-        } else {
+
+            return new ExprSTO(a.getName() + getName()+ b.getName(), a.getType());
+        }
+        else if (a.isConst() && b.isConst())
+        {
+            return new ConstSTO( a.getName()+ getName() + b.getName() , b.getType());
+        }
+        else {
             //if it's not both integer then return error STO
             // should increment m_nNumErrors++; in MyParser
-            if (a.getType().isInt())
+            if (aType instanceof intType)
                 return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),"%",a.getType().getName()));
             else
                 return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(),"%",b.getType().getName()));
