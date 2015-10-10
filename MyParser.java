@@ -426,7 +426,9 @@ class MyParser extends parser
 	STO DoRelationOpExpr(STO a, Operator o, STO b)
 	{
 		STO result = o.checkOperands(a, b);
+		System.out.println("Inside relation Operator");
 
+		System.out.println("result : " + result.getName() + result.getType().toString());
 		if( result.isError())
 		{
 			m_nNumErrors++;

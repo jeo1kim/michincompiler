@@ -7,6 +7,10 @@ abstract class BasicType extends Type {
     private String m_typeName;
     private int m_size;
 
+    public BasicType(){
+        super();
+    }
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

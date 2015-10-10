@@ -6,6 +6,10 @@ public class BoolType extends BasicType {
     private String m_typeName;
     private int m_size;
 
+    public BoolType(){
+        super();
+    }
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

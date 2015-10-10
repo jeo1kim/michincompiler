@@ -908,11 +908,11 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_TRUE
                     {:
-                        RESULT = new ConstSTO ("true", null, 1);    // fix me!
+                        RESULT = new ConstSTO ("true", new BoolType(), 1);    // fix me!
                     :}
     |               T_FALSE
                     {:
-                        RESULT = new ConstSTO ("false", null, 0);   // fix me!
+                        RESULT = new ConstSTO ("false", new BoolType(), 0);   // fix me!
                     :}
     |               T_NULLPTR
                     {:
