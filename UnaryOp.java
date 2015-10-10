@@ -15,6 +15,9 @@ abstract class UnaryOp extends Operator {
         //setSize(size);
     }
 
+    STO checkOperands(STO a){
+        return a;
+    }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

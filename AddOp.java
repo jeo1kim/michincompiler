@@ -16,6 +16,8 @@ public class AddOp extends ArithmeticOp {
         //setSize(size);
     }
 
+
+
     STO checkOperands(STO a, STO b)
     {
         return checkOperands(a,b, getName() );

@@ -865,6 +865,13 @@ class Lexer
 		m_htKeywords.put ("while", new Integer (sym.T_WHILE));
 		m_htKeywords.put ("new", new Integer (sym.T_NEW));
 		m_htKeywords.put ("delete", new Integer (sym.T_DELETE));
+        m_htKeywords.put ("+", new Integer (sym.T_PLUS));
+        m_htKeywords.put ("-", new Integer (sym.T_MINUS));
+        m_htKeywords.put ("*", new Integer (sym.T_STAR));
+        m_htKeywords.put ("/", new Integer (sym.T_SLASH));
+        m_htKeywords.put ("%", new Integer (sym.T_MOD));
+
+
         m_htKeywords.put ("<", new Integer (sym.T_LT));     // added for relations operation
         m_htKeywords.put (">", new Integer (sym.T_GT));
         m_htKeywords.put (">=", new Integer (sym.T_GTE));
