@@ -13,6 +13,9 @@ class ErrorType extends Type
 		super("Error", 0);
 	}
 
+	public boolean isAssignableTo(Type t) { return false; }
+	public boolean isEquivalentTo(Type t) { return t.isError(); }
+
 	//----------------------------------------------------------------
 	//	There are times where it is an error if the Type is not a
 	//	assignable, equivalent,  or something else. However, if

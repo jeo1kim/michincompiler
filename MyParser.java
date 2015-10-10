@@ -393,100 +393,23 @@ class MyParser extends parser
 		return sto;
 	}
 
-	STO DoAddOpExpr(STO a, Operator o, STO b)
-	{
-		STO result = o.checkOperands(a, b);
 
-		//System.out.println("result : " + result.getName());
-		if ( result.isError())
+
+	STO DoBinaryExpr(STO a, Operator o, STO b)
+	{
+		//STO result = o.checkOperands(a, b);
+		//System.out.println(o.checkOperands(a, b));
+		//System.out.println(o);System.out.println(a);System.out.println(b);
+
+		if (o.checkOperands(a, b).isError())
 		{
 			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
-			return new ErrorSTO(result.getName());
+			m_errors.print(o.checkOperands(a, b).getName());
+			return new ErrorSTO(o.checkOperands(a, b).getName());
 		}
-
-		return result;
+		return o.checkOperands(a, b);
 	}
 
-	STO DoMulOpExpr(STO a, Operator o, STO b)
-	{
-		STO result = o.checkOperands(a, b);
-
-		System.out.println("result : " + result.getName());
-		if ( result.isError())
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
-			return new ErrorSTO(result.getName());
-		}
-
-		return result;
-	}
-
-	STO DoRelationOpExpr(STO a, Operator o, STO b)
-	{
-		STO result = o.checkOperands(a, b);
-
-		if( result.isError())
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
-			return new ErrorSTO(result.getName());
-		}
-		return result;
-	}
-
-	STO DoEqualityOp(STO a, Operator o, STO b)
-	{
-
-		STO result = o.checkOperands(a, b);
-		if (result.isError())
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
-			return new ErrorSTO(result.getName());
-		}
-		return result;
-	}
-
-	STO DoAndOp(STO a, Operator o, STO b)
-	{
-
-		STO result = o.checkOperands(a, b);
-		if (result.isError())
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
-			return new ErrorSTO(result.getName());
-		}
-		return result;
-	}
-
-	STO DoOrOp(STO a, Operator o, STO b)
-	{
-
-		STO result = o.checkOperands(a, b);
-		if (result.isError())
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
-			return new ErrorSTO(result.getName());
-		}
-		return result;
-	}
-
-	STO DoIncDecOp(STO a, UnaryOp o)
-	{
-		STO result = o.checkOperands(a);
-		if (result.isError())
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
-			return new ErrorSTO(result.getName());
-		}
-
-
-	}
 
 
 }

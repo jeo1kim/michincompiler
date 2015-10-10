@@ -12,34 +12,35 @@ public class NotEqualOp extends ComparisonOp {
     public NotEqualOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 
+    STO checkOperands(STO a, STO b) {
+
+
+        if (a.getType().isNumeric() && b.getType().isNumeric()) {
+            //System.out.println("Inside Not Equal Op");
+            return new ExprSTO(a.getName() + b.getName(), new BoolType("bool", 4));
+        } else if (a.getType().isBool() && b.getType().isBool()){
+            return new ExprSTO(a.getName() + b.getName(), new BoolType("bool", 4));
+        }
+        else
+        {
+            //if it's not both integer then return error STO
+            // should increment m_nNumErrors++; in MyParser
+            if (a.getType().isNumeric())
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),"!=",a.getType().getName()));
+            else
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(),"!=",b.getType().getName()));
+        }
+    }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
     public String getName()
     {
         return m_OpName;
-    }
-
-    //EqualOp and NotEqualOp must be either BOTH numeric, or BOTH equal to bool
-    //and returning bool
-    STO checkOperands(STO a, STO b) {
-        Type aType = a.getType();
-        Type bType = b.getType();
-
-        if (((aType.isNumeric()) && (bType.isNumeric()))
-                || (aType.isBool() && bType.isBool()))
-        {
-            return new ExprSTO(a.getName() + " >= " + b.getName(), new BoolType("newBool" ,1));
-
-        } else {
-            //if it's not both integer then return error STO
-            STO err = (!(aType.isNumeric())) ? b : a;
-            // should increment m_nNumErrors++; in MyParser
-            return new ErrorSTO(err.getName());
-        }
     }
 
     //----------------------------------------------------------------

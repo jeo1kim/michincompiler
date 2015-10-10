@@ -7,6 +7,10 @@ abstract class BasicType extends Type {
     private String m_typeName;
     private int m_size;
 
+    public BasicType(){
+        super();
+    }
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -16,6 +20,8 @@ abstract class BasicType extends Type {
         setName(strName);
         setSize(size);
     }
+    public boolean isAssignableTo(Type t) { return false; }
+    public boolean isEquivalentTo(Type t) { return t.isBasic(); }
 
     //----------------------------------------------------------------
     //

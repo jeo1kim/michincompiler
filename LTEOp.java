@@ -12,6 +12,7 @@ public class LTEOp extends ComparisonOp {
     public LTEOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 
@@ -25,22 +26,10 @@ public class LTEOp extends ComparisonOp {
 
     //T_LT, T_LTE, T_GT, T_GTE operands tryp must be numeric
     //with returning Bollean
-    STO checkOperands(STO a, STO b) {
-        Type aType = a.getType();
-        Type bType = b.getType();
-
-        if ((aType.isNumeric()) && (bType.isNumeric())) {
-
-            return new ExprSTO(a.getName() + " <= " + b.getName(), new BoolType("newBool" ,1));
-
-        } else {
-            //if it's not both integer then return error STO
-            STO err = (!(aType.isNumeric())) ? b : a;
-            // should increment m_nNumErrors++; in MyParser
-            return new ErrorSTO(err.getName());
-        }
+    STO checkOperands(STO a, STO b)
+    {
+        return super.checkOperands(a,b, getName() );
     }
-
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

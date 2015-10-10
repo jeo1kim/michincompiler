@@ -23,14 +23,6 @@ abstract class UnaryOp extends Operator {
         return m_OpName;
     }
 
-    STO checkOperands(STO a) {
-        Type aType = a.getType();
-
-
-
-    }
-
-
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

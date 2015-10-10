@@ -16,6 +16,8 @@ public class FloatType extends NumericType {
         setSize(size);
     }
 
+    public boolean isAssignableTo(Type t) { return t.isNumeric(); }
+    public boolean isEquivalentTo(Type t) { return t.isFloat(); }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

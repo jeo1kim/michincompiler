@@ -12,6 +12,7 @@ public class MulOp extends ArithmeticOp {
     public MulOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 
@@ -25,26 +26,9 @@ public class MulOp extends ArithmeticOp {
 
     STO checkOperands(STO a, STO b)
     {
-        Type aType = a.getType();
-        Type bType = b.getType();
-
-        if( !(aType.isNumeric()) || !(bType.isNumeric()))
-        {
-            STO err = (!(aType.isNumeric())) ? b : a;
-            // should increment m_nNumErrors++; in MyParser
-            return new ErrorSTO(err.getName());
-        }
-
-        else if ( aType.isInt() && bType.isInt()){
-            System.out.println(a.getName()+" * "+b.getName() +" has typ: "+ a.getType().toString());
-            return new ExprSTO(a.getName()+" * "+b.getName(), a.getType());
-        }
-
-        else{
-            STO c = !(aType.isInt()) ? b : a;
-            System.out.println("A val: " + a.getName()+" B val: "+b.getName());
-            return new ExprSTO(a.getName()+" * "+b.getName(), c.getType());
-        }
+        //System.out.println(a);System.out.println(b);System.out.println(getName());
+        //System.out.println(checkOperands(a,b, getName()));
+        return checkOperands(a,b, getName());
     }
 
     //----------------------------------------------------------------

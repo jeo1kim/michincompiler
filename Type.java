@@ -15,6 +15,8 @@ abstract class Type
 	private String m_typeName;
 	private int m_size;
 
+	public Type(){}
+
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
@@ -23,6 +25,9 @@ abstract class Type
 		setName(strName);
 		setSize(size);
 	}
+
+	public boolean isAssignableTo(Type t) { return false; }
+	public boolean isEquivalentTo(Type t) { return false; }
 
 	//----------------------------------------------------------------
 	//
