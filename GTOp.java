@@ -28,7 +28,6 @@ public class GTOp extends ComparisonOp {
     STO checkOperands(STO a, STO b)
     {
         return super.checkOperands(a,b, getName() );
-
     }
     //----------------------------------------------------------------
     //

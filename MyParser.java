@@ -409,8 +409,6 @@ class MyParser extends parser
 		return o.checkOperands(a, b);
 	}
 
-
-
 	STO DoEqualityOp(STO a, Operator o, STO b)
 	{
 
@@ -450,11 +448,9 @@ class MyParser extends parser
 		return result;
 	}
 
-	STO DoIncDecOp(STO a, UnaryOp o)
-	{
+	STO DoIncDecOp(STO a, UnaryOp o) {
 		STO result = o.checkOperands(a);
-		if (result.isError())
-		{
+		if (result.isError()) {
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
 			return new ErrorSTO(result.getName());
@@ -462,6 +458,5 @@ class MyParser extends parser
 
 		return result;
 	}
-
 
 }
