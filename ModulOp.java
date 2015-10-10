@@ -30,6 +30,10 @@ public class ModulOp extends ArithmeticOp {
 
         if (a.getType().isInt() && b.getType().isInt()) {
             //System.out.println(a.getName() + b.getName() + " has typ: " + a.getType().toString());
+            if (a.isConst() && b.isConst())
+            {
+                return new ConstSTO( a.getName()+b.getName() , b.getType());
+            }
             return new ExprSTO(a.getName() + b.getName(), a.getType());
         } else {
             //if it's not both integer then return error STO

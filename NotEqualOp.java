@@ -17,9 +17,12 @@ public class NotEqualOp extends ComparisonOp {
     }
 
     STO checkOperands(STO a, STO b) {
+        Type aType = a.getType();
+        Type bType = b.getType();
 
-
-        if (a.getType().isNumeric() && b.getType().isNumeric()) {
+        if (((aType.isNumeric()) && (bType.isNumeric()))
+                || (aType.isBool() && bType.isBool()))
+        {
             //System.out.println("Inside Not Equal Op");
             return new ExprSTO(a.getName() + b.getName(), new BoolType("bool", 4));
         } else if (a.getType().isBool() && b.getType().isBool()){
@@ -43,24 +46,7 @@ public class NotEqualOp extends ComparisonOp {
         return m_OpName;
     }
 
-    //EqualOp and NotEqualOp must be either BOTH numeric, or BOTH equal to bool
-    //and returning bool
-    STO checkOperands(STO a, STO b) {
-        Type aType = a.getType();
-        Type bType = b.getType();
 
-        if (((aType.isNumeric()) && (bType.isNumeric()))
-                || (aType.isBool() && bType.isBool()))
-        {
-            return new ExprSTO(a.getName() + " >= " + b.getName(), new BoolType("newBool" ,1));
-
-        } else {
-            //if it's not both integer then return error STO
-            STO err = (!(aType.isNumeric())) ? b : a;
-            // should increment m_nNumErrors++; in MyParser
-            return new ErrorSTO(err.getName());
-        }
-    }
 
     //----------------------------------------------------------------
     //
