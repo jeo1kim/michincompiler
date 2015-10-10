@@ -707,7 +707,7 @@ Expr4 ::=           Expr4:_1 T_AMPERSAND Expr5
 
 Expr5 ::=           Expr5:_1 Equality:_2 Expr6:_3
                     {:
-                        RESULT = ((MyParser) parser).DoEqualityOp(_1, _2, _3);   //DoEqualityOp;
+                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, _2, _3);   //DoEqualityOp;
                     :}
     |               Expr6:_1
                     {:
@@ -717,7 +717,7 @@ Expr5 ::=           Expr5:_1 Equality:_2 Expr6:_3
 
 Expr6 ::=           Expr6:_1 Relation:_2 Expr7:_3
                     {:
-                        RESULT = ((MyParser) parser).DoRelationOpExpr(_1, _2, _3);
+                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, _2, _3);
                     :}
     |               Expr7:_1
                     {:
@@ -728,7 +728,7 @@ Expr6 ::=           Expr6:_1 Relation:_2 Expr7:_3
 
 Expr7 ::=           Expr7:_1 AddOp:_2 Expr8:_3
                     {:
-                        RESULT = ((MyParser) parser).DoAddOpExpr(_1, _2, _3);
+                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, _2, _3);
                     :}
     |               Expr8:_1
                     {:
@@ -739,7 +739,7 @@ Expr7 ::=           Expr7:_1 AddOp:_2 Expr8:_3
 
 Expr8 ::=           Expr8:_1 MulOp:_2 Designator:_3
                     {:
-                        RESULT = ((MyParser) parser).DoMulOpExpr(_1, _2, _3);
+                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, _2, _3);
                     :}
     |               Designator:_1
                     {:
@@ -749,7 +749,13 @@ Expr8 ::=           Expr8:_1 MulOp:_2 Designator:_3
 
 
 Equality ::=        T_EQU
+                    {:
+                        RESULT = new EqualOp("==");
+                    :}
     |               T_NEQ
+                    {:
+                        RESULT = new NotEqualOp("!=");
+                    :}
     ;
 
 
@@ -895,12 +901,12 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_INT_LITERAL:_1
                     {:
-                        RESULT = new ConstSTO (_1, new intType(_1, 4) , 4 );    // fix me!
+                        RESULT = new ConstSTO (_1, new intType("int", 4) , 0 );    // fix me!
 
                     :}
     |               T_FLOAT_LITERAL:_1
                     {:
-                        RESULT = new ConstSTO (_1, new FloatType(_1, 4), 4.00);  // fix me!
+                        RESULT = new ConstSTO (_1, new FloatType("float", 4), 0.00);  // fix me!
                     :}
     |               T_STR_LITERAL:_1
                     {:
@@ -908,11 +914,11 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_TRUE
                     {:
-                        RESULT = new ConstSTO ("true", new BoolType(), 1);    // fix me!
+                        RESULT = new ConstSTO ("true", new BoolType("bool", 4), 1);    // fix me!
                     :}
     |               T_FALSE
                     {:
-                        RESULT = new ConstSTO ("false", new BoolType(), 0);   // fix me!
+                        RESULT = new ConstSTO ("false", new BoolType("bool", 4), 0);   // fix me!
                     :}
     |               T_NULLPTR
                     {:

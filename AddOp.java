@@ -12,12 +12,13 @@ public class AddOp extends ArithmeticOp {
     public AddOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 
     STO checkOperands(STO a, STO b)
     {
-        return super.checkOperands(a,b);
+        return checkOperands(a,b, getName() );
     }
 
     //----------------------------------------------------------------

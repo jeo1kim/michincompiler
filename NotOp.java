@@ -12,6 +12,7 @@ public class NotOp extends UnaryOp {
     public NotOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 

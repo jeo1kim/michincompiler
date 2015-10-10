@@ -12,6 +12,7 @@ public class GTOp extends ComparisonOp {
     public GTOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
     //----------------------------------------------------------------
@@ -24,10 +25,10 @@ public class GTOp extends ComparisonOp {
 
     //T_LT, T_LTE, T_GT, T_GTE operands tryp must be numeric
     //with returning Bollean
-    STO checkOperands(STO a, STO b) {
-        return super.checkOperands(a,b);
+    STO checkOperands(STO a, STO b)
+    {
+        return super.checkOperands(a,b, getName() );
     }
-
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

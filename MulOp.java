@@ -12,6 +12,7 @@ public class MulOp extends ArithmeticOp {
     public MulOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 
@@ -25,7 +26,9 @@ public class MulOp extends ArithmeticOp {
 
     STO checkOperands(STO a, STO b)
     {
-        return super.checkOperands(a, b);
+        //System.out.println(a);System.out.println(b);System.out.println(getName());
+        //System.out.println(super.checkOperands(a,b, getName()));
+        return checkOperands(a,b, getName());
     }
 
     //----------------------------------------------------------------

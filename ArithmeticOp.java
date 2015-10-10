@@ -12,29 +12,35 @@ public abstract class ArithmeticOp extends BinaryOp {
     public ArithmeticOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 
-    STO checkOperands(STO a, STO b)
+    STO checkOperands(STO a, STO b, String opName)
     {
-        Type aType = a.getType();
-        Type bType = b.getType();
 
-        if( !(aType.isNumeric()) || !(bType.isNumeric()))
+
+        if( !(a.getType().isNumeric()) || !(b.getType().isNumeric()))
         {
-            STO err = (!(aType.isNumeric())) ? b : a;
             // should increment m_nNumErrors++; in MyParser
-            return new ErrorSTO(err.getName());
-        }
+            if (a.getType().isNumeric())
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),opName,a.getType().getName()));
+            else
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(), opName, b.getType().getName()));
 
-        else if ( aType.isInt() && bType.isInt()){
-            System.out.println(a.getName()+b.getName() +" has typ: "+ a.getType().toString());
+        }
+        else if (a.isConst() && b.isConst())
+        {
+            return new ConstSTO( a.getName()+b.getName() , b.getType());
+        }
+        else if ( a.getType().isInt() && b.getType().isInt()){
+            //System.out.println(a.getName()+b.getName() +" has typ: "+ a.getType().toString());
             return new ExprSTO(a.getName()+b.getName(), a.getType());
         }
 
         else{
-            STO c = !(aType.isInt()) ? b : a;
-            System.out.println("A val: " + a.getName()+" B val: "+b.getName());
+            STO c = !(a.getType().isInt()) ? b : a;
+            //System.out.println("A val: " + a.getName()+" B val: "+b.getName());
             return new ExprSTO(a.getName()+b.getName(), c.getType());
         }
     }

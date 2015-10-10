@@ -12,6 +12,7 @@ public class MinusOp extends ArithmeticOp {
     public MinusOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 
@@ -23,8 +24,9 @@ public class MinusOp extends ArithmeticOp {
         return m_OpName;
     }
 
-    STO checkOperands(STO a, STO b) {
-        return super.checkOperands(a,b);
+    STO checkOperands(STO a, STO b)
+    {
+        return super.checkOperands(a,b, getName() );
     }
 
     //----------------------------------------------------------------

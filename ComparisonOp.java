@@ -15,23 +15,22 @@ abstract class ComparisonOp extends BinaryOp {
         //setSize(size);
     }
 
-    STO checkOperands(STO a, STO b)
+    STO checkOperands(STO a, STO b, String opName)
     {
-        Type aType = a.getType();
-        Type bType = b.getType();
-
         // operands must be numeric and resulting type must be bool
-        if( (aType.isNumeric()) && (bType.isNumeric()))
+        if( (a.getType().isNumeric()) && (b.getType().isNumeric()))
         {
-            System.out.println(a.getName()+b.getName() +" has typ: "+ a.getType().toString());
+            //System.out.println(a.getName()+b.getName() +" has typ: "+ a.getType().toString());
             return new ExprSTO(a.getName()+b.getName(), new BoolType());
-
         }
         else
         {
-            STO err = (!(aType.isNumeric())) ? a : b;
+            STO err = (!(a.getType().isNumeric())) ? a : b;
             // should increment m_nNumErrors++; in MyParser
-            return new ErrorSTO(err.getName());
+            if (a.getType().isNumeric())
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),opName,a.getType().getName()));
+            else
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(),opName,b.getType().getName()));
         }
 
     }

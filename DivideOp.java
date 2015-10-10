@@ -12,6 +12,7 @@ public class DivideOp extends ArithmeticOp {
     public DivideOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 
@@ -25,7 +26,7 @@ public class DivideOp extends ArithmeticOp {
 
     STO checkOperands(STO a, STO b)
     {
-        return super.checkOperands(a, b);
+        return super.checkOperands(a, b, getName());
     }
 
     //----------------------------------------------------------------

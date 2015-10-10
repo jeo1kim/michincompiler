@@ -12,6 +12,7 @@ public class AndOp extends BooleanOp {
     public AndOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 
