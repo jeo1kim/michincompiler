@@ -19,16 +19,17 @@ public abstract class ArithmeticOp extends BinaryOp {
     STO checkOperands(STO a, STO b, String opName)
     {
         //System.out.println(a.getType().isNumeric());
-        if (a.isConst() && b.isConst())
-        {
 
-            return new ConstSTO( a.getName()+b.getName() , b.getType());
-        }
 
-        else if( !(a.getType().isNumeric()) || !(b.getType().isNumeric()))
+        if( !(a.getType().isNumeric()) || !(b.getType().isNumeric()))
         {
+            if (a.isConst() && b.isConst())
+            {
+
+                return new ConstSTO( a.getName()+b.getName() , b.getType());
+            }
             // should increment m_nNumErrors++; in MyParser
-            if (a.getType().isNumeric())
+            else if (a.getType().isNumeric())
                 return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),opName,a.getType().getName()));
             else
                 return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(), opName, b.getType().getName()));

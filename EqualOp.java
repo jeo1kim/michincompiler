@@ -17,9 +17,12 @@ public class EqualOp extends ComparisonOp {
     }
 
     STO checkOperands(STO a, STO b) {
+        Type aType = a.getType();
+        Type bType = b.getType();
 
-
-        if (a.getType().isNumeric() && b.getType().isNumeric()) {
+        if (((aType.isNumeric()) && (bType.isNumeric()))
+                || (aType.isBool() && bType.isBool()))
+        {
             //System.out.println("Inside Equal Op");
             return new ExprSTO(a.getName() + b.getName(), new BoolType("bool", 4));
         } else if (a.getType().isBool() && b.getType().isBool()){
@@ -44,7 +47,7 @@ public class EqualOp extends ComparisonOp {
     {
         return m_OpName;
     }
-
+    
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
