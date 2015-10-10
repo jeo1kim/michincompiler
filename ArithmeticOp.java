@@ -24,6 +24,10 @@ public abstract class ArithmeticOp extends BinaryOp {
 
         if( !(aType instanceof NumericType) || !(bType instanceof NumericType) )
         {
+            if (a.isConst() && b.isConst())
+            {
+                return new ConstSTO( a.getName()+b.getName() , b.getType());
+            }
             // should increment m_nNumErrors++; in MyParser
             if ( aType instanceof NumericType)
                 return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),opName,a.getType().getName()));
@@ -35,10 +39,6 @@ public abstract class ArithmeticOp extends BinaryOp {
         else if ( aType instanceof intType && bType instanceof intType){
             //System.out.println(a.getName()+b.getName() +" has typ: "+ a.getType().toString());
             return new ExprSTO(a.getName()+b.getName(), a.getType());
-        }
-        if (a.isConst() && b.isConst())
-        {
-            return new ConstSTO( a.getName()+b.getName() , b.getType());
         }
 
         else{
