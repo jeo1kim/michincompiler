@@ -475,4 +475,18 @@ class MyParser extends parser
 		return result;
 	}
 
+	STO DoIncDecOp(STO a, UnaryOp o)
+	{
+		STO result = o.checkOperands(a);
+		if (result.isError())
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
+			return new ErrorSTO(result.getName());
+		}
+
+
+	}
+
+
 }
