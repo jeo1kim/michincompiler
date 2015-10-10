@@ -16,6 +16,8 @@ abstract class BasicType extends Type {
         setName(strName);
         setSize(size);
     }
+    public boolean isAssignableTo(Type t) { return false; }
+    public boolean isEquivalentTo(Type t) { return t.isBasic(); }
 
     //----------------------------------------------------------------
     //

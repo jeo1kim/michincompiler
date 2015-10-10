@@ -15,6 +15,8 @@ public abstract class CompositeType extends Type {
         setName(strName);
         setSize(size);
     }
+    public boolean isAssignableTo(Type t) { return false; }
+    public boolean isEquivalentTo(Type t) { return t.isComposite(); }
 
     //----------------------------------------------------------------
     //
@@ -57,4 +59,15 @@ public abstract class CompositeType extends Type {
     //----------------------------------------------------------------
     public boolean  isError()   { return false; }
     public boolean  isInt()	    { return false; }
+    public boolean	isFloat() 	{ return false; }	// added checks for All types
+    public boolean	isBool()	{ return false; }
+    public boolean 	isArray()	{ return false;	}
+    public boolean 	isStruct()	{ return false;	}
+    public boolean 	isNullPointer() { return false; }
+    public boolean	isPointer()	{ return false; }
+
+    public boolean isVoid() 	{ return false; } // where is this used?
+    public boolean isBasic()	{ return false; }
+    public boolean isComposite(){ return true; }
+    public boolean isNumeric()	{ return false; }
 }

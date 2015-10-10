@@ -15,6 +15,8 @@ public class BoolType extends BasicType {
         setName(strName);
         setSize(size);
     }
+    public boolean isAssignableTo(Type t) { return false; }
+    public boolean isEquivalentTo(Type t) { return t.isBool(); }
 
     //----------------------------------------------------------------
     //
@@ -65,7 +67,7 @@ public class BoolType extends BasicType {
     public boolean	isPointer()	{ return false; }
 
     public boolean isVoid() 	{ return false; } // where is this used?
-    public boolean isBasic()	{ return false; }
+    public boolean isBasic()	{ return true; }
     public boolean isComposite(){ return false; }
 
 }

@@ -17,6 +17,8 @@ public class AddOp extends ArithmeticOp {
 
     STO checkOperands(STO a, STO b)
     {
+
+
         Type aType = a.getType();
         Type bType = b.getType();
 
@@ -26,8 +28,14 @@ public class AddOp extends ArithmeticOp {
             // should increment m_nNumErrors++; in MyParser
             return new ErrorSTO(err.getName());
         }
+
         else if ( aType.isInt() && bType.isInt()){
 
+            if (a.getType().isEquivalentTo(b.getType()) ) {
+                System.out.println(a.getType().toString());
+                System.out.println(b.getType().toString());
+                System.out.println("isEquivalentTO is working");
+            }
             System.out.println(a.getName()+""+b.getName() +" has typ: "+ a.getType().toString());
             return new ExprSTO(a.getName()+" + "+b.getName(), a.getType());
         }

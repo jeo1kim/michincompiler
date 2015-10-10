@@ -17,6 +17,15 @@ public class intType extends NumericType {
         setSize(size);
     }
 
+    public boolean isAssignableTo(Type t) {
+        return t.isNumeric();
+    }
+
+    // check if the param type is the class type
+    public boolean isEquivalentTo(Type t) {
+        return t.isInt();
+    }
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

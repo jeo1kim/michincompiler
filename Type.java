@@ -24,6 +24,9 @@ abstract class Type
 		setSize(size);
 	}
 
+	public boolean isAssignableTo(Type t) { return false; }
+	public boolean isEquivalentTo(Type t) { return false; }
+
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
