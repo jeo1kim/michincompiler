@@ -785,7 +785,7 @@ AddOp ::=           T_PLUS
 
 MulOp ::=           T_STAR
                     {:
-                        RESULT = new MulOp("+");
+                        RESULT = new MulOp("*");
                     :}
     |               T_SLASH
                     {:
