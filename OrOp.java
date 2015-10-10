@@ -31,6 +31,7 @@ public class OrOp extends BooleanOp {
 
         if ((aType.isBool()) && (bType.isBool())) {
 
+            //errro
             return new ExprSTO(a.getName() + " && " + b.getName(), new BoolType("newBool" ,1));
 
         } else {

@@ -32,6 +32,7 @@ public class AndOp extends BooleanOp {
 
         if ((aType.isBool()) && (bType.isBool())) {
 
+            // error msg
             return new ExprSTO(a.getName() + " && " + b.getName(), new BoolType("newBool" ,1));
 
         } else {
