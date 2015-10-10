@@ -27,7 +27,7 @@ public class MulOp extends ArithmeticOp {
     STO checkOperands(STO a, STO b)
     {
         //System.out.println(a);System.out.println(b);System.out.println(getName());
-        //System.out.println(super.checkOperands(a,b, getName()));
+        //System.out.println(checkOperands(a,b, getName()));
         return checkOperands(a,b, getName());
     }
 

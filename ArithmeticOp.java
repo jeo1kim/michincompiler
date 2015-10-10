@@ -18,9 +18,14 @@ public abstract class ArithmeticOp extends BinaryOp {
 
     STO checkOperands(STO a, STO b, String opName)
     {
+        //System.out.println(a.getType().isNumeric());
+        if (a.isConst() && b.isConst())
+        {
 
+            return new ConstSTO( a.getName()+b.getName() , b.getType());
+        }
 
-        if( !(a.getType().isNumeric()) || !(b.getType().isNumeric()))
+        else if( !(a.getType().isNumeric()) || !(b.getType().isNumeric()))
         {
             // should increment m_nNumErrors++; in MyParser
             if (a.getType().isNumeric())
@@ -29,10 +34,7 @@ public abstract class ArithmeticOp extends BinaryOp {
                 return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(), opName, b.getType().getName()));
 
         }
-        else if (a.isConst() && b.isConst())
-        {
-            return new ConstSTO( a.getName()+b.getName() , b.getType());
-        }
+
         else if ( a.getType().isInt() && b.getType().isInt()){
             //System.out.println(a.getName()+b.getName() +" has typ: "+ a.getType().toString());
             return new ExprSTO(a.getName()+b.getName(), a.getType());
