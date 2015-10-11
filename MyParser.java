@@ -181,6 +181,17 @@ class MyParser extends parser
 		VarSTO sto = new VarSTO(id);
 		m_symtab.insert(sto);
 	}
+	void DoVarDeclwType(String id, Type typ)
+{
+	if (m_symtab.accessLocal(id) != null)
+	{
+		m_nNumErrors++;
+		m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+	}
+
+	VarSTO sto = new VarSTO(id, typ);
+	m_symtab.insert(sto);
+}
 
 	//----------------------------------------------------------------
 	//

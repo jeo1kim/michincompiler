@@ -24,26 +24,20 @@ public abstract class ArithmeticOp extends BinaryOp {
 
         if( !(aType instanceof NumericType) || !(bType instanceof NumericType) )
         {
-            if (a.isConst() && b.isConst())
-            {
-                return new ConstSTO( a.getName()+b.getName() , b.getType());
-            }
             // should increment m_nNumErrors++; in MyParser
             if ( aType instanceof NumericType)
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),opName,a.getType().getName()));
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, b.getType().getName(),opName));
             else
-
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(), opName, b.getType().getName()));
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, a.getType().getName(), opName));
         }
 
-        else if ( aType instanceof intType && bType instanceof intType){
-            //System.out.println(a.getName()+b.getName() +" has typ: "+ a.getType().toString());
-            return new ExprSTO(a.getName()+b.getName(), a.getType());
+        else if (a.isConst() && b.isConst())
+        {
+            return new ConstSTO( a.getName()+b.getName() , b.getType());
         }
 
-        else{
+        else {
             STO c = !(aType instanceof intType) ? b : a;
-            //System.out.println("A val: " + a.getName()+" B val: "+b.getName());
             return new ExprSTO(a.getName()+b.getName(), c.getType());
         }
     }

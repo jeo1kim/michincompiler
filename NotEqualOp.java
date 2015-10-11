@@ -33,9 +33,9 @@ public class NotEqualOp extends ComparisonOp {
             //if it's not both integer then return error STO
             // should increment m_nNumErrors++; in MyParser
             if (a.getType().isNumeric())
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),"!=",a.getType().getName()));
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, b.getType().getName(),m_OpName,a.getType().getName()));
             else
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(),"!=",b.getType().getName()));
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, a.getType().getName(),m_OpName,b.getType().getName()));
         }
     }
     //----------------------------------------------------------------

@@ -27,10 +27,15 @@ abstract class ComparisonOp extends BinaryOp {
         {
             STO err = (!(a.getType().isNumeric())) ? a : b;
             // should increment m_nNumErrors++; in MyParser
+
+            /*
+            public static final String error1n_Expr  =
+                "Incompatible type %T to binary operator %O, numeric expected.";
+            * */
             if (a.getType().isNumeric())
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),opName,a.getType().getName()));
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, b.getType().getName(),opName));
             else
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(),opName,b.getType().getName()));
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, a.getType().getName(),opName));
         }
 
     }

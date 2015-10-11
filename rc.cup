@@ -245,7 +245,7 @@ ExternDecl ::=      T_EXTERN DecoratedBasicType:_2 T_ID:_3 OptArrayList:_4
 
 VarDecl ::=         OptStatic:_1 DecoratedType:_2 T_ID:_3 OptArrayList:_4 OptInit:_5
                     {:
-                        ((MyParser) parser).DoVarDecl (_3);
+                        ((MyParser) parser).DoVarDeclwType (_3, _2);
                     :}
                     T_SEMI
     |               OptStatic:_1 T_AUTO T_ID:_3 T_ASSIGN Expr:_5
@@ -424,15 +424,15 @@ DecoratedBasicType ::= TypecType:_1 OptPointerList:_2
 
 TypecType ::=       T_INT
                     {:
-                        RESULT = null;  // gotta do something here!
+                        RESULT = new intType("int", 4);  // gotta do something here!
                     :}
     |               T_FLOAT
                     {:
-                        RESULT = null;  // gotta do something here!
+                        RESULT = new FloatType("float", 4);  // gotta do something here!
                     :}
     |               T_BOOL
                     {:
-                        RESULT = null;  // gotta do something here!
+                        RESULT = new BoolType("bool",4);  // gotta do something here!
                     :}
     ;
 
