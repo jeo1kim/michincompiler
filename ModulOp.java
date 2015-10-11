@@ -50,7 +50,7 @@ public class ModulOp extends ArithmeticOp {
             if (aType instanceof intType)
                 return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(), m_OpName ,a.getType().getName()));
             else
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(), m_OpName ,b.getType().getName()));
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(), m_OpName, new intType("int", 4).getName()));
         }
     }
 
