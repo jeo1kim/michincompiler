@@ -34,11 +34,11 @@ public class ModulOp extends ArithmeticOp {
         if (aType instanceof intType && bType instanceof intType) {
             //System.out.println(a.getName() + b.getName() + " has typ: " + a.getType().toString());
 
+            if (a.isConst() && b.isConst())
+            {
+                return new ConstSTO( a.getName()+ getName() + b.getName() , b.getType());
+            }
             return new ExprSTO(a.getName() + getName()+ b.getName(), a.getType());
-        }
-        else if (a.isConst() && b.isConst())
-        {
-            return new ConstSTO( a.getName()+ getName() + b.getName() , b.getType());
         }
         else {
             //if it's not both integer then return error STO

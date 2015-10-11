@@ -870,6 +870,9 @@ class Lexer
         m_htKeywords.put ("*", new Integer (sym.T_STAR));
         m_htKeywords.put ("/", new Integer (sym.T_SLASH));
         m_htKeywords.put ("%", new Integer (sym.T_MOD));
+        m_htKeywords.put ("&&", new Integer (sym.T_AND));
+        m_htKeywords.put ("||", new Integer (sym.T_OR));
+        m_htKeywords.put ("!", new Integer (sym.T_NOT));
 
 
         m_htKeywords.put ("<", new Integer (sym.T_LT));     // added for relations operation
