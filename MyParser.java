@@ -188,7 +188,6 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
-
 		VarSTO sto = new VarSTO(id, typ);
 		m_symtab.insert(sto);
 	}
@@ -459,7 +458,7 @@ class MyParser extends parser
 		return result;
 	}
 
-	STO DoIncDecOp(STO a, UnaryOp o) {
+	/*STO DoIncDecOp(STO a, UnaryOp o) {
 		STO result = o.checkOperands(a);
 		if (result.isError()) {
 			m_nNumErrors++;
@@ -467,7 +466,8 @@ class MyParser extends parser
 			return new ErrorSTO(result.getName());
 		}
 
-		return result;
+		return ;
 	}
+	*/
 
 }

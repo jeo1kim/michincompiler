@@ -1,3 +1,5 @@
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 /**
  * Created by jinyongsuk on 10/8/15.
  */
@@ -20,8 +22,8 @@ public class EqualOp extends ComparisonOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
-        if (((aType.isNumeric()) && (bType.isNumeric()))
-                || (aType.isBool() && bType.isBool()))
+        if (((aType instanceof NumericType) && (bType instanceof NumericType))
+                || (aType instanceof BoolType && bType instanceof BoolType))
         {
             //System.out.println("Inside Equal Op");
             return new ExprSTO(a.getName() + b.getName(), new BoolType("bool", 4));
@@ -31,12 +33,13 @@ public class EqualOp extends ComparisonOp {
         else
         {
             //if it's not both integer then return error STO
-            STO err = (!(a.getType().isNumeric())) ? b : a;
+            //STO err = (!(a.getType().isNumeric())) ? a : b;
             // should increment m_nNumErrors++; in MyParser
-            if (a.getType().isNumeric())
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),"==",a.getType().getName()));
+            //"Incompatible types to operator: %T %O %T;\n  both must be numeric, or both equivalent to bool.";
+            if ( !(aType instanceof BoolType) )
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, a.getType().getName(),m_OpName,b.getType().getName()));
             else
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(),"==",b.getType().getName()));
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, b.getType().getName(),m_OpName,b.getType().getName()));
         }
     }
 
@@ -47,7 +50,7 @@ public class EqualOp extends ComparisonOp {
     {
         return m_OpName;
     }
-    
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

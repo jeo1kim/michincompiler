@@ -432,7 +432,7 @@ TypecType ::=       T_INT
                     :}
     |               T_BOOL
                     {:
-                        RESULT = new BoolType("bool", 4);  // gotta do something here!
+                        RESULT = new BoolType("bool",4);  // gotta do something here!
                     :}
     ;
 
