@@ -650,9 +650,9 @@ Expr ::=            Designator:_1 T_ASSIGN Expr
     ;
 
 
-Expr0 ::=           Expr0:_1 T_OR Expr1
+Expr0 ::=           Expr0:_1 T_OR Expr1:_3
                     {:
-                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, new OrOp("||"), _3);
+                        RESULT =  ((MyParser) parser).DoBinaryExpr(_1, new OrOp("||"), _3);
                     :}
     |               Expr1:_1
                     {:
@@ -661,9 +661,9 @@ Expr0 ::=           Expr0:_1 T_OR Expr1
     ;
 
 
-Expr1 ::=           Expr1:_1 T_AND Expr2
+Expr1 ::=           Expr1:_1 T_AND Expr2:_3
                     {:
-                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, new AndOp("&&"), _3);;
+                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, new AndOp("&&"), _3);
                     :}
     |               Expr2:_1
                     {:
@@ -672,9 +672,9 @@ Expr1 ::=           Expr1:_1 T_AND Expr2
     ;
 
 
-Expr2 ::=           Expr2:_1 T_BAR Expr3
+Expr2 ::=           Expr2:_1 T_BAR Expr3:_3
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, new BwOrOp("|"), _3);
                     :}
     |               Expr3:_1
                     {:
@@ -683,9 +683,9 @@ Expr2 ::=           Expr2:_1 T_BAR Expr3
     ;
 
 
-Expr3 ::=           Expr3:_1 T_CARET Expr4
+Expr3 ::=           Expr3:_1 T_CARET Expr4:_3
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, new XorOp("^"), _3);
                     :}
     |               Expr4:_1
                     {:
@@ -694,9 +694,9 @@ Expr3 ::=           Expr3:_1 T_CARET Expr4
     ;
 
 
-Expr4 ::=           Expr4:_1 T_AMPERSAND Expr5
+Expr4 ::=           Expr4:_1 T_AMPERSAND Expr5:_3
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoBinaryExpr(_1, new BwAndOp("&"), _3);
                     :}
     |               Expr5:_1
                     {:

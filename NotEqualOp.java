@@ -20,22 +20,28 @@ public class NotEqualOp extends ComparisonOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
-        if (((aType.isNumeric()) && (bType.isNumeric()))
-                || (aType.isBool() && bType.isBool()))
+        if(!(aType instanceof NumericType) && !(aType instanceof BoolType))
         {
-            //System.out.println("Inside Not Equal Op");
-            return new ExprSTO(a.getName() + b.getName(), new BoolType("bool", 4));
-        } else if (a.getType().isBool() && b.getType().isBool()){
-            return new ExprSTO(a.getName() + b.getName(), new BoolType("bool", 4));
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName(), m_OpName, bType.getName()));
         }
-        else
+        if(!(bType instanceof NumericType) && !(bType instanceof BoolType))
         {
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName(), m_OpName, bType.getName()));
+        }
+
+        else if (((aType instanceof NumericType) && (bType instanceof NumericType))
+                ||( aType instanceof BoolType && bType instanceof BoolType)) {
+            //errro
+            if (a.isConst() && b.isConst())
+            {
+                return new ConstSTO( a.getName()+ getName() + b.getName() , b.getType());
+            }
+            return new ExprSTO(a.getName() + getName()+ b.getName(), a.getType());
+        } else {
             //if it's not both integer then return error STO
+            STO err = (!(aType instanceof BoolType) || !(aType instanceof NumericType)) ? b : a;
             // should increment m_nNumErrors++; in MyParser
-            if (a.getType().isNumeric())
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, b.getType().getName(),m_OpName,a.getType().getName()));
-            else
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, a.getType().getName(),m_OpName,b.getType().getName()));
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, err.getType().getName(), m_OpName, bType.getName()));
         }
     }
     //----------------------------------------------------------------

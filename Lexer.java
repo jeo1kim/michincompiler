@@ -873,7 +873,9 @@ class Lexer
         m_htKeywords.put ("&&", new Integer (sym.T_AND));
         m_htKeywords.put ("||", new Integer (sym.T_OR));
         m_htKeywords.put ("!", new Integer (sym.T_NOT));
-
+        m_htKeywords.put ("^", new Integer (sym.T_CARET));
+        m_htKeywords.put ("&", new Integer (sym.T_AMPERSAND));
+        m_htKeywords.put ("|", new Integer (sym.T_BAR));
 
         m_htKeywords.put ("<", new Integer (sym.T_LT));     // added for relations operation
         m_htKeywords.put (">", new Integer (sym.T_GT));

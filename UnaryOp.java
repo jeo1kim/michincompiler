@@ -12,6 +12,7 @@ abstract class UnaryOp extends Operator {
     public UnaryOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 

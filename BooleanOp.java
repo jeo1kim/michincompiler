@@ -20,14 +20,15 @@ abstract class BooleanOp extends BinaryOp {
         Type bType = b.getType();
 
 
-        if( !(aType instanceof BoolType) || !(bType instanceof BoolType) )
+        if(!(aType instanceof BoolType))
         {
-            // should increment m_nNumErrors++; in MyParser
-            if ( aType instanceof NumericType)
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(),opName,a.getType().getName()));
-            else
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(), opName, b.getType().getName()));
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(),opName, "bool"));
         }
+        if(!(bType instanceof BoolType))
+        {
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(), opName, "bool"));
+        }
+
         else if ((aType instanceof BoolType) && (bType instanceof BoolType)) {
             //errro
             if (a.isConst() && b.isConst())

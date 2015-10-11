@@ -12,9 +12,13 @@ public class BwOrOp extends BitwiseOp {
     public BwOrOp(String strName )
     {
         super(strName);
+        setName(strName);
+
         //setSize(size);
     }
-
+    STO checkOperands(STO a, STO b) {
+        return checkOperands(a, b, getName());
+    }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

@@ -31,7 +31,16 @@ public class ModulOp extends ArithmeticOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
-        if (aType instanceof intType && bType instanceof intType) {
+        if(!(aType instanceof intType))
+        {
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, aType.getName(), m_OpName , "int"));
+        }
+        if(!(bType instanceof intType))
+        {
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, bType.getName(), m_OpName, "int"));
+        }
+
+        else if (aType instanceof intType && bType instanceof intType) {
 
             if (a.isConst() && b.isConst())
             {
@@ -41,17 +50,12 @@ public class ModulOp extends ArithmeticOp {
 
             return new ExprSTO(a.getName()+ b.getName(), a.getType());
         }
-
-        else {
-            //if it's not both integer then return error STO
-            // should increment m_nNumErrors++; in MyParser
-
-            //"Incompatible type %T to binary operator %O, equivalent to %T expected.";
-            if (aType instanceof intType)
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(), m_OpName ,a.getType().getName()));
-            else
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(), m_OpName, new intType("int", 4).getName()));
+        else{
+            STO c = !(aType instanceof intType) ? b : a;
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, c.getType().getName(), m_OpName, "int"));
         }
+
+
     }
 
     //----------------------------------------------------------------
