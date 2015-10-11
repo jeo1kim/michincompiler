@@ -884,6 +884,11 @@ class Lexer
         m_htKeywords.put ("==", new Integer (sym.T_EQU));
         m_htKeywords.put ("!=", new Integer (sym.T_NEQ));
 
+        m_htKeywords.put ("++", new Integer (sym.T_MINUSMINUS));
+        m_htKeywords.put ("--", new Integer (sym.T_PLUSPLUS));
+
+
+
     }
 
 

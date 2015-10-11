@@ -15,6 +15,9 @@ public class IncOp extends UnaryOp {
         //setSize(size);
     }
 
+    STO checkOperands(STO a){
+        return checkOperands(a, getName());
+    }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

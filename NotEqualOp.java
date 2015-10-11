@@ -39,7 +39,7 @@ public class NotEqualOp extends ComparisonOp {
             return new ExprSTO(a.getName() + getName()+ b.getName(), a.getType());
         } else {
             //if it's not both integer then return error STO
-            STO err = (!(aType instanceof BoolType) || !(aType instanceof NumericType)) ? b : a;
+            STO err = (!(aType instanceof BoolType) && !(aType instanceof NumericType)) ? b : a;
             // should increment m_nNumErrors++; in MyParser
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, err.getType().getName(), m_OpName, bType.getName()));
         }

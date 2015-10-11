@@ -16,7 +16,11 @@ abstract class UnaryOp extends Operator {
         //setSize(size);
     }
 
-    STO checkOperands(STO a){
+    STO checkOperands(STO a,  String opName)
+    {
+        //System.out.println(a.getType().isNumeric());
+        Type aType = a.getType();
+
         return a;
     }
     //----------------------------------------------------------------
