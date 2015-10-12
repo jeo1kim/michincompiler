@@ -9,6 +9,12 @@ public class FloatType extends NumericType {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
+
+    public FloatType(){
+        super();
+        setName("float");
+        setSize(4);
+    }
     public FloatType(String strName, int size)
     {
         super(strName, size);

@@ -37,9 +37,9 @@ public class EqualOp extends ComparisonOp {
             //errro
             if (a.isConst() && b.isConst())
             {
-                return new ConstSTO( a.getName()+ getName() + b.getName() , b.getType());
+                return new ConstSTO( a.getName()+ getName() + b.getName() , new BoolType());
             }
-            return new ExprSTO(a.getName() + getName()+ b.getName(), a.getType());
+            return new ExprSTO(a.getName() + getName()+ b.getName(), new BoolType());
         }
         else {
             //if it's not both integer then return error STO

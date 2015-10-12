@@ -8,6 +8,8 @@ public class BoolType extends BasicType {
 
     public BoolType(){
         super();
+        setName("bool");
+        setSize(4);
     }
 
     //----------------------------------------------------------------

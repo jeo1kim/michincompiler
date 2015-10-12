@@ -33,6 +33,7 @@ public abstract class ArithmeticOp extends BinaryOp {
 
         else if (a.isConst() && b.isConst())
         {
+            // need to check float <=> int
             return new ConstSTO( a.getName()+b.getName() , b.getType());
         }
 

@@ -316,7 +316,7 @@ class MyParser extends parser
 		}
 		if( !stoDes.isAssignableTo(expr.getType())){
 			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, expr.getType().getName(), stoDes.getType().getName() ));
+			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, expr.getType().getName(), stoDes.getType().getName()));
 		}
 		//error3b_Assign ="Value of type %T not assignable to variable of type %T.";
 
@@ -405,6 +405,17 @@ class MyParser extends parser
 		}
 
 		return sto.getType();
+	}
+
+	STO DoConditionCheck(STO condition)
+	{
+		Type conType = condition.getType();
+		if (!conType.isBool()) {
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.error4_Test, conType.getName()));
+			return new ErrorSTO(condition.getName());
+		}
+		return condition;
 	}
 
 	STO CheckGlobalColonColon(String strID)
