@@ -37,16 +37,7 @@ public class EqualOp extends ComparisonOp {
             // should increment m_nNumErrors++; in MyParser
             //"Incompatible types to operator: %T %O %T;\n  both must be numeric, or both equivalent to bool.";
 
-            if( aType instanceof NumericType && !(bType instanceof NumericType))
-            {
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, a.getType().getName(), m_OpName, b.getType().getName()));
-            }
-
-            else if (!(aType instanceof  NumericType) && bType instanceof NumericType)
-            {
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, b.getType().getName(), m_OpName, a.getType().getName()));
-            }
-            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, b.getType().getName(),m_OpName,a.getType().getName()));
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName() , m_OpName, bType.getName()));
         }
     }
 
