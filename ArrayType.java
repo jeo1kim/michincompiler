@@ -16,7 +16,7 @@ public class ArrayType extends CompositeType {
         setSize(size);
     }
 
-    public boolean isAssignableTo(Type t) { return false; }
+    public boolean isAssignableTo(Type t) { return t.isArray(); }
     public boolean isEquivalentTo(Type t) { return t.isArray(); }
 
     //----------------------------------------------------------------

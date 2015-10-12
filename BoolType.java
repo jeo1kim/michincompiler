@@ -8,6 +8,8 @@ public class BoolType extends BasicType {
 
     public BoolType(){
         super();
+        setName("bool");
+        setSize(4);
     }
 
     //----------------------------------------------------------------
@@ -19,7 +21,7 @@ public class BoolType extends BasicType {
         setName(strName);
         setSize(size);
     }
-    public boolean isAssignableTo(Type t) { return false; }
+    public boolean isAssignableTo(Type t) { return t.isBool(); }
     public boolean isEquivalentTo(Type t) { return t.isBool(); }
 
     //----------------------------------------------------------------

@@ -870,7 +870,12 @@ class Lexer
         m_htKeywords.put ("*", new Integer (sym.T_STAR));
         m_htKeywords.put ("/", new Integer (sym.T_SLASH));
         m_htKeywords.put ("%", new Integer (sym.T_MOD));
-
+        m_htKeywords.put ("&&", new Integer (sym.T_AND));
+        m_htKeywords.put ("||", new Integer (sym.T_OR));
+        m_htKeywords.put ("!", new Integer (sym.T_NOT));
+        m_htKeywords.put ("^", new Integer (sym.T_CARET));
+        m_htKeywords.put ("&", new Integer (sym.T_AMPERSAND));
+        m_htKeywords.put ("|", new Integer (sym.T_BAR));
 
         m_htKeywords.put ("<", new Integer (sym.T_LT));     // added for relations operation
         m_htKeywords.put (">", new Integer (sym.T_GT));
@@ -878,6 +883,11 @@ class Lexer
         m_htKeywords.put ("<=", new Integer (sym.T_LTE));
         m_htKeywords.put ("==", new Integer (sym.T_EQU));
         m_htKeywords.put ("!=", new Integer (sym.T_NEQ));
+
+        m_htKeywords.put ("++", new Integer (sym.T_MINUSMINUS));
+        m_htKeywords.put ("--", new Integer (sym.T_PLUSPLUS));
+
+
 
     }
 

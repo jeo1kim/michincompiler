@@ -12,7 +12,11 @@ public class DecOp extends UnaryOp {
     public DecOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
+    }
+    STO checkOperands(STO a){
+        return checkOperands(a, getName());
     }
 
     //----------------------------------------------------------------

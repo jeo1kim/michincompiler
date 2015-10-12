@@ -182,17 +182,15 @@ class MyParser extends parser
 		m_symtab.insert(sto);
 	}
 	void DoVarDeclwType(String id, Type typ)
-{
-	if (m_symtab.accessLocal(id) != null)
 	{
-		m_nNumErrors++;
-		m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+		if (m_symtab.accessLocal(id) != null)
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+		}
+		VarSTO sto = new VarSTO(id, typ);
+		m_symtab.insert(sto);
 	}
-
-	VarSTO sto = new VarSTO(id, typ);
-	m_symtab.insert(sto);
-}
-
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
@@ -299,15 +297,32 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	STO DoAssignExpr(STO stoDes)
+	STO DoAssignExpr(STO stoDes, STO expr)
 	{
+
 		if (!stoDes.isModLValue())
 		{
+			if ( expr instanceof ErrorSTO){
+				return new ErrorSTO(ErrorMsg.error3a_Assign);
+			}
+			m_nNumErrors++;
+			//      "Left-hand operand is not assignable (not a modifiable L-value).";
+			m_errors.print(ErrorMsg.error3a_Assign);
+//			STO result = new ExprSTO(stoDes.getName()+expr.getName(), expr.getType());
+//			result.markRVal();
+//			return result;
 			// Good place to do the assign checks
+			return new ErrorSTO(ErrorMsg.error3a_Assign);
 		}
-		
+		if( !stoDes.isAssignableTo(expr.getType())){
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, expr.getType().getName(), stoDes.getType().getName()));
+		}
+		//error3b_Assign ="Value of type %T not assignable to variable of type %T.";
+
 		return stoDes;
 	}
+
 
 	//----------------------------------------------------------------
 	//
@@ -392,14 +407,25 @@ class MyParser extends parser
 		return sto.getType();
 	}
 
+	STO DoConditionCheck(STO condition)
+	{
+		Type conType = condition.getType();
+		if (!conType.isBool()) {
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.error4_Test, conType.getName()));
+			return new ErrorSTO(condition.getName());
+		}
+		return condition;
+	}
+
 	STO CheckGlobalColonColon(String strID)
 	{
 		STO sto;
 		if ((sto = m_symtab.accessGlobal(strID)) == null)
 		{
-
+			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error0g_Scope, strID));
-			sto = new ErrorSTO(strID);
+			return new ErrorSTO(strID);
 		}
 		return sto;
 	}
@@ -421,55 +447,17 @@ class MyParser extends parser
 		return o.checkOperands(a, b);
 	}
 
-	STO DoEqualityOp(STO a, Operator o, STO b)
-	{
 
-		STO result = o.checkOperands(a, b);
-		if (result.isError())
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
-			return new ErrorSTO(result.getName());
-		}
-		return result;
-	}
-
-	STO DoAndOp(STO a, Operator o, STO b)
-	{
-
-		STO result = o.checkOperands(a, b);
-		if (result.isError())
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
-			return new ErrorSTO(result.getName());
-		}
-		return result;
-	}
-
-	STO DoOrOp(STO a, Operator o, STO b)
-	{
-
-		STO result = o.checkOperands(a, b);
-		if (result.isError())
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
-			return new ErrorSTO(result.getName());
-		}
-		return result;
-	}
-
-	/*STO DoIncDecOp(STO a, UnaryOp o) {
+	STO DoUnaryOp(STO a, Operator o) {
 		STO result = o.checkOperands(a);
 		if (result.isError()) {
 			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
+			m_errors.print(result.getName());
 			return new ErrorSTO(result.getName());
 		}
 
-		return ;
+		return result;
 	}
-	*/
+
 
 }

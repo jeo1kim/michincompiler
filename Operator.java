@@ -15,26 +15,14 @@ abstract class Operator {
         //setSize(size);
     }
 
+    STO checkOperands(STO a)
+    {
+        return new ErrorSTO(getName());
+    }
+
     STO checkOperands(STO a, STO b)
     {
         return new ErrorSTO(getName());
-        /*
-        if( !(a.getType().isNumeric()) || !(b.getType().isNumeric()))
-        {
-            STO err = (!(a.getType().isNumeric())) ? b : a;
-            // should increment m_nNumErrors++; in MyParser
-            return new ErrorSTO(err.getName());
-        }
-        else if ( a.getType().isInt() && b.getType().isInt()){
-
-            //System.out.println(a.getName()+""+b.getName() +" has typ: "+ a.getType().toString());
-            return new ExprSTO(a.getName()+""+b.getName(), a.getType());
-        }
-        else{
-            STO c = !(a.getType().isInt()) ? b : a;
-            //System.out.println(a.getName()+""+b.getName());
-            return new ExprSTO(a.getName()+""+b.getName(), c.getType());
-        }*/
     }
 
     //----------------------------------------------------------------

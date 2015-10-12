@@ -12,7 +12,13 @@ public class XorOp extends BitwiseOp {
     public XorOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
+    }
+
+
+    STO checkOperands(STO a, STO b) {
+        return checkOperands(a, b, getName());
     }
 
     //----------------------------------------------------------------

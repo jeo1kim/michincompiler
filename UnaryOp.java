@@ -12,11 +12,35 @@ abstract class UnaryOp extends Operator {
     public UnaryOp(String strName )
     {
         super(strName);
+        setName(strName);
         //setSize(size);
     }
 
-    STO checkOperands(STO a){
-        return a;
+    STO checkOperands(STO a,  String opName)
+    {
+        //System.out.println(a.getType().isNumeric());
+        Type aType = a.getType();
+
+        if( !(aType instanceof NumericType))
+        {
+            // "Incompatible type %T to operator %O, equivalent to int, float, or pointer expected.";
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(),opName));
+        }
+        if(!a.isModLValue()){
+            //      "Operand to %O is not a modifiable L-value.";
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Lval,aType.getName()));
+        }
+        else
+        {
+            STO result = new ConstSTO( a.getName() , a.getType()); // do i make a new STO or return the old one.
+            if (a.isConst()){
+                result.markRVal();
+                return result;
+            }
+            else{
+                return result;
+            }
+        }
     }
     //----------------------------------------------------------------
     //

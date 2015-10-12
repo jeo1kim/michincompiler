@@ -10,6 +10,12 @@ public class intType extends NumericType {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
+    public intType()
+    {
+        super();
+        setName("int");
+        setSize(4);
+    }
     public intType(String strName, int size)
     {
         super(strName, size);

@@ -13,7 +13,7 @@ class ErrorType extends Type
 		super("Error", 0);
 	}
 
-	public boolean isAssignableTo(Type t) { return false; }
+	public boolean isAssignableTo(Type t) { return t.isError(); }
 	public boolean isEquivalentTo(Type t) { return t.isError(); }
 
 	//----------------------------------------------------------------

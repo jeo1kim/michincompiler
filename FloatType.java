@@ -9,6 +9,12 @@ public class FloatType extends NumericType {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
+
+    public FloatType(){
+        super();
+        setName("float");
+        setSize(4);
+    }
     public FloatType(String strName, int size)
     {
         super(strName, size);
@@ -16,7 +22,7 @@ public class FloatType extends NumericType {
         setSize(size);
     }
 
-    public boolean isAssignableTo(Type t) { return t.isNumeric(); }
+    public boolean isAssignableTo(Type t) { return t.isFloat(); }
     public boolean isEquivalentTo(Type t) { return t.isFloat(); }
     //----------------------------------------------------------------
     //

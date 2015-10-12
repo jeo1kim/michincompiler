@@ -22,21 +22,22 @@ public abstract class ArithmeticOp extends BinaryOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
-        if( !(aType instanceof NumericType) || !(bType instanceof NumericType) )
+        if( !(aType instanceof NumericType))
         {
-            // should increment m_nNumErrors++; in MyParser
-            if ( aType instanceof NumericType)
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, b.getType().getName(),opName));
-            else
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, a.getType().getName(), opName));
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, aType.getName(),opName));
+        }
+        if(!(bType instanceof NumericType))
+        {
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, bType.getName(), opName));
         }
 
         else if (a.isConst() && b.isConst())
         {
+            // need to check float <=> int
             return new ConstSTO( a.getName()+b.getName() , b.getType());
         }
 
-        else {
+        else{
             STO c = !(aType instanceof intType) ? b : a;
             return new ExprSTO(a.getName()+b.getName(), c.getType());
         }

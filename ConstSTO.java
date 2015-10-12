@@ -115,6 +115,7 @@ class ConstSTO extends STO
 	// modifiable. Objects like constants are not modifiable, so they
 	// are not modifiable L-values.
 	//----------------------------------------------------------------
+
 	public boolean isModLValue()
 	{
 		return getIsModifiable() && getIsAddressable();
@@ -122,6 +123,10 @@ class ConstSTO extends STO
 
 	// return true only if both are false
 	public boolean isRValue() { return !(getIsAddressable() || getIsModifiable()); } // double check this,
+
+	public void markRVal(){
+		setIsModifiable(false); setIsAddressable(false);
+	}
 
 	public String getName()
 	{

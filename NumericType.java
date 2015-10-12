@@ -7,6 +7,10 @@ abstract class NumericType extends BasicType {
         private String m_typeName;
         private int m_size;
 
+        public NumericType()
+        {
+                super();
+        }
         //----------------------------------------------------------------
         //
         //----------------------------------------------------------------
