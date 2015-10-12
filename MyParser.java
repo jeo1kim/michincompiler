@@ -7,6 +7,7 @@
 
 import java_cup.runtime.*;
 
+import java.util.Stack;
 import java.util.Vector;
 import java.lang.*;
 
@@ -459,5 +460,19 @@ class MyParser extends parser
 		return result;
 	}
 
+	STO DoVoidReturn()
+	{
+		FuncSTO result;
 
+		//get current funcSTO
+		result =  m_symtab.getFunc();
+		if(result.getReturnType() instanceof VoidType)
+			return result;
+		else
+		{
+			m_nNumErrors++;
+			m_errors.print(ErrorMsg.error6a_Return_expr);
+			return new ErrorSTO(result.getName());
+		}
+	}
 }

@@ -609,6 +609,9 @@ ExitStmt ::=        T_EXIT T_LPAREN Expr T_RPAREN T_SEMI
 
 
 ReturnStmt ::=      T_RETURN T_SEMI
+                    {:
+                        ((MyParser) parser).DoVoidReturn();
+                    :}
     |               T_RETURN Expr T_SEMI
     ;
 
