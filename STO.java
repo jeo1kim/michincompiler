@@ -111,7 +111,9 @@ abstract class STO
 	// return true if both are false.
 	public boolean isRValue() { return !(getIsAddressable() || getIsModifiable()); }
 
-
+	public void markRVal(){
+		setIsModifiable(false); setIsAddressable(false);
+	}
 	//----------------------------------------------------------------
 	//	It will be helpful to ask a STO what specific STO it is.
 	//	The Java operator instanceof will do this, but these methods 

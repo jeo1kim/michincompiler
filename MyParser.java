@@ -297,14 +297,41 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	STO DoAssignExpr(STO stoDes)
+	STO DoAssignExpr(STO stoDes, STO expr)
 	{
+
 		if (!stoDes.isModLValue())
 		{
+			if ( expr instanceof ErrorSTO){
+				return new ErrorSTO(ErrorMsg.error3a_Assign);
+			}
+			m_nNumErrors++;
+			//      "Left-hand operand is not assignable (not a modifiable L-value).";
+			m_errors.print(ErrorMsg.error3a_Assign);
+//			STO result = new ExprSTO(stoDes.getName()+expr.getName(), expr.getType());
+//			result.markRVal();
+//			return result;
+			// Good place to do the assign checks
+			return new ErrorSTO(ErrorMsg.error3a_Assign);
+		}
+
+		return stoDes;
+	}
+
+	STO DoAssignExpr2(STO stoDes, STO expr) {
+
+
+		if (!stoDes.isModLValue() && !expr.isError()) {
+			//      "Left-hand operand is not assignable (not a modifiable L-value).";
+			m_nNumErrors++;
+			m_errors.print(ErrorMsg.error3a_Assign);
+			return new ErrorSTO(ErrorMsg.error3a_Assign);
 			// Good place to do the assign checks
 		}
-		
-		return stoDes;
+
+		STO result = new ExprSTO(stoDes.getName() + "=" + expr.getName(), expr.getType());
+		result.markRVal();
+		return result;
 	}
 
 	//----------------------------------------------------------------
@@ -424,7 +451,7 @@ class MyParser extends parser
 		STO result = o.checkOperands(a);
 		if (result.isError()) {
 			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_type, result.getName()));
+			m_errors.print(result.getName());
 			return new ErrorSTO(result.getName());
 		}
 
