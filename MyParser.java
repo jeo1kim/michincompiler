@@ -314,25 +314,15 @@ class MyParser extends parser
 			// Good place to do the assign checks
 			return new ErrorSTO(ErrorMsg.error3a_Assign);
 		}
+		if( !stoDes.isAssignableTo(expr.getType())){
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, expr.getType().getName(), stoDes.getType().getName() ));
+		}
+		//error3b_Assign ="Value of type %T not assignable to variable of type %T.";
 
 		return stoDes;
 	}
 
-	STO DoAssignExpr2(STO stoDes, STO expr) {
-
-
-		if (!stoDes.isModLValue() && !expr.isError()) {
-			//      "Left-hand operand is not assignable (not a modifiable L-value).";
-			m_nNumErrors++;
-			m_errors.print(ErrorMsg.error3a_Assign);
-			return new ErrorSTO(ErrorMsg.error3a_Assign);
-			// Good place to do the assign checks
-		}
-
-		STO result = new ExprSTO(stoDes.getName() + "=" + expr.getName(), expr.getType());
-		result.markRVal();
-		return result;
-	}
 
 	//----------------------------------------------------------------
 	//

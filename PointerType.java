@@ -15,7 +15,7 @@ public abstract class PointerType extends CompositeType {
         setName(strName);
         setSize(size);
     }
-    public boolean isAssignableTo(Type t) { return false; }
+    public boolean isAssignableTo(Type t) { return t.isPointer(); }
     public boolean isEquivalentTo(Type t) { return t.isPointer(); }
     //----------------------------------------------------------------
     //

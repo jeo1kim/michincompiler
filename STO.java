@@ -114,6 +114,8 @@ abstract class STO
 	public void markRVal(){
 		setIsModifiable(false); setIsAddressable(false);
 	}
+	public boolean isAssignableTo(Type t) { return false; }
+	public boolean isEquivalentTo(Type t) { return false; }
 	//----------------------------------------------------------------
 	//	It will be helpful to ask a STO what specific STO it is.
 	//	The Java operator instanceof will do this, but these methods 

@@ -20,7 +20,7 @@ public class AddOp extends ArithmeticOp {
 
     STO checkOperands(STO a, STO b)
     {
-        return checkOperands(a,b, getName() );
+        return checkOperands(a,b, getName());
     }
 
     //----------------------------------------------------------------
