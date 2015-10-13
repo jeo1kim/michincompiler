@@ -46,11 +46,7 @@ class FuncSTO extends STO
 	public FuncSTO(String strName, Type retType, Vector<STO> params)
 	{
 		super (strName);
-		setType(retType);
-		setReturnType(retType);
-		setName(strName);
-		setParamCount(params.size());
-		paramSTO = params;
+		initSTO(strName,retType, params, false);
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
@@ -59,11 +55,8 @@ class FuncSTO extends STO
 	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
 	{
 		super (strName);
-		setReturnType(retType);
-		setName(strName);
-		setReference(ref);
-		setParamCount(params.size());
-		paramSTO = params;
+		initSTO(strName,retType, params, ref);
+		setParamVec(params);
 		m_return_top_level = false;
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
@@ -71,15 +64,19 @@ class FuncSTO extends STO
 	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref, int level)
 	{
 		super (strName);
-		setReturnType(retType);
-		setName(strName);
-		setReference(ref);
-		setParamCount(params.size());
-		paramSTO = params;
 		setLevel(level);
+		initSTO(strName,retType, params, ref);
 		m_return_top_level = false;
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
+	}
+
+	public void initSTO(String strName, Type retType, Vector<STO> params, boolean ref){
+		setReturnType(retType);
+		setType(retType);
+		setName(strName);
+		setReference(ref);
+		setParamCount(params.size());
 	}
 
 	public void setParamVec(Vector<STO> paraList){
@@ -201,7 +198,15 @@ class FuncSTO extends STO
 
 	// return true only if both are false
 	public boolean isRValue() { return !(getIsAddressable() || getIsModifiable()); }
-
+	public void markRVal(){
+		setIsModifiable(false); setIsAddressable(false);
+	}
+	public void markModVal(){
+		setIsModifiable(true); setIsAddressable(true);
+	}
+	public void markModLVal(){
+		setIsModifiable(false); setIsAddressable(true);
+	}
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
