@@ -342,9 +342,9 @@ class MyParser extends parser
 			// Good place to do the assign checks
 			return new ErrorSTO(ErrorMsg.error3a_Assign);
 		}
-		if( !stoDes.isAssignableTo(expr.getType())){
+		if( !stoDes.getType().isAssignableTo(expr.getType())){
 			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, expr.getType().getName(), stoDes.getType().getName()));
+			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getName(expr), getName(stoDes)));
 		}
 		//error3b_Assign ="Value of type %T not assignable to variable of type %T.";
 
@@ -404,6 +404,7 @@ class MyParser extends parser
 		// check if func sto was called by ref and assign R val or mod l val
 		if( func.isRef()) {
 			sto.markModLVal();
+
 			return sto;
 		}else if(!func.isRef())
 		{
