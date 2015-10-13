@@ -138,7 +138,7 @@ class FuncSTO extends STO
 	public int getParamCount(){ return m_paramCount; }
 
 	public void setParamCount(int count){
-		m_paramCount = paramSTO.size();
+		m_paramCount = count;
 	}
 
 	public void setReturn_top_level(boolean top_level)
@@ -151,11 +151,8 @@ class FuncSTO extends STO
 		return m_return_top_level;
 	}
 
-	public int getParamCount(){ return m_paramCount; }
 
-	public void setParamCount(int count){
-		m_paramCount =count;
-	}
+
 
 	//----------------------------------------------------------------
 	// Addressable refers to if the object has an address. Variables
