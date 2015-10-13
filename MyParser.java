@@ -249,6 +249,7 @@ class MyParser extends parser
 		}
 	
 		FuncSTO sto = new FuncSTO(id);
+		sto.setLevel(m_symtab.getLevel());
 		m_symtab.insert(sto);
 
 		m_symtab.openScope();
@@ -466,13 +467,108 @@ class MyParser extends parser
 
 		//get current funcSTO
 		result =  m_symtab.getFunc();
+
+		//if this return Key is in top level
+		if(result.getLevel() == m_symtab.getLevel())
+		{
+			result.setReturn_top_level(true);
+		}
+
+
 		if(result.getReturnType() instanceof VoidType)
-			return result;
+			return null;
 		else
 		{
 			m_nNumErrors++;
 			m_errors.print(ErrorMsg.error6a_Return_expr);
 			return new ErrorSTO(result.getName());
 		}
+	}
+
+	STO DoExprReturn(STO a)
+	{
+		FuncSTO result;
+		result = m_symtab.getFunc();
+
+		//if this return Key is in top level
+		if(result.getLevel() == m_symtab.getLevel())
+		{
+			result.setReturn_top_level(true);
+		}
+
+		//type check pass by value
+		if (!result.isRetByRef())
+		{
+			if(result.getReturnType() != a.getType())
+			{
+				//if type is different but is assignable ex) int to float
+				if (result.isAssignableTo(a.getType()))
+				{
+					return a;
+				}
+
+				//error6a_Return_type =
+				//"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(
+						ErrorMsg.error6a_Return_type,
+						result.getReturnType().toString(),
+						a.getType().toString()));
+
+				return new ErrorSTO(a.getName());
+			}
+		}
+		else
+		//pass by reference
+		//the type of the return expression is not equivalent to the return type of the function
+		{
+			//Expression is not ModLValue
+			if (!(a.isModLValue()))
+			{
+				//error6b_Return_modlval =
+				//		"Return expression is not a modifiable L-value for function that returns by reference.";
+				m_nNumErrors++;
+				m_errors.print(ErrorMsg.error6b_Return_modlval);
+				return new ErrorSTO(a.getName());
+			}
+
+
+			if (result.getReturnType() != a.getType()) {
+				//error6b_Return_equiv =
+				//"Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(
+						ErrorMsg.error6b_Return_equiv,
+						result.getReturnType().toString(),
+						a.getType().toString()));
+				return new ErrorSTO(a.getName());
+			}
+			else
+			{
+				return a;
+			}
+
+		}
+		return a;
+	}
+
+
+	STO DoNoRerutn() {
+
+		FuncSTO result = m_symtab.getFunc();
+
+		//if there is no ReturnType in Top-level
+		if(!(result.getReturn_top_level())
+				&& !(result.getReturnType() instanceof VoidType))
+		{
+			m_nNumErrors++;
+			m_errors.print(ErrorMsg.error6c_Return_missing);
+			return new ErrorSTO(result.getName());
+		}
+		else{ //if there is return stmt and correspond to retunType
+			return null;
+		}
+
+
 	}
 }

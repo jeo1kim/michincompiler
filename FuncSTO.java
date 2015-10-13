@@ -3,7 +3,7 @@
 // Copyright (C) 2008-2015 Garo Bournoutian and Rick Ord
 // University of California, San Diego
 //---------------------------------------------------------------------
-
+import java.util.Vector;
 
 class FuncSTO extends STO
 {
@@ -12,6 +12,11 @@ class FuncSTO extends STO
 	private Type m_type;
 	private boolean m_isAddressable;
 	private boolean m_isModifiable;
+	private boolean m_isRetByRef;
+	private int m_paramCount;
+	private Vector<STO> paramSTO;
+	private int m_level;
+	private boolean m_return_top_level = false;
 
 	//----------------------------------------------------------------
 	//
@@ -22,6 +27,8 @@ class FuncSTO extends STO
 		super (strName);
 		setReturnType(null);
 		setName(strName);
+		m_return_top_level = false;
+
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
@@ -30,10 +37,54 @@ class FuncSTO extends STO
 		super (strName);
 		setReturnType(retType);
 		setName(strName);
+		m_return_top_level = false;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+	public FuncSTO(String strName, Type retType, Vector<STO> params)
+	{
+		super (strName);
+		setReturnType(retType);
+		setName(strName);
+		setParamCount(params.size());
+		paramSTO = params;
+		m_return_top_level = false;
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
 
+	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
+	{
+		super (strName);
+		setReturnType(retType);
+		setName(strName);
+		setReference(ref);
+		setParamCount(params.size());
+		paramSTO = params;
+		m_return_top_level = false;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref, int level)
+	{
+		super (strName);
+		setReturnType(retType);
+		setName(strName);
+		setReference(ref);
+		setParamCount(params.size());
+		paramSTO = params;
+		setLevel(level);
+		m_return_top_level = false;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+
+	public void setParamVec(Vector<STO> paraList){
+		paramSTO = paraList;
+	}
+	public Vector<STO> getParamVec(){
+		return paramSTO;
+	}
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
@@ -64,6 +115,37 @@ class FuncSTO extends STO
 	private void setType(Type type)
 	{
 		m_type = type;
+	}
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public int getLevel()
+	{
+		return m_level;
+	}
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public void setLevel(int level)
+	{
+		m_level = level;
+	}
+
+	public int getParamCount(){ return m_paramCount; }
+
+	public void setParamCount(int count){
+		m_paramCount = paramSTO.size();
+	}
+
+	public void setReturn_top_level(boolean top_level)
+	{
+		m_return_top_level = top_level;
+	}
+
+	public boolean getReturn_top_level()
+	{
+		return m_return_top_level;
 	}
 
 	//----------------------------------------------------------------
@@ -117,12 +199,15 @@ class FuncSTO extends STO
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	public boolean isFunc() 
-	{ 
+	public boolean isFunc()
+	{
 		return true;
-		// You may want to change the isModifiable and isAddressable                      
+		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
+
+	public void setReference(boolean ref){ m_isRetByRef = ref; }
+	public boolean isRetByRef(){ return m_isRetByRef;}
 
 	//----------------------------------------------------------------
 	// This is the return type of the function. This is different from 
