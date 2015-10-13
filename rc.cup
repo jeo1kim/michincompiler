@@ -112,7 +112,7 @@ non terminal
     StructdefDecl,
     CtorDef,
     DtorDef,
-    OptRef,
+    //OptRef,
     FieldVarsList,
     FieldVarDecl,
     OptCtorDtorList,
@@ -125,7 +125,6 @@ non terminal
     StmtList,
     Stmt,
     CodeBlock,
-    OptExprList,
     IfStmt,
     OptElse,
     ForeachStmt,
@@ -157,8 +156,11 @@ non terminal
     DeleteStmt
     ;
 
+non terminal Boolean
+    OptRef
+    ;
+
 non terminal String
-    ParamDecl
     ;
 
 non terminal Operator
@@ -182,7 +184,8 @@ non terminal STO
     Expr8,
     Designator,
     Designator2,
-    Designator3
+    Designator3,
+    ParamDecl
     ;
 
 non terminal Type
@@ -195,6 +198,7 @@ non terminal Type
     ;
 
 non terminal Vector
+    OptExprList,
     OptParamList,
     ParamList
     ;
@@ -366,7 +370,8 @@ FieldFuncDecl ::=   FuncDef
 FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
                     {:
                         ((MyParser) parser).SaveLineNum ();
-                        ((MyParser) parser).DoFuncDecl_1(_3);
+                        // FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
+                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1); // id, rettype, ref '&' or empty? null
                     :}
                     T_LPAREN OptParamList:_4 T_RPAREN
                     {:
@@ -383,7 +388,7 @@ FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
 
 FuncDecl ::=        T_EXTERN T_FUNCTION T_COLON ReturnType:_1 T_ID:_3
                     {:
-                        ((MyParser) parser).DoFuncDecl_1(_3);
+                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1);
                     :}
                     T_LPAREN OptParamList:_4 T_RPAREN
                     {:
@@ -474,7 +479,10 @@ ArrayList ::=       Array
     |               ArrayList Array
     ;
 
-Array ::=           T_LBRACKET ConstExpr T_RBRACKET
+Array ::=           T_LBRACKET ConstExpr:_1 T_RBRACKET
+                    //{:
+                    //    RESULT = new VarSTO(
+                    //:}
     ;
 
 
@@ -532,11 +540,17 @@ ParamList ::=       ParamDecl:_2
     ;
 
 
-ParamDecl ::=       Type OptRef T_ID OptArrayList
+ParamDecl ::=       Type:_1 OptRef:_2 T_ID:_3 OptArrayList:_4
+                    //{:
+                    //    RESULT = new VarSTO(_3, _1, _2);
+                    //:}
     ;
 
 
 OptRef ::=          T_AMPERSAND
+                    {:
+                        RESULT = true;
+                    :}
     |               /* empty */
     ;
 
@@ -647,7 +661,11 @@ ConstExpr ::=       Expr
     ;
 
 
-OptExprList ::=     ExprList
+OptExprList ::=     ExprList:_1
+                    {:
+                        RESULT = new Vector ();
+                        RESULT.addElement (_1);
+                    :}
     |               /* empty */
     ;
 
@@ -902,9 +920,9 @@ Designator2 ::=     Designator2:_1 T_DOT T_ID:_3
                     {:
                         RESULT = ((MyParser) parser).DoUnaryOp(_1, _2);
                     :}
-    |               Designator2:_1 T_LPAREN OptExprList T_RPAREN
+    |               Designator2:_1 T_LPAREN OptExprList:_2 T_RPAREN
                     {:
-                        ((MyParser) parser).DoFuncCall (_1);
+                        ((MyParser) parser).DoFuncCall (_1, _2);
                         RESULT = _1;
                     :}
     |               Designator3:_1

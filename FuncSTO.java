@@ -5,6 +5,8 @@
 //---------------------------------------------------------------------
 import java.util.Vector;
 
+import java.util.Vector;
+
 class FuncSTO extends STO
 {
 	private Type m_returnType;
@@ -35,23 +37,24 @@ class FuncSTO extends STO
 	public FuncSTO(String strName, Type retType)
 	{
 		super (strName);
+		setType(retType);
 		setReturnType(retType);
 		setName(strName);
-		m_return_top_level = false;
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
 	public FuncSTO(String strName, Type retType, Vector<STO> params)
 	{
 		super (strName);
+		setType(retType);
 		setReturnType(retType);
 		setName(strName);
 		setParamCount(params.size());
 		paramSTO = params;
-		m_return_top_level = false;
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
+
 
 	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
 	{
@@ -135,7 +138,7 @@ class FuncSTO extends STO
 	public int getParamCount(){ return m_paramCount; }
 
 	public void setParamCount(int count){
-		m_paramCount = paramSTO.size();
+		m_paramCount = count;
 	}
 
 	public void setReturn_top_level(boolean top_level)
@@ -147,6 +150,9 @@ class FuncSTO extends STO
 	{
 		return m_return_top_level;
 	}
+
+
+
 
 	//----------------------------------------------------------------
 	// Addressable refers to if the object has an address. Variables

@@ -15,8 +15,10 @@ class VarSTO extends STO
 	private Type m_type;
 	private boolean m_isAddressable;
 	private boolean m_isModifiable;
-
+	private boolean m_ref  = false;
 	private BigDecimal m_value;
+
+	private STO m_array;
 
 	//----------------------------------------------------------------
 	//
@@ -34,22 +36,26 @@ class VarSTO extends STO
 	public VarSTO(String strName, Type typ)
 	{
 		super(strName, typ);
-		setName(strName);
-		setType(typ);
-		setIsAddressable(true);
-		setIsModifiable(true);
-		// You may want to change the isModifiable and isAddressable 
+		initSTO(strName, typ);
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+
+	public VarSTO(String strName, Type typ, boolean ref)//, STO array)
+	{
+		super(strName, typ);
+		initSTO(strName, typ);
+		setRef(ref);
+		//m_array = array;
+		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
 
 	public VarSTO(String strName, Type typ, int val)
 	{
 		super(strName, typ);
-		setName(strName);
-		setType(typ);
+		initSTO(strName, typ);
 		m_value = new BigDecimal(val);
-		setIsAddressable(true);
-		setIsModifiable(true);
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
@@ -57,15 +63,22 @@ class VarSTO extends STO
 	public VarSTO(String strName, Type typ, double val)
 	{
 		super(strName, typ);
-		setName(strName);
-		setType(typ);
+		initSTO(strName, typ);
 		m_value = new BigDecimal(val);
-		setIsAddressable(true);
-		setIsModifiable(true);
+
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
 
+	public void initSTO(String strName, Type typ){
+		setName(strName);
+		setType(typ);
+		setIsAddressable(true);
+		setIsModifiable(true);
+	}
+
+	public void setRef(boolean ref){ m_ref = ref; }
+	public boolean isRef(){ return m_ref;}
 
 	//----------------------------------------------------------------
 	// Addressable refers to if the object has an address. Variables
