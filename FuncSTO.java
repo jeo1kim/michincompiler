@@ -5,6 +5,8 @@
 //---------------------------------------------------------------------
 
 
+import java.util.Vector;
+
 class FuncSTO extends STO
 {
 	private Type m_returnType;
@@ -12,6 +14,9 @@ class FuncSTO extends STO
 	private Type m_type;
 	private boolean m_isAddressable;
 	private boolean m_isModifiable;
+	private boolean m_isRetByRef;
+	private int m_paramCount;
+	private Vector<STO> paramSTO;
 
 	//----------------------------------------------------------------
 	//
@@ -22,18 +27,51 @@ class FuncSTO extends STO
 		super (strName);
 		setReturnType(null);
 		setName(strName);
+
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
 	public FuncSTO(String strName, Type retType)
 	{
 		super (strName);
+		setType(retType);
 		setReturnType(retType);
 		setName(strName);
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
+	public FuncSTO(String strName, Type retType, Vector<STO> params)
+	{
+		super (strName);
+		setType(retType);
+		setReturnType(retType);
+		setName(strName);
+		setParamCount(params.size());
+		paramSTO = params;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
 
+	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
+	{
+		super (strName);
+		setType(retType);
+		setReturnType(retType);
+		setName(strName);
+		setReference(ref);
+		setParamCount(params.size());
+		paramSTO = params;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+
+
+	public void setParamVec(Vector<STO> paraList){
+		paramSTO = paraList;
+	}
+	public Vector<STO> getParamVec(){
+		return paramSTO;
+	}
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
@@ -64,6 +102,12 @@ class FuncSTO extends STO
 	private void setType(Type type)
 	{
 		m_type = type;
+	}
+
+	public int getParamCount(){ return m_paramCount; }
+
+	public void setParamCount(int count){
+		m_paramCount =count;
 	}
 
 	//----------------------------------------------------------------
@@ -123,6 +167,9 @@ class FuncSTO extends STO
 		// You may want to change the isModifiable and isAddressable                      
 		// fields as necessary
 	}
+
+	public void setReference(boolean ref){ m_isRetByRef = ref; }
+	public boolean isRetByRef(){ return m_isRetByRef;}
 
 	//----------------------------------------------------------------
 	// This is the return type of the function. This is different from 

@@ -6,6 +6,7 @@
 
 
 import java_cup.runtime.*;
+import sun.tools.jstat.Identifier;
 
 import java.util.Vector;
 import java.lang.*;
@@ -254,6 +255,22 @@ class MyParser extends parser
 		m_symtab.setFunc(sto);
 	}
 
+	void DoFuncDecl_1_param(String id, Type ret)
+	{
+
+		if (m_symtab.accessLocal(id) != null)
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+		}
+
+		FuncSTO sto = new FuncSTO(id, ret);
+		m_symtab.insert(sto);
+
+		m_symtab.openScope();
+		m_symtab.setFunc(sto);
+	}
+
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
@@ -268,13 +285,19 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	void DoFormalParams(Vector<String> params)
 	{
+		//System.out.print(params);
 		if (m_symtab.getFunc() == null)
 		{
 			m_nNumErrors++;
 			m_errors.print ("internal: DoFormalParams says no proc!");
 		}
 
-		// insert parameters here
+		FuncSTO func = m_symtab.getFunc();
+		if( params != null) {
+			func.setParamCount(params.size()); // set the
+		}
+		func.setParamCount(0);
+			// insert parameters here
 	}
 
 	//----------------------------------------------------------------
@@ -327,14 +350,29 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	STO DoFuncCall(STO sto)
+	STO DoFuncCall(STO sto, Vector<STO> paramTyp)
 	{
+
+		STO func =  m_symtab.access(sto.getName());
 		if (!sto.isFunc())
 		{
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.not_function, sto.getName()));
 			return new ErrorSTO(sto.getName());
 		}
+		else if(!func.isFunc() || func == null)
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.not_function, func.getName()));
+			return new ErrorSTO(sto.getName());
+		}
+		else if (((FuncSTO) sto).getParamCount() != ((FuncSTO)func).getParamCount()){
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.error5n_Call,sto.getName(), func.getName()));
+			return new ErrorSTO(sto.getName());
+
+		}
+
 
 		return sto;
 	}
@@ -434,9 +472,7 @@ class MyParser extends parser
 
 	STO DoBinaryExpr(STO a, Operator o, STO b)
 	{
-		//STO result = o.checkOperands(a, b);
-		//System.out.println(o.checkOperands(a, b));
-		//System.out.println(o);System.out.println(a);System.out.println(b);
+
 
 		if (o.checkOperands(a, b).isError())
 		{

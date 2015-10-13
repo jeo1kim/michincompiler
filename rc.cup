@@ -125,7 +125,6 @@ non terminal
     StmtList,
     Stmt,
     CodeBlock,
-    OptExprList,
     IfStmt,
     OptElse,
     ForeachStmt,
@@ -195,6 +194,7 @@ non terminal Type
     ;
 
 non terminal Vector
+    OptExprList,
     OptParamList,
     ParamList
     ;
@@ -366,7 +366,8 @@ FieldFuncDecl ::=   FuncDef
 FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
                     {:
                         ((MyParser) parser).SaveLineNum ();
-                        ((MyParser) parser).DoFuncDecl_1(_3);
+                        // FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
+                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1); // id, rettype, ref '&' or empty? null
                     :}
                     T_LPAREN OptParamList:_4 T_RPAREN
                     {:
@@ -382,7 +383,7 @@ FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
 
 FuncDecl ::=        T_EXTERN T_FUNCTION T_COLON ReturnType:_1 T_ID:_3
                     {:
-                        ((MyParser) parser).DoFuncDecl_1(_3);
+                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1);
                     :}
                     T_LPAREN OptParamList:_4 T_RPAREN
                     {:
@@ -635,7 +636,11 @@ ConstExpr ::=       Expr
     ;
 
 
-OptExprList ::=     ExprList
+OptExprList ::=     ExprList:_1
+                    {:
+                        RESULT = new Vector ();
+                        RESULT.addElement (_1);
+                    :}
     |               /* empty */
     ;
 
@@ -890,9 +895,9 @@ Designator2 ::=     Designator2:_1 T_DOT T_ID:_3
                     {:
                         RESULT = ((MyParser) parser).DoUnaryOp(_1, _2);
                     :}
-    |               Designator2:_1 T_LPAREN OptExprList T_RPAREN
+    |               Designator2:_1 T_LPAREN OptExprList:_2 T_RPAREN
                     {:
-                        ((MyParser) parser).DoFuncCall (_1);
+                        ((MyParser) parser).DoFuncCall (_1, _2);
                         RESULT = _1;
                     :}
     |               Designator3:_1
