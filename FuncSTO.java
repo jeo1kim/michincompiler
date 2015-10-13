@@ -198,7 +198,15 @@ class FuncSTO extends STO
 
 	// return true only if both are false
 	public boolean isRValue() { return !(getIsAddressable() || getIsModifiable()); }
-
+	public void markRVal(){
+		setIsModifiable(false); setIsAddressable(false);
+	}
+	public void markModVal(){
+		setIsModifiable(true); setIsAddressable(true);
+	}
+	public void markModLVal(){
+		setIsModifiable(false); setIsAddressable(true);
+	}
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------

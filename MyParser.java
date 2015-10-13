@@ -285,28 +285,26 @@ class MyParser extends parser
 	}
 
 	//----------------------------------------------------------------
-	//
+	// Method for Function parameter checking
 	//----------------------------------------------------------------
 	void DoFormalParams(Vector<STO> params)
 	{
+		STO func = m_symtab.getFunc();
 		//System.out.print(params.get(0));
-		if (m_symtab.getFunc() == null)
+		if (func == null)
 		{
 			m_nNumErrors++;
 			m_errors.print ("internal: DoFormalParams says no proc!");
 		}
 
-		FuncSTO func = m_symtab.getFunc();
-		if( params != null) {
-			func.setParamVec(params);
-			func.setParamCount(params.size()); // set the
-		}
-		func.setParamCount(0);
+		func.setParamVec(params);
+		func.setParamCount(params.size()); // set the
+
 			// insert parameters here
 	}
 
 	//----------------------------------------------------------------
-	//
+	// Opens the Scope, global, function, brackets.
 	//----------------------------------------------------------------
 	void DoBlockOpen()
 	{
@@ -355,10 +353,14 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	STO DoFuncCall(STO sto, Vector<STO> paramTyp)
+	STO DoFuncCall(STO sto, Vector<STO> argTyp)
 	{
 		// func holds expected param
 		STO func =  m_symtab.access(sto.getName());
+		Vector<STO> paramList = func.getParamVec();
+
+
+
 		if (!sto.isFunc())
 		{
 			m_nNumErrors++;
@@ -371,40 +373,44 @@ class MyParser extends parser
 			m_errors.print(Formatter.toString(ErrorMsg.not_function, func.getName()));
 			return new ErrorSTO(sto.getName());
 		}
-		else if (((FuncSTO) sto).getParamCount() != ((FuncSTO)func).getParamCount()){
+		else if ( argTyp.size() != func.getParamCount()){
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error5n_Call,sto.getName(), func.getName()));
 			return new ErrorSTO(sto.getName());
 		}
+
+
+		//chech 0 parm
 		// paramType has arguments
 		Iterator<STO> it1;
 		Iterator<STO> it2;
-		Vector<STO> paramList = ((FuncSTO) func).getParamVec();
 
-		it1 = paramTyp.iterator();
-		it2 = paramList.iterator();
-		for( it1 = paramTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
+		for( it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
 			STO arg =  it1.next();
 			STO param =  it2.next();
 
 			if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())  ){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
+				return new ErrorSTO(sto.getName());
+
 			}
 			if(param.isRef() && arg.getType().isEquivalentTo(param.getType())){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
+				return new ErrorSTO(sto.getName());
+
 			}
 			if(param.isRef() && !arg.isModLValue()){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getName(param), getName(param)));
+				return new ErrorSTO(sto.getName());
 			}
 		}
 
 		// check if func sto was called by ref and assign R val or mod l val
 		if( func.isRef()) {
 			sto.markModLVal();
-
 			return sto;
 		}else if(!func.isRef())
 		{
