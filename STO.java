@@ -121,6 +121,7 @@ abstract class STO
 		m_isModifiable = modifiable;
 	}
 
+
 	//----------------------------------------------------------------
 	// A modifiable L-value is an object that is both addressable and
 	// modifiable. Objects like constants are not modifiable, so they 
@@ -136,6 +137,12 @@ abstract class STO
 
 	public void markRVal(){
 		setIsModifiable(false); setIsAddressable(false);
+	}
+	public void markModVal(){
+		setIsModifiable(true); setIsAddressable(true);
+	}
+	public void markModLVal(){
+		setIsModifiable(false); setIsAddressable(true);
 	}
 	public boolean isAssignableTo(Type t) { return false; }
 	public boolean isEquivalentTo(Type t) { return false; }

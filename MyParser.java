@@ -375,7 +375,6 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error5n_Call,sto.getName(), func.getName()));
 			return new ErrorSTO(sto.getName());
-
 		}
 		// paramType has arguments
 		Iterator<STO> it1;
@@ -403,6 +402,14 @@ class MyParser extends parser
 		}
 
 		// check if func sto was called by ref and assign R val or mod l val
+		if( func.isRef()) {
+			sto.markModLVal();
+			return sto;
+		}else if(!func.isRef())
+		{
+			sto.markRVal();
+			return sto;
+		}
 		return sto;
 	}
 
