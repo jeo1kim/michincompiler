@@ -605,7 +605,10 @@ ContinueStmt ::=    T_CONTINUE T_SEMI
     ;
 
 
-ExitStmt ::=        T_EXIT T_LPAREN Expr T_RPAREN T_SEMI
+ExitStmt ::=        T_EXIT T_LPAREN Expr:_1 T_RPAREN T_SEMI
+                    {:
+                        ((MyParser) parser).DoExitExpr(_1);
+                    :}
     ;
 
 

@@ -6,6 +6,7 @@
 
 
 import java_cup.runtime.*;
+import sun.jvm.hotspot.debugger.cdbg.IntType;
 
 import java.util.Stack;
 import java.util.Vector;
@@ -570,5 +571,21 @@ class MyParser extends parser
 		}
 
 
+	}
+
+	STO DoExitExpr(STO a)
+	{
+
+		if (!(a.isAssignableTo(new intType("intType", 4))))
+		{
+
+			//error7_Exit  =
+			//"Exit expression (type %T) is not assignable to int.";
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.error7_Exit, a.getType().toString()));
+		}
+
+		//if assignable to int then return expr
+		return a;
 	}
 }
