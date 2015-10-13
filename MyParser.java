@@ -385,20 +385,20 @@ class MyParser extends parser
 		it1 = paramTyp.iterator();
 		it2 = paramList.iterator();
 		for( it1 = paramTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
-			VarSTO arg = (VarSTO) it1.next();
-			VarSTO param = (VarSTO) it2.next();
+			STO arg =  it1.next();
+			STO param =  it2.next();
 
-			if (!param.isRef() && !arg.isAssignableTo(param.getType())  ){
+			if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())  ){
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, arg.getName(), param.getName(), param.getType().getName()));
+				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
 			}
-			if(param.isRef() && arg.isEquivalentTo(param.getType())){
+			if(param.isRef() && arg.getType().isEquivalentTo(param.getType())){
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, arg.getName(), param.getName(), param.getType().getName()));
+				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
 			}
 			if(param.isRef() && !arg.isModLValue()){
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, param.getName(), param.getType().getName()));
+				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getName(param), getName(param)));
 			}
 		}
 
@@ -636,4 +636,12 @@ class MyParser extends parser
 	}
 
 
+
+	// Helper Function
+	String getName(Type typ){
+		return typ.getName();
+	}
+	String getName(STO sto){
+		return sto.getType().getName();
+	}
 }
