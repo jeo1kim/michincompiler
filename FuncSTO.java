@@ -3,7 +3,7 @@
 // Copyright (C) 2008-2015 Garo Bournoutian and Rick Ord
 // University of California, San Diego
 //---------------------------------------------------------------------
-
+import java.util.Vector;
 
 import java.util.Vector;
 
@@ -17,6 +17,8 @@ class FuncSTO extends STO
 	private boolean m_isRetByRef;
 	private int m_paramCount;
 	private Vector<STO> paramSTO;
+	private int m_level;
+	private boolean m_return_top_level = false;
 
 	//----------------------------------------------------------------
 	//
@@ -27,6 +29,7 @@ class FuncSTO extends STO
 		super (strName);
 		setReturnType(null);
 		setName(strName);
+		m_return_top_level = false;
 
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
@@ -52,19 +55,32 @@ class FuncSTO extends STO
 		// fields as necessary
 	}
 
+
 	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
 	{
 		super (strName);
-		setType(retType);
 		setReturnType(retType);
 		setName(strName);
 		setReference(ref);
 		setParamCount(params.size());
 		paramSTO = params;
+		m_return_top_level = false;
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
-
+	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref, int level)
+	{
+		super (strName);
+		setReturnType(retType);
+		setName(strName);
+		setReference(ref);
+		setParamCount(params.size());
+		paramSTO = params;
+		setLevel(level);
+		m_return_top_level = false;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
 
 	public void setParamVec(Vector<STO> paraList){
 		paramSTO = paraList;
@@ -102,6 +118,37 @@ class FuncSTO extends STO
 	private void setType(Type type)
 	{
 		m_type = type;
+	}
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public int getLevel()
+	{
+		return m_level;
+	}
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public void setLevel(int level)
+	{
+		m_level = level;
+	}
+
+	public int getParamCount(){ return m_paramCount; }
+
+	public void setParamCount(int count){
+		m_paramCount = paramSTO.size();
+	}
+
+	public void setReturn_top_level(boolean top_level)
+	{
+		m_return_top_level = top_level;
+	}
+
+	public boolean getReturn_top_level()
+	{
+		return m_return_top_level;
 	}
 
 	public int getParamCount(){ return m_paramCount; }
@@ -161,10 +208,10 @@ class FuncSTO extends STO
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	public boolean isFunc() 
-	{ 
+	public boolean isFunc()
+	{
 		return true;
-		// You may want to change the isModifiable and isAddressable                      
+		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
 

@@ -375,6 +375,7 @@ FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
                     :}
                     T_LBRACE OptStmtList
                     {:
+                        ((MyParser) parser).DoNoRerutn(); //added check if there is return stmt
                         ((MyParser) parser).DoFuncDecl_2();
                     :}
                     T_RBRACE
@@ -610,7 +611,15 @@ ExitStmt ::=        T_EXIT T_LPAREN Expr T_RPAREN T_SEMI
 
 
 ReturnStmt ::=      T_RETURN T_SEMI
-    |               T_RETURN Expr T_SEMI
+                    {:
+                        ((MyParser) parser).DoVoidReturn();
+                    :}
+    |               T_RETURN Expr:_1 T_SEMI
+                    {:
+                        ((MyParser) parser).DoExprReturn(_1);
+                    :}
+
+
     ;
 
 
