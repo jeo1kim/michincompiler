@@ -285,9 +285,9 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	void DoFormalParams(Vector<String> params)
+	void DoFormalParams(Vector<STO> params)
 	{
-		//System.out.print(params);
+		//System.out.print(params.get(0));
 		if (m_symtab.getFunc() == null)
 		{
 			m_nNumErrors++;
@@ -548,8 +548,8 @@ class MyParser extends parser
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(
 						ErrorMsg.error6a_Return_type,
-						result.getReturnType().toString(),
-						a.getType().toString()));
+						result.getReturnType().getName(),
+						a.getType().getName()));
 
 				return new ErrorSTO(a.getName());
 			}
@@ -607,4 +607,6 @@ class MyParser extends parser
 
 
 	}
+
+
 }

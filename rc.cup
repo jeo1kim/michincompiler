@@ -112,7 +112,7 @@ non terminal
     StructdefDecl,
     CtorDef,
     DtorDef,
-    OptRef,
+    //OptRef,
     FieldVarsList,
     FieldVarDecl,
     OptCtorDtorList,
@@ -156,8 +156,11 @@ non terminal
     DeleteStmt
     ;
 
+non terminal Boolean
+    OptRef
+    ;
+
 non terminal String
-    ParamDecl
     ;
 
 non terminal Operator
@@ -181,7 +184,8 @@ non terminal STO
     Expr8,
     Designator,
     Designator2,
-    Designator3
+    Designator3,
+    ParamDecl
     ;
 
 non terminal Type
@@ -475,7 +479,10 @@ ArrayList ::=       Array
     |               ArrayList Array
     ;
 
-Array ::=           T_LBRACKET ConstExpr T_RBRACKET
+Array ::=           T_LBRACKET ConstExpr:_1 T_RBRACKET
+                    //{:
+                    //    RESULT = new VarSTO(
+                    //:}
     ;
 
 
@@ -533,11 +540,17 @@ ParamList ::=       ParamDecl:_2
     ;
 
 
-ParamDecl ::=       Type OptRef T_ID OptArrayList
+ParamDecl ::=       Type:_1 OptRef:_2 T_ID:_3 OptArrayList:_4
+                    //{:
+                    //    RESULT = new VarSTO(_3, _1, _2);
+                    //:}
     ;
 
 
 OptRef ::=          T_AMPERSAND
+                    {:
+                        RESULT = true;
+                    :}
     |               /* empty */
     ;
 
