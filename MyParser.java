@@ -8,6 +8,8 @@
 import java_cup.runtime.*;
 import sun.tools.jstat.Identifier;
 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Stack;
 import java.util.Vector;
 import java.lang.*;
@@ -296,6 +298,7 @@ class MyParser extends parser
 
 		FuncSTO func = m_symtab.getFunc();
 		if( params != null) {
+			func.setParamVec(params);
 			func.setParamCount(params.size()); // set the
 		}
 		func.setParamCount(0);
@@ -354,7 +357,7 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	STO DoFuncCall(STO sto, Vector<STO> paramTyp)
 	{
-
+		// func holds expected param
 		STO func =  m_symtab.access(sto.getName());
 		if (!sto.isFunc())
 		{
@@ -374,8 +377,32 @@ class MyParser extends parser
 			return new ErrorSTO(sto.getName());
 
 		}
+		// paramType has arguments
+		Iterator<STO> it1;
+		Iterator<STO> it2;
+		Vector<STO> paramList = ((FuncSTO) func).getParamVec();
 
+		it1 = paramTyp.iterator();
+		it2 = paramList.iterator();
+		for( it1 = paramTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
+			VarSTO arg = (VarSTO) it1.next();
+			VarSTO param = (VarSTO) it2.next();
 
+			if (!param.isRef() && !arg.isAssignableTo(param.getType())  ){
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, arg.getName(), param.getName(), param.getType().getName()));
+			}
+			if(param.isRef() && arg.isEquivalentTo(param.getType())){
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, arg.getName(), param.getName(), param.getType().getName()));
+			}
+			if(param.isRef() && !arg.isModLValue()){
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, param.getName(), param.getType().getName()));
+			}
+		}
+
+		// check if func sto was called by ref and assign R val or mod l val
 		return sto;
 	}
 
