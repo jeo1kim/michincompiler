@@ -261,6 +261,7 @@ class MyParser extends parser
 	}
 
 	void DoFuncDecl_1_param(String id, Type ret)
+
 	{
 
 		if (m_symtab.accessLocal(id) != null)
@@ -317,6 +318,9 @@ class MyParser extends parser
 			m_errors.print ("internal: DoFormalParams says no proc!");
 		}
 
+		for(STO param : params){
+			m_symtab.insert(param);
+		}
 		func.setParamVec(params);
 		func.setParamCount(params.size()); // set the
 

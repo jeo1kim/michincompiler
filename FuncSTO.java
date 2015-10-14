@@ -27,7 +27,7 @@ class FuncSTO extends STO
 	public FuncSTO(String strName)
 	{
 		super (strName);
-		setReturnType(null);
+		setType(new VoidType("void",4));
 		setName(strName);
 		m_return_top_level = false;
 
