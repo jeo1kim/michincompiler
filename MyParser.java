@@ -685,7 +685,8 @@ class MyParser extends parser
 		}
 
 		//if assignable to int then return expr
-		return a;
+		// double check what to return when you exit
+		return new ExprSTO(a.getName());
 	}
 
 	// Helper Function
