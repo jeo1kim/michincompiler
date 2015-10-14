@@ -27,8 +27,8 @@ class FuncSTO extends STO
 	public FuncSTO(String strName)
 	{
 		super (strName);
-		setReturnType(null);
 		setName(strName);
+		setType(new VoidType(strName, 4));
 		m_return_top_level = false;
 
 		// You may want to change the isModifiable and isAddressable
@@ -37,8 +37,15 @@ class FuncSTO extends STO
 	public FuncSTO(String strName, Type retType)
 	{
 		super (strName);
-		setType(retType);
-		setReturnType(retType);
+
+		Type x = retType;
+
+		if(x == null)
+		{
+			x = new VoidType(strName, 4);
+		}
+		setType(x);
+		setReturnType(x);
 		setName(strName);
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
@@ -72,8 +79,15 @@ class FuncSTO extends STO
 	}
 
 	public void initSTO(String strName, Type retType, Vector<STO> params, boolean ref){
-		setReturnType(retType);
-		setType(retType);
+
+		Type x = retType;
+
+		if(x == null)
+		{
+			x = new VoidType(strName, 4);
+		}
+		setReturnType(x);
+		setType(x);
 		setName(strName);
 		setReference(ref);
 		setParamCount(params.size());

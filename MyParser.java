@@ -9,7 +9,6 @@ import java_cup.runtime.*;
 import sun.tools.jstat.Identifier;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Iterator;
 import java.util.Stack;
 import java.util.Vector;
 import java.lang.*;
@@ -92,7 +91,7 @@ class MyParser extends parser
 			//	It is possible that the error was detected
 			//	at the end of a line - in which case, s will
 			//	be null.  Instead, we saved the last token
-			//	read in to give a more meaningful error 
+			//	read in to give a more meaningful error
 			//	message.
 			m_errors.print(Formatter.toString(ErrorMsg.syntax_error, m_strLastLexeme));
 		}
@@ -220,7 +219,7 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
-		
+
 		ConstSTO sto = new ConstSTO(id, null, 0);   // fix me
 		m_symtab.insert(sto);
 	}
@@ -235,7 +234,7 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
-		
+
 		StructdefSTO sto = new StructdefSTO(id);
 		m_symtab.insert(sto);
 	}
@@ -250,7 +249,7 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
-	
+
 		FuncSTO sto = new FuncSTO(id);
 
 		m_symtab.insert(sto);
@@ -272,6 +271,7 @@ class MyParser extends parser
 		FuncSTO sto = new FuncSTO(id, ret);
 		m_symtab.insert(sto);
 
+		System.out.println();
 
 		m_symtab.openScope();
 		m_symtab.setFunc(sto);
@@ -284,31 +284,34 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	void DoFuncDecl_2()
 	{
+		DoNoRerutn();
 		m_symtab.closeScope();
 		m_symtab.setFunc(null);
 	}
 
 	//----------------------------------------------------------------
-	// Method for Function parameter checking
+	//
 	//----------------------------------------------------------------
 	void DoFormalParams(Vector<STO> params)
 	{
-		STO func = m_symtab.getFunc();
 		//System.out.print(params.get(0));
-		if (func == null)
+		if (m_symtab.getFunc() == null)
 		{
 			m_nNumErrors++;
 			m_errors.print ("internal: DoFormalParams says no proc!");
 		}
 
-		func.setParamVec(params);
-		func.setParamCount(params.size()); // set the
-
+		FuncSTO func = m_symtab.getFunc();
+		if( params != null) {
+			func.setParamVec(params);
+			func.setParamCount(params.size()); // set the
+		}
+		func.setParamCount(0);
 			// insert parameters here
 	}
 
 	//----------------------------------------------------------------
-	// Opens the Scope, global, function, brackets.
+	//
 	//----------------------------------------------------------------
 	void DoBlockOpen()
 	{
@@ -357,14 +360,10 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	STO DoFuncCall(STO sto, Vector<STO> argTyp)
+	STO DoFuncCall(STO sto, Vector<STO> paramTyp)
 	{
 		// func holds expected param
 		STO func =  m_symtab.access(sto.getName());
-		Vector<STO> paramList = func.getParamVec();
-
-
-
 		if (!sto.isFunc())
 		{
 			m_nNumErrors++;
@@ -377,44 +376,40 @@ class MyParser extends parser
 			m_errors.print(Formatter.toString(ErrorMsg.not_function, func.getName()));
 			return new ErrorSTO(sto.getName());
 		}
-		else if ( argTyp.size() != func.getParamCount()){
+		else if (((FuncSTO) sto).getParamCount() != ((FuncSTO)func).getParamCount()){
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error5n_Call,sto.getName(), func.getName()));
 			return new ErrorSTO(sto.getName());
 		}
-
-
-		//chech 0 parm
 		// paramType has arguments
 		Iterator<STO> it1;
 		Iterator<STO> it2;
+		Vector<STO> paramList = ((FuncSTO) func).getParamVec();
 
-		for( it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
+		it1 = paramTyp.iterator();
+		it2 = paramList.iterator();
+		for( it1 = paramTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
 			STO arg =  it1.next();
 			STO param =  it2.next();
 
 			if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())  ){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
-				return new ErrorSTO(sto.getName());
-
 			}
 			if(param.isRef() && arg.getType().isEquivalentTo(param.getType())){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
-				return new ErrorSTO(sto.getName());
-
 			}
 			if(param.isRef() && !arg.isModLValue()){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getName(param), getName(param)));
-				return new ErrorSTO(sto.getName());
 			}
 		}
 
 		// check if func sto was called by ref and assign R val or mod l val
 		if( func.isRef()) {
 			sto.markModLVal();
+
 			return sto;
 		}else if(!func.isRef())
 		{
@@ -640,14 +635,17 @@ class MyParser extends parser
 
 	STO DoNoRerutn() {
 
-
 		FuncSTO result = m_symtab.getFunc();
 		Type resultType = result.getReturnType();
 
 		//if there is no ReturnType in Top-level
-		if(!(result.getReturn_top_level())
-				&& !(resultType instanceof VoidType))
+		if(!(result.getReturn_top_level()))
 		{
+			if (resultType instanceof VoidType )
+			{
+
+				return null;
+			}
 			m_nNumErrors++;
 			m_errors.print(ErrorMsg.error6c_Return_missing);
 			return new ErrorSTO(result.getName());

@@ -380,7 +380,6 @@ FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
                     :}
                     T_LBRACE OptStmtList
                     {:
-                        ((MyParser) parser).DoNoRerutn(); //added check if there is return stmt
                         ((MyParser) parser).DoFuncDecl_2();
                     :}
                     T_RBRACE
