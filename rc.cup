@@ -387,6 +387,7 @@ FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
     ;
 
 
+
 FuncDecl ::=        T_EXTERN T_FUNCTION T_COLON ReturnType:_1 T_ID:_3
                     {:
                         ((MyParser) parser).DoFuncDecl_1_param(_3,_1);
