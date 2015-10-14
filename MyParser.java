@@ -271,6 +271,22 @@ class MyParser extends parser
 		m_symtab.openScope();
 		m_symtab.setFunc(sto);
 	}
+	void DoFuncDecl_1_param(String id, Type ret, boolean ref)
+	{
+
+		if (m_symtab.accessLocal(id) != null)
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+		}
+
+		FuncSTO sto = new FuncSTO(id, ret);
+		sto.setRef(ref);
+		m_symtab.insert(sto);
+
+		m_symtab.openScope();
+		m_symtab.setFunc(sto);
+	}
 
 	//----------------------------------------------------------------
 	//
@@ -382,6 +398,7 @@ class MyParser extends parser
 		Iterator<STO> it1;
 		Iterator<STO> it2;
 
+		Boolean flag = false;
 		for( it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
 			STO arg =  it1.next();
 			STO param =  it2.next();
@@ -389,20 +406,21 @@ class MyParser extends parser
 			if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())  ){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
-				return new ErrorSTO(sto.getName());
-
+				flag = true;
 			}
 			if(param.isRef() && arg.getType().isEquivalentTo(param.getType())){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
-				return new ErrorSTO(sto.getName());
-
+				flag = true;
 			}
 			if(param.isRef() && !arg.isModLValue()){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getName(param), getName(param)));
-				return new ErrorSTO(sto.getName());
+				flag = true;
 			}
+		}
+		if(flag){
+			return new ErrorSTO(sto.getName());
 		}
 
 		// check if func sto was called by ref and assign R val or mod l val
@@ -649,7 +667,7 @@ class MyParser extends parser
 	STO DoExitExpr(STO a)
 	{
 
-		if (!(a.isAssignableTo(new intType("intType", 4))))
+		if (!(a.isAssignableTo(new intType("int", 4))))
 		{
 			//error7_Exit  =
 			//"Exit expression (type %T) is not assignable to int.";
