@@ -372,7 +372,7 @@ FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
                     {:
                         ((MyParser) parser).SaveLineNum ();
                         // FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
-                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1); // id, rettype, ref '&' or empty? null
+                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1, _2); // id, rettype, ref '&' or empty? null
                     :}
                     T_LPAREN OptParamList:_4 T_RPAREN
                     {:
@@ -380,7 +380,7 @@ FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
                     :}
                     T_LBRACE OptStmtList
                     {:
-                        ((MyParser) parser).DoNoRerutn(); //added check if there is return stmt
+                        ((MyParser) parser).DoNoReturn(); //added check if there is return stmt
                         ((MyParser) parser).DoFuncDecl_2();
                     :}
                     T_RBRACE
@@ -548,7 +548,6 @@ ParamList ::=       ParamDecl:_2
 
 ParamDecl ::=       Type:_1 OptRef:_2 T_ID:_3 OptArrayList:_4
                     {:
-                        //System.out.println("print id "+_3);
                         RESULT = new VarSTO(_3, _1, _2);
                     :}
     ;

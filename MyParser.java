@@ -309,7 +309,7 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	void DoFormalParams(Vector<STO> params)
 	{
-		STO func = m_symtab.getFunc();
+		FuncSTO func = m_symtab.getFunc();
 		//System.out.print(params.get(0));
 		if (func == null)
 		{
@@ -656,16 +656,17 @@ class MyParser extends parser
 	}
 
 
-	STO DoNoRerutn() {
-
-
+	STO DoNoReturn() {
 		FuncSTO result = m_symtab.getFunc();
 		Type resultType = result.getReturnType();
 
 		//if there is no ReturnType in Top-level
-		if(!(result.getReturn_top_level())
-				&& !(resultType instanceof VoidType))
+		if(!(result.getReturn_top_level()))
 		{
+			if (resultType instanceof VoidType)
+			{
+				return null;
+			}
 			m_nNumErrors++;
 			m_errors.print(ErrorMsg.error6c_Return_missing);
 			return new ErrorSTO(result.getName());

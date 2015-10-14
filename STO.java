@@ -18,6 +18,7 @@ abstract class STO
 	private BigDecimal m_value;
 	private int m_paramCount;
 	private Vector<STO> paramSTO;
+	private boolean m_return_top_level = false;
 
 	private STO m_array;
 

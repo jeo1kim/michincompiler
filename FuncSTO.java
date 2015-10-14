@@ -52,6 +52,8 @@ class FuncSTO extends STO
 	}
 
 
+
+
 	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
 	{
 		super (strName);
