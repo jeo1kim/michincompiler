@@ -138,7 +138,7 @@ non terminal
     WritePairList,
     WritePair,
     ConstExpr,
-    ExprList,
+    //ExprList,
     UnarySign,
     //Equality, moved To Operator
     //Relation, moved To Operator
@@ -199,6 +199,7 @@ non terminal Type
 
 non terminal Vector
     OptExprList,
+    ExprList,
     OptParamList,
     ParamList
     ;
@@ -523,7 +524,12 @@ Stmt ::=            VarDecl
 
 
 OptParamList ::=    ParamList:_1
-    |               /* empty */
+                    {:
+                        RESULT = _1;
+                    :}
+    |               {:
+                        RESULT = new Vector();
+                    :}
     ;
 
 
@@ -541,9 +547,10 @@ ParamList ::=       ParamDecl:_2
 
 
 ParamDecl ::=       Type:_1 OptRef:_2 T_ID:_3 OptArrayList:_4
-                    //{:
-                    //    RESULT = new VarSTO(_3, _1, _2);
-                    //:}
+                    {:
+                        //System.out.println("print id "+_3);
+                        RESULT = new VarSTO(_3, _1, _2);
+                    :}
     ;
 
 
@@ -551,7 +558,9 @@ OptRef ::=          T_AMPERSAND
                     {:
                         RESULT = true;
                     :}
-    |               /* empty */
+    |               {:
+                        RESULT = false;
+                    :}/* empty */
     ;
 
 
@@ -663,15 +672,24 @@ ConstExpr ::=       Expr
 
 OptExprList ::=     ExprList:_1
                     {:
-                        RESULT = new Vector ();
-                        RESULT.addElement (_1);
+                        RESULT = _1;
                     :}
-    |               /* empty */
+    |               {:
+                        RESULT = new Vector();
+                    :}
     ;
 
 
-ExprList ::=        Expr
-    |               ExprList T_COMMA Expr
+ExprList ::=        Expr:_2
+                    {:
+                        RESULT = new Vector ();
+                        RESULT.addElement (_2);
+                    :}
+    |               ExprList:_1 T_COMMA Expr:_2
+                    {:
+                        RESULT = _1;
+                        RESULT.addElement (_2);
+                    :}
     ;
 
 

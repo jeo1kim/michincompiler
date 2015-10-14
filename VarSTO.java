@@ -51,6 +51,7 @@ class VarSTO extends STO
 		// fields as necessary
 	}
 
+
 	public VarSTO(String strName, Type typ, int val)
 	{
 		super(strName, typ);

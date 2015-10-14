@@ -6,6 +6,9 @@
 
 
 import java_cup.runtime.*;
+import sun.tools.jstat.Identifier;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Stack;
 import java.util.Vector;
 import java.lang.*;
@@ -248,11 +251,12 @@ class MyParser extends parser
 		}
 	
 		FuncSTO sto = new FuncSTO(id);
-		sto.setLevel(m_symtab.getLevel());
+
 		m_symtab.insert(sto);
 
 		m_symtab.openScope();
 		m_symtab.setFunc(sto);
+		sto.setLevel(m_symtab.getLevel());
 	}
 
 	void DoFuncDecl_1_param(String id, Type ret)
@@ -267,8 +271,11 @@ class MyParser extends parser
 		FuncSTO sto = new FuncSTO(id, ret);
 		m_symtab.insert(sto);
 
+
 		m_symtab.openScope();
 		m_symtab.setFunc(sto);
+		sto.setLevel(m_symtab.getLevel());
+
 	}
 
 	//----------------------------------------------------------------
@@ -294,6 +301,7 @@ class MyParser extends parser
 
 		FuncSTO func = m_symtab.getFunc();
 		if( params != null) {
+			func.setParamVec(params);
 			func.setParamCount(params.size()); // set the
 		}
 		func.setParamCount(0);
@@ -337,9 +345,9 @@ class MyParser extends parser
 			// Good place to do the assign checks
 			return new ErrorSTO(ErrorMsg.error3a_Assign);
 		}
-		if( !stoDes.isAssignableTo(expr.getType())){
+		if( !stoDes.getType().isAssignableTo(expr.getType())){
 			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, expr.getType().getName(), stoDes.getType().getName()));
+			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getName(expr), getName(stoDes)));
 		}
 		//error3b_Assign ="Value of type %T not assignable to variable of type %T.";
 
@@ -352,7 +360,7 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	STO DoFuncCall(STO sto, Vector<STO> paramTyp)
 	{
-
+		// func holds expected param
 		STO func =  m_symtab.access(sto.getName());
 		if (!sto.isFunc())
 		{
@@ -370,10 +378,42 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error5n_Call,sto.getName(), func.getName()));
 			return new ErrorSTO(sto.getName());
+		}
+		// paramType has arguments
+		Iterator<STO> it1;
+		Iterator<STO> it2;
+		Vector<STO> paramList = ((FuncSTO) func).getParamVec();
 
+		it1 = paramTyp.iterator();
+		it2 = paramList.iterator();
+		for( it1 = paramTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
+			STO arg =  it1.next();
+			STO param =  it2.next();
+
+			if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())  ){
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
+			}
+			if(param.isRef() && arg.getType().isEquivalentTo(param.getType())){
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
+			}
+			if(param.isRef() && !arg.isModLValue()){
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getName(param), getName(param)));
+			}
 		}
 
+		// check if func sto was called by ref and assign R val or mod l val
+		if( func.isRef()) {
+			sto.markModLVal();
 
+			return sto;
+		}else if(!func.isRef())
+		{
+			sto.markRVal();
+			return sto;
+		}
 		return sto;
 	}
 
@@ -523,6 +563,8 @@ class MyParser extends parser
 	{
 		FuncSTO result;
 		result = m_symtab.getFunc();
+		Type resultType = result.getReturnType();
+		Type aType = a.getType();
 
 		//if this return Key is in top level
 		if(result.getLevel() == m_symtab.getLevel())
@@ -533,23 +575,25 @@ class MyParser extends parser
 		//type check pass by value
 		if (!result.isRetByRef())
 		{
-			if(result.getReturnType() != a.getType())
+			if(resultType != aType)
 			{
 				//if type is different but is assignable ex) int to float
-				if (result.isAssignableTo(a.getType()))
+				if (aType.isAssignableTo(resultType))
 				{
 					return a;
 				}
+				else {
 
-				//error6a_Return_type =
-				//"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
-				m_nNumErrors++;
-				m_errors.print(Formatter.toString(
-						ErrorMsg.error6a_Return_type,
-						result.getReturnType().getName(),
-						a.getType().getName()));
+					//error6a_Return_type =
+					//"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
+					m_nNumErrors++;
+					m_errors.print(Formatter.toString(
+							ErrorMsg.error6a_Return_type,
+							result.getReturnType().getName(),
+							a.getType().getName()));
 
-				return new ErrorSTO(a.getName());
+					return new ErrorSTO(a.getName());
+				}
 			}
 		}
 		else
@@ -567,14 +611,14 @@ class MyParser extends parser
 			}
 
 
-			if (result.getReturnType() != a.getType()) {
+			if (resultType != aType) {
 				//error6b_Return_equiv =
 				//"Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(
 						ErrorMsg.error6b_Return_equiv,
-						result.getReturnType().toString(),
-						a.getType().toString()));
+						a.getType().getName(),
+						result.getReturnType().getName()));
 				return new ErrorSTO(a.getName());
 			}
 			else
@@ -589,11 +633,13 @@ class MyParser extends parser
 
 	STO DoNoRerutn() {
 
+
 		FuncSTO result = m_symtab.getFunc();
+		Type resultType = result.getReturnType();
 
 		//if there is no ReturnType in Top-level
 		if(!(result.getReturn_top_level())
-				&& !(result.getReturnType() instanceof VoidType))
+				&& !(resultType instanceof VoidType))
 		{
 			m_nNumErrors++;
 			m_errors.print(ErrorMsg.error6c_Return_missing);
@@ -609,16 +655,24 @@ class MyParser extends parser
 	STO DoExitExpr(STO a)
 	{
 
-		if (!(a.isAssignableTo(new intType("intType", 4))))
+		Type aType = a.getType();
+		if (!(aType.isAssignableTo(new intType("intType", 4))))
 		{
 			//error7_Exit  =
 			//"Exit expression (type %T) is not assignable to int.";
 			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.error7_Exit, a.getType().toString()));
+			m_errors.print(Formatter.toString(ErrorMsg.error7_Exit, aType.getName()));
 		}
 
 		//if assignable to int then return expr
 		return a;
 	}
-}
 
+	// Helper Function
+	String getName(Type typ){
+		return typ.getName();
+	}
+	String getName(STO sto){
+		return sto.getType().getName();
+	}
+}

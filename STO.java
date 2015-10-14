@@ -5,12 +5,21 @@
 //---------------------------------------------------------------------
 
 
+import java.math.BigDecimal;
+import java.util.Vector;
+
 abstract class STO
 {
 	private String m_strName;
 	private Type m_type;
 	private boolean m_isAddressable;
 	private boolean m_isModifiable;
+	private boolean m_ref  = false;
+	private BigDecimal m_value;
+	private int m_paramCount;
+	private Vector<STO> paramSTO;
+
+	private STO m_array;
 
 	//----------------------------------------------------------------
 	//
@@ -31,6 +40,20 @@ abstract class STO
 		setIsModifiable(false);
 	}
 
+	public void setParamVec(Vector<STO> paraList){
+		paramSTO = paraList;
+	}
+	public Vector<STO> getParamVec(){
+		return paramSTO;
+	}
+	public int getParamCount(){ return m_paramCount; }
+
+	public void setParamCount(int count){
+		m_paramCount = count;
+	}
+
+	public void setRef(boolean ref){ m_ref = ref; }
+	public boolean isRef(){ return m_ref;}
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
@@ -98,6 +121,7 @@ abstract class STO
 		m_isModifiable = modifiable;
 	}
 
+
 	//----------------------------------------------------------------
 	// A modifiable L-value is an object that is both addressable and
 	// modifiable. Objects like constants are not modifiable, so they 
@@ -113,6 +137,12 @@ abstract class STO
 
 	public void markRVal(){
 		setIsModifiable(false); setIsAddressable(false);
+	}
+	public void markModVal(){
+		setIsModifiable(true); setIsAddressable(true);
+	}
+	public void markModLVal(){
+		setIsModifiable(false); setIsAddressable(true);
 	}
 	public boolean isAssignableTo(Type t) { return false; }
 	public boolean isEquivalentTo(Type t) { return false; }
