@@ -281,7 +281,6 @@ class MyParser extends parser
 	}
 	void DoFuncDecl_1_param(String id, Type ret, boolean ref)
 	{
-
 		if (m_symtab.accessLocal(id) != null)
 		{
 			m_nNumErrors++;
@@ -301,9 +300,11 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	void DoFuncDecl_2()
 	{
+		//System.out.println("DoFuncDecl2"+m_symtab.getFunc().getName());
 		m_symtab.closeScope();
 		m_symtab.setFunc(null);
 	}
+
 
 	//----------------------------------------------------------------
 	// Method for Function parameter checking
@@ -367,6 +368,7 @@ class MyParser extends parser
 		if( !stoDes.getType().isAssignableTo(expr.getType())){
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getName(expr), getName(stoDes)));
+			return new ErrorSTO(ErrorMsg.error3a_Assign); // do we need this?
 		}
 		//error3b_Assign ="Value of type %T not assignable to variable of type %T.";
 
@@ -564,68 +566,56 @@ class MyParser extends parser
 		return result;
 	}
 
+	// this function is called on void return type functions
 	STO DoVoidReturn()
 	{
-		FuncSTO result;
+		FuncSTO result = m_symtab.getFunc();
 
-		//get current funcSTO
-		result =  m_symtab.getFunc();
-
-		//if this return Key is in top level
-		if(result.getLevel() == m_symtab.getLevel())
-		{
-			result.setReturn_top_level(true);
-		}
-
-
-		if(result.getReturnType() instanceof VoidType)
-			return null;
-		else
-		{
+		if(!(result.getType().isVoid())) {
 			m_nNumErrors++;
 			m_errors.print(ErrorMsg.error6a_Return_expr);
 			return new ErrorSTO(result.getName());
+		}
+		else {
+			m_symtab.setFunc(null);
+			return new ExprSTO(result.getName()); //
 		}
 	}
 
 	STO DoExprReturn(STO a)
 	{
-		FuncSTO result;
-		result = m_symtab.getFunc();
-		Type resultType = result.getReturnType();
-		Type aType = a.getType();
+		FuncSTO result = m_symtab.getFunc();
+		Type resultType = result.getType();
+		Type exprType = a.getType();
 
 		//if this return Key is in top level
-		if(result.getLevel() == m_symtab.getLevel())
-		{
-			result.setReturn_top_level(true);
-		}
 
 		//type check pass by value
 		if (!result.isRetByRef())
 		{
-			if(resultType != aType)
+			if(resultType != exprType)
 			{
 				//if type is different but is assignable ex) int to float
-				if (aType.isAssignableTo(resultType))
+				if (!exprType.isAssignableTo(resultType))
 				{
-					return a;
-				}
-				else {
-
 					//error6a_Return_type =
 					//"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
 					m_nNumErrors++;
-					m_errors.print(Formatter.toString(
-							ErrorMsg.error6a_Return_type,
-							result.getReturnType().getName(),
-							a.getType().getName()));
+					m_errors.print(Formatter.toString(ErrorMsg.error6a_Return_type,
+							getName(resultType), getName(a)));
 
 					return new ErrorSTO(a.getName());
 				}
+				else {
+					//System.out.println("clearing func");
+					//m_symtab.setFunc(null);
+					return new ExprSTO(result.getName());
+				}
+
+
 			}
 		}
-		else
+		else if(result.isRetByRef()) // sane check
 		//pass by reference
 		//the type of the return expression is not equivalent to the return type of the function
 		{
@@ -640,46 +630,46 @@ class MyParser extends parser
 			}
 
 
-			if (resultType != aType) {
+			if (!resultType.isEquivalentTo(exprType)){  //resultType != exprType) {
 				//error6b_Return_equiv =
 				//"Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(
-						ErrorMsg.error6b_Return_equiv,
-						a.getType().getName(),
-						result.getReturnType().getName()));
+				m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
+						getName(a), getName(result)));
+
 				return new ErrorSTO(a.getName());
 			}
 			else
 			{
-				return a;
+				//System.out.println("clearing func2");
+				//m_symtab.setFunc(null);
+				return new ExprSTO(result.getName());
 			}
 
 		}
-		return a;
+		System.out.println("In DoExpReturn this should never reach");
+		m_symtab.setFunc(null);
+		return new ExprSTO(result.getName());
 	}
 
 
-	STO DoNoReturn() {
+	STO DoNoReturn(Vector<STO> ret) {
 		FuncSTO result = m_symtab.getFunc();
 		Type resultType = result.getReturnType();
-
 		//if there is no ReturnType in Top-level
-		if(!(result.getReturn_top_level()))
+
+		// ret should be null if return is empty.
+		if (!resultType.isVoid() && result.getLevel() == 0 && ret == null)
 		{
-			if (resultType instanceof VoidType)
-			{
-				return null;
-			}
+			//check for return
 			m_nNumErrors++;
 			m_errors.print(ErrorMsg.error6c_Return_missing);
 			return new ErrorSTO(result.getName());
 		}
-		else{ //if there is return stmt and correspond to retunType
-			return null;
+		else {
+			//if there is return stmt and correspond to retunType
+			return new ExprSTO(result.getName());
 		}
-
-
 	}
 
 	STO DoExitExpr(STO a)
