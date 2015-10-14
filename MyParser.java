@@ -6,6 +6,9 @@
 
 
 import java_cup.runtime.*;
+import sun.tools.jstat.Identifier;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.Stack;
 import java.util.Vector;
@@ -249,11 +252,12 @@ class MyParser extends parser
 		}
 	
 		FuncSTO sto = new FuncSTO(id);
-		sto.setLevel(m_symtab.getLevel());
+
 		m_symtab.insert(sto);
 
 		m_symtab.openScope();
 		m_symtab.setFunc(sto);
+		sto.setLevel(m_symtab.getLevel());
 	}
 
 	void DoFuncDecl_1_param(String id, Type ret)
@@ -268,8 +272,11 @@ class MyParser extends parser
 		FuncSTO sto = new FuncSTO(id, ret);
 		m_symtab.insert(sto);
 
+
 		m_symtab.openScope();
 		m_symtab.setFunc(sto);
+		sto.setLevel(m_symtab.getLevel());
+
 	}
 	void DoFuncDecl_1_param(String id, Type ret, boolean ref)
 	{
@@ -581,6 +588,8 @@ class MyParser extends parser
 	{
 		FuncSTO result;
 		result = m_symtab.getFunc();
+		Type resultType = result.getReturnType();
+		Type aType = a.getType();
 
 		//if this return Key is in top level
 		if(result.getLevel() == m_symtab.getLevel())
@@ -591,23 +600,25 @@ class MyParser extends parser
 		//type check pass by value
 		if (!result.isRetByRef())
 		{
-			if(result.getReturnType() != a.getType())
+			if(resultType != aType)
 			{
 				//if type is different but is assignable ex) int to float
-				if (result.isAssignableTo(a.getType()))
+				if (aType.isAssignableTo(resultType))
 				{
 					return a;
 				}
+				else {
 
-				//error6a_Return_type =
-				//"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
-				m_nNumErrors++;
-				m_errors.print(Formatter.toString(
-						ErrorMsg.error6a_Return_type,
-						result.getReturnType().getName(),
-						a.getType().getName()));
+					//error6a_Return_type =
+					//"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
+					m_nNumErrors++;
+					m_errors.print(Formatter.toString(
+							ErrorMsg.error6a_Return_type,
+							result.getReturnType().getName(),
+							a.getType().getName()));
 
-				return new ErrorSTO(a.getName());
+					return new ErrorSTO(a.getName());
+				}
 			}
 		}
 		else
@@ -625,14 +636,14 @@ class MyParser extends parser
 			}
 
 
-			if (result.getReturnType() != a.getType()) {
+			if (resultType != aType) {
 				//error6b_Return_equiv =
 				//"Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(
 						ErrorMsg.error6b_Return_equiv,
-						result.getReturnType().toString(),
-						a.getType().toString()));
+						a.getType().getName(),
+						result.getReturnType().getName()));
 				return new ErrorSTO(a.getName());
 			}
 			else
@@ -647,11 +658,13 @@ class MyParser extends parser
 
 	STO DoNoRerutn() {
 
+
 		FuncSTO result = m_symtab.getFunc();
+		Type resultType = result.getReturnType();
 
 		//if there is no ReturnType in Top-level
 		if(!(result.getReturn_top_level())
-				&& !(result.getReturnType() instanceof VoidType))
+				&& !(resultType instanceof VoidType))
 		{
 			m_nNumErrors++;
 			m_errors.print(ErrorMsg.error6c_Return_missing);
@@ -667,12 +680,13 @@ class MyParser extends parser
 	STO DoExitExpr(STO a)
 	{
 
-		if (!(a.isAssignableTo(new intType("int", 4))))
+		Type aType = a.getType();
+		if (!(aType.isAssignableTo(new intType("int", 4))))
 		{
 			//error7_Exit  =
 			//"Exit expression (type %T) is not assignable to int.";
 			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.error7_Exit, a.getType().toString()));
+			m_errors.print(Formatter.toString(ErrorMsg.error7_Exit, aType.getName()));
 		}
 
 		//if assignable to int then return expr
