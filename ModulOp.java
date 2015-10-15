@@ -31,7 +31,6 @@ public class ModulOp extends ArithmeticOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
-        System.out.println("modulo"+a+a.getType().getName());
         if(!(aType.isInt()))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, aType.getName(), m_OpName , "int"));
