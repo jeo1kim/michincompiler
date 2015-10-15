@@ -899,10 +899,6 @@ UnarySign ::=       T_PLUS
                     {:
                         RESULT = new MinusOp("-");
                     :}
-                    T_NOT
-                    {:
-                        RESULT = new NotOp("!");
-                    :}
     ;
 
 
