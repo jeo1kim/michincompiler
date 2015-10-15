@@ -541,13 +541,20 @@ class MyParser extends parser
 
 	STO DoBinaryExpr(STO a, Operator o, STO b)
 	{
-		if (o.checkOperands(a, b).isError())
+		STO result = o.checkOperands(a, b);
+		if(b.isError()){
+			return b;
+		}
+		if(a.isError()){
+			return a;
+		}
+		if (result.isError())
 		{
 			m_nNumErrors++;
-			m_errors.print(o.checkOperands(a, b).getName());
-			return new ErrorSTO(o.checkOperands(a, b).getName());
+			m_errors.print(result.getName());
+			return new ErrorSTO(result.getName());
 		}
-		return o.checkOperands(a, b);
+		return result;
 	}
 
 
