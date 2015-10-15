@@ -365,7 +365,7 @@ class MyParser extends parser
 			// Good place to do the assign checks
 			return new ErrorSTO(ErrorMsg.error3a_Assign);
 		}
-		if( !expr.getType().isAssignableTo(stoDes.getType())){
+		if( !expr.getType().isAssignableTo(stoDes.getType()) && !expr.isError()){
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getName(expr), getName(stoDes)));
 			return new ErrorSTO(ErrorMsg.error3a_Assign); // do we need this?
