@@ -23,7 +23,6 @@ abstract class ComparisonOp extends BinaryOp {
 
         if(!(aType instanceof NumericType) && !b.isError())
         {
-            System.out.println(aType.getName());
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, aType.getName(),opName));
         }
         if(!(bType instanceof NumericType) && !a.isError())

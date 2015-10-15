@@ -560,6 +560,10 @@ class MyParser extends parser
 
 	STO DoIncDecOp(STO a, Operator o) {
 		STO result = o.checkOperands(a);
+
+		if(a.isError()){
+			return a;
+		}
 		if (result.isError()) {
 			m_nNumErrors++;
 			m_errors.print(result.getName());
