@@ -139,7 +139,7 @@ non terminal
     WritePair,
     ConstExpr,
     //ExprList,
-    UnarySign,
+    //UnarySign,   // is this op?
     //Equality, moved To Operator
     //Relation, moved To Operator
     OptInit,
@@ -167,6 +167,7 @@ non terminal Operator
     AddOp,
     IncDecOp,
     MulOp,
+    UnarySign,      //movded
     Equality,       //moved
     Relation        //moved
     ;
@@ -892,11 +893,15 @@ IncDecOp ::=        T_PLUSPLUS
 
 UnarySign ::=       T_PLUS
                     {:
-                        RESULT = "+";
+                        RESULT = new AddOp("+");
                     :}
     |               T_MINUS
                     {:
-                        RESULT = "-";
+                        RESULT = new MinusOp("-");
+                    :}
+                    T_NOT
+                    {:
+                        RESULT = new NotOp("!");
                     :}
     ;
 
@@ -909,13 +914,13 @@ Designator ::=      T_STAR Designator:_1
                     {:
                         RESULT = _1;
                     :}
-    |               UnarySign Designator:_2
+    |               UnarySign:_1 Designator:_2
                     {:
-                        RESULT = _2;
+                        RESULT = ((MyParser) parser).DoUnaryOp(_2, _1);
                     :}
     |               T_NOT Designator:_1
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoUnaryOp(_1, new NotOp("!"));
                     :}
     |               T_SIZEOF T_LPAREN Designator:_2 T_RPAREN
                     {:
@@ -931,7 +936,7 @@ Designator ::=      T_STAR Designator:_1
                     :}
     |               IncDecOp:_1 Designator:_2
                     {:
-                        RESULT = ((MyParser) parser).DoUnaryOp(_2, _1);
+                        RESULT = ((MyParser) parser).DoIncDecOp(_2, _1);
                     :}
     |               Designator2:_1 
                     {:
@@ -954,7 +959,7 @@ Designator2 ::=     Designator2:_1 T_DOT T_ID:_3
                     :}
     |               Designator2:_1 IncDecOp:_2
                     {:
-                        RESULT = ((MyParser) parser).DoUnaryOp(_1, _2);
+                        RESULT = ((MyParser) parser).DoIncDecOp(_1, _2);
                     :}
     |               Designator2:_1 T_LPAREN OptExprList:_2 T_RPAREN
                     {:
