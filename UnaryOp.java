@@ -21,12 +21,12 @@ abstract class UnaryOp extends Operator {
         //System.out.println(a.getType().isNumeric());
         Type aType = a.getType();
 
-        if( !(aType instanceof NumericType))
+        if( !(aType instanceof NumericType) && !a.isError())
         {
             // "Incompatible type %T to operator %O, equivalent to int, float, or pointer expected.";
             return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(),opName));
         }
-        if(!a.isModLValue()){
+        if(!a.isModLValue() && a.isError()){
             //      "Operand to %O is not a modifiable L-value.";
             return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Lval,aType.getName()));
         }
