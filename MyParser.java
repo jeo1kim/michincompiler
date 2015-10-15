@@ -6,7 +6,6 @@
 
 
 import java_cup.runtime.*;
-import sun.tools.jstat.Identifier;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Iterator;
@@ -160,6 +159,7 @@ class MyParser extends parser
 	void DoProgramStart()
 	{
 		// Opens the global scope.
+
 		m_symtab.openScope();
 	}
 
@@ -365,7 +365,7 @@ class MyParser extends parser
 			// Good place to do the assign checks
 			return new ErrorSTO(ErrorMsg.error3a_Assign);
 		}
-		if( !stoDes.getType().isAssignableTo(expr.getType())){
+		if( !expr.getType().isAssignableTo(stoDes.getType())){
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getName(expr), getName(stoDes)));
 			return new ErrorSTO(ErrorMsg.error3a_Assign); // do we need this?
@@ -474,7 +474,6 @@ class MyParser extends parser
 	STO DoDesignator3_ID(String strID)
 	{
 		STO sto;
-
 		//check variable name in local scope
 		if ((sto = m_symtab.accessLocal(strID)) == null)
 		{
@@ -488,7 +487,6 @@ class MyParser extends parser
 			}
 
 		}
-
 		return sto;
 	}
 
@@ -543,8 +541,6 @@ class MyParser extends parser
 
 	STO DoBinaryExpr(STO a, Operator o, STO b)
 	{
-
-
 		if (o.checkOperands(a, b).isError())
 		{
 			m_nNumErrors++;
@@ -556,6 +552,7 @@ class MyParser extends parser
 
 
 	STO DoUnaryOp(STO a, Operator o) {
+		System.out.print(a.getName());
 		STO result = o.checkOperands(a);
 		if (result.isError()) {
 			m_nNumErrors++;

@@ -159,4 +159,11 @@ abstract class STO
 	public boolean isFunc() { return false; }
 	public boolean isStructdef() { return false; }
 	public boolean isError() { return false; }
+
+	String getName(Type typ){
+		return typ.getName();
+	}
+	String getName(STO sto){
+		return sto.getType().getName();
+	}
 }

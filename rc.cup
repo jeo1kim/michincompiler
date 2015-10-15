@@ -974,12 +974,12 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_INT_LITERAL:_1
                     {:
-                        RESULT = new ConstSTO (_1, new intType("int", 4) , 0 );    // fix me!
+                        RESULT = new ConstSTO (_1, new intType("int", 4) , Integer.parseInt(_1) );    // fix me!
 
                     :}
     |               T_FLOAT_LITERAL:_1
                     {:
-                        RESULT = new ConstSTO (_1, new FloatType("float", 4), 0.00);  // fix me!
+                        RESULT = new ConstSTO (_1, new FloatType("float", 4), Double.parseDouble(_1));  // fix me!
                     :}
     |               T_STR_LITERAL:_1
                     {:
