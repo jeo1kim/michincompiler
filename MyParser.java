@@ -271,8 +271,6 @@ class MyParser extends parser
 		FuncSTO sto = new FuncSTO(id, ret);
 		m_symtab.insert(sto);
 
-		System.out.println();
-
 		m_symtab.openScope();
 		m_symtab.setFunc(sto);
 		sto.setLevel(m_symtab.getLevel());
@@ -294,7 +292,6 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	void DoFormalParams(Vector<STO> params)
 	{
-		//System.out.print(params.get(0));
 		if (m_symtab.getFunc() == null)
 		{
 			m_nNumErrors++;
@@ -613,7 +610,7 @@ class MyParser extends parser
 			}
 
 
-			if (resultType != aType) {
+			else if (resultType != aType) {
 				//error6b_Return_equiv =
 				//"Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
 				m_nNumErrors++;
