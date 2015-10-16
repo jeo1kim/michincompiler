@@ -24,6 +24,7 @@ class ConstSTO extends STO
 	private Type m_type;
 	private boolean m_isAddressable;
 	private boolean m_isModifiable;
+	private boolean m_static;
 
 	//----------------------------------------------------------------
 	//
@@ -74,7 +75,8 @@ class ConstSTO extends STO
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
-
+	public void setStatic(boolean stat){ m_static = stat;}
+	public boolean isStatic(){ return m_static; }
 	//----------------------------------------------------------------
 	// Addressable refers to if the object has an address. Variables
 	// and declared constants have an address, whereas results from

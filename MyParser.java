@@ -5,6 +5,7 @@
 //---------------------------------------------------------------------
 
 
+import com.sun.tools.internal.jxc.ap.Const;
 import java_cup.runtime.*;
 import java.util.Iterator;
 import java.util.Map;
@@ -185,15 +186,66 @@ class MyParser extends parser
 		VarSTO sto = new VarSTO(id);
 		m_symtab.insert(sto);
 	}
-	void DoVarDeclwType(String id, Type typ)
+	void DoVarDeclwType(String id, Type typ, boolean stat, Vector<STO> array, STO init)
 	{
+//		if (init.isError()){
+//			return;    // might wanan change with !init.isError()
+//		}
 		if (m_symtab.accessLocal(id) != null)
 		{
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
 		VarSTO sto = new VarSTO(id, typ);
-		m_symtab.insert(sto);
+		if(stat){
+			sto.setStatic(stat); // set Variable static
+		}
+		if (array.size() == 0 && (init != null)){ // indicates that this var is not an array and init exp exist
+			// do the type check with init if it exist
+			if( !init.getType().isAssignableTo(sto.getType()) && !init.isError()){
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getName(init), getName(sto)));
+				return;
+			}
+			else{ // exp is assignable to this varSto type. so
+				m_symtab.insert(sto);
+				return;
+			}
+		}
+		//case where var is an array
+		else{
+			m_symtab.insert(sto);
+		}
+	}
+
+	void DoVarDeclwAuto(String id, STO expr, boolean stat)
+	{
+		if (expr.isError()){
+			return;
+		}
+		if (m_symtab.accessLocal(id) != null)
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+		}
+
+		if (!expr.isConst()){
+			VarSTO sto = new VarSTO(id, expr.getType());
+			if(stat){
+				sto.setStatic(stat); // set variable static
+			}
+			m_symtab.insert(sto);
+
+		}
+		else{
+			ConstSTO sto = new ConstSTO(id, expr.getType());
+			if(stat){
+				sto.setStatic(stat); // set variable static
+			}
+			m_symtab.insert(sto);
+		}
+
+		//m_symtab.insert(sto);
 	}
 	//----------------------------------------------------------------
 	//
@@ -213,15 +265,37 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	void DoConstDecl(String id)
+	void DoConstDecl(String id, Type typ, STO exp, boolean stat)
 	{
+		if (exp.isError()){
+			return;
+		}
 		if (m_symtab.accessLocal(id) != null)
 		{
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
-		
-		ConstSTO sto = new ConstSTO(id, null, 0);   // fix me
+
+		ConstSTO sto = new ConstSTO(id, typ, 0);   // fix me
+		sto.markModLVal();
+		m_symtab.insert(sto);
+	}
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	void DoConstDeclwAuto(String id, STO exp, boolean stat)
+	{
+		if (exp.isError()){
+			return;
+		}
+		if (m_symtab.accessLocal(id) != null)
+		{
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+		}
+
+		ConstSTO sto = new ConstSTO(id, exp.getType(), 0);   // fix me
+		sto.markModLVal();
 		m_symtab.insert(sto);
 	}
 

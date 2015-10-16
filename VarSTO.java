@@ -18,6 +18,7 @@ class VarSTO extends STO
 	private boolean m_ref  = false;
 	private BigDecimal m_value;
 
+	private boolean m_static;
 	private STO m_array;
 
 	//----------------------------------------------------------------
@@ -76,8 +77,11 @@ class VarSTO extends STO
 		setType(typ);
 		setIsAddressable(true);
 		setIsModifiable(true);
+		setStatic(false);
 	}
 
+	public void setStatic(boolean stat){ m_static = stat;}
+	public boolean isStatic(){ return m_static; }
 	public void setRef(boolean ref){ m_ref = ref; }
 	public boolean isRef(){ return m_ref;}
 

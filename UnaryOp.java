@@ -20,7 +20,7 @@ abstract class UnaryOp extends Operator {
     {
         //System.out.println(a.getType().isNumeric());
         Type aType = a.getType();
-
+        //System.out.println(a);System.out.println(aType);
         if(!a.isModLValue() && !a.isError() && aType.isNumeric()){
             //      "Operand to %O is not a modifiable L-value.";
             return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Lval, opName));

@@ -163,4 +163,7 @@ class ArrayVarSTO extends VarSTO{
     {
         return true;
     }
+    public boolean isArrayVar(){
+        return true;
+    }
 }

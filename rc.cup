@@ -108,7 +108,7 @@ non terminal
     ExternDecl,
     VarDecl,
     ConstDecl,
-    OptStatic,
+    //OptStatic,
     StructdefDecl,
     CtorDef,
     DtorDef,
@@ -148,8 +148,8 @@ non terminal
     OptPointerList,
     PointerList,
     Pointer,
-    OptArrayList,
-    ArrayList,
+    //OptArrayList,
+    //ArrayList,
     Array,
 
     NewStmt,
@@ -157,6 +157,7 @@ non terminal
     ;
 
 non terminal Boolean
+    OptStatic,
     OptRef
     ;
 
@@ -199,6 +200,8 @@ non terminal Type
     ;
 
 non terminal Vector
+    OptArrayList,
+    ArrayList,
     OptExprList,
     ExprList,
     StmtList,
@@ -253,12 +256,13 @@ ExternDecl ::=      T_EXTERN DecoratedBasicType:_2 T_ID:_3 OptArrayList:_4
 
 VarDecl ::=         OptStatic:_1 DecoratedType:_2 T_ID:_3 OptArrayList:_4 OptInit:_5
                     {:
-                        ((MyParser) parser).DoVarDeclwType (_3, _2);
+
+                        ((MyParser) parser).DoVarDeclwType (_3, _2, _1, _4, (STO)_5);
                     :}
                     T_SEMI
     |               OptStatic:_1 T_AUTO T_ID:_3 T_ASSIGN Expr:_5
                     {:
-                        ((MyParser) parser).DoVarDecl (_3);
+                        ((MyParser) parser).DoVarDeclwAuto (_3, _5, _1);
                     :}
                     T_SEMI
     |               OptStatic:_1 StructType:_2 T_ID:_3 OptArrayList:_4 OptCtorCall:_5
@@ -271,19 +275,24 @@ VarDecl ::=         OptStatic:_1 DecoratedType:_2 T_ID:_3 OptArrayList:_4 OptIni
 
 ConstDecl ::=       OptStatic:_1 T_CONST TypecType:_2 T_ID:_3 T_ASSIGN ConstExpr:_5
                     {:
-                        ((MyParser) parser).DoConstDecl (_3);
+                        ((MyParser) parser).DoConstDecl (_3, _2, (STO)_5, _1 );
                     :}
                     T_SEMI
     |               OptStatic:_1 T_CONST T_AUTO T_ID:_3 T_ASSIGN ConstExpr:_5
                     {:
-                        ((MyParser) parser).DoConstDecl (_3);
+                        ((MyParser) parser).DoConstDeclwAuto (_3,(STO)_5,_1);
                     :}
                     T_SEMI
     ;
 
 
 OptStatic ::=       T_STATIC
-    |               /* empty */
+                    {:
+                        RESULT = true;
+                    :}
+    |               {:
+                        RESULT = false;
+                    :}
     ;
 
 
@@ -479,18 +488,32 @@ Pointer ::=         T_STAR
     ;
 
 
-OptArrayList ::=    ArrayList
-    |               /* empty */
+OptArrayList ::=    ArrayList:_1
+                    {:
+                        RESULT = _1;
+                    :}
+    |               {:
+                        RESULT = new Vector();
+                    :}
     ;
 
-ArrayList ::=       Array
-    |               ArrayList Array
+ArrayList ::=       Array:_1
+                    {:
+                        RESULT = new Vector ();
+                        RESULT.addElement (_1);
+                    :}
+    |               ArrayList:_1 Array:_2
+                    {:
+                        _1.addElement (_2);
+                        RESULT = _1;
+
+                    :}
     ;
 
 Array ::=           T_LBRACKET ConstExpr:_1 T_RBRACKET
-                    //{:
-                    //    RESULT = new VarSTO(
-                    //:}
+                    {:
+                        RESULT = _1;
+                    :}
     ;
 
 
@@ -583,7 +606,10 @@ OptRef ::=          T_AMPERSAND
     ;
 
 
-OptInit ::=         T_ASSIGN Expr
+OptInit ::=         T_ASSIGN Expr:_1
+                    {:
+                        RESULT = _1;
+                    :}
     |               /* empty */
     ;
 
@@ -685,7 +711,10 @@ WritePair ::=       Expr
     ;
 
 
-ConstExpr ::=       Expr
+ConstExpr ::=       Expr:_1
+                    {:
+                        RESULT = _1;
+                    :}
     ;
 
 
