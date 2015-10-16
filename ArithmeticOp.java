@@ -44,7 +44,6 @@ public abstract class ArithmeticOp extends BinaryOp {
         }
         else{
             STO c = !(aType instanceof intType) ? a : b;
-            System.out.println("c"+c.getType());
             return new ExprSTO(a.getName()+b.getName(), c.getType());
         }
     }
