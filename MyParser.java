@@ -214,6 +214,7 @@ class MyParser extends parser
 		}
 		//case where var is an array
 		else{
+			//sto.setType(new ArrayType("array",array.size())); // double check array size
 			m_symtab.insert(sto);
 		}
 	}

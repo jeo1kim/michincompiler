@@ -167,7 +167,7 @@ class VarSTO extends STO
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	private void setType(Type type)
+	public void setType(Type type)
 	{
 		m_type = type;
 	}
