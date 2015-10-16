@@ -26,7 +26,8 @@ abstract class UnaryOp extends Operator {
             // "Incompatible type %T to operator %O, equivalent to int, float, or pointer expected.";
             return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(),opName));
         }
-        if(!a.isModLValue() && a.isError()){
+        System.out.print(a.isModLValue());
+        if(!a.isModLValue() && !a.isError()){
             //      "Operand to %O is not a modifiable L-value.";
             return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Lval,aType.getName()));
         }
