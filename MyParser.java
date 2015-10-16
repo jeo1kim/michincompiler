@@ -517,6 +517,9 @@ class MyParser extends parser
 	STO DoConditionCheck(STO condition)
 	{
 		Type conType = condition.getType();
+		if(condition.isError()){
+			return condition;
+		}
 		if (!conType.isBool()) {
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error4_Test, conType.getName()));
@@ -575,6 +578,9 @@ class MyParser extends parser
 
 	STO DoUnaryOp(STO a, Operator o) {
 		STO result = o.checkOperands(a);
+		if(a.isError()){
+			return a;
+		}
 		if (result.isError()) {
 			m_nNumErrors++;
 			m_errors.print(result.getName());
@@ -608,6 +614,9 @@ class MyParser extends parser
 
 		//if this return Key is in top level
 
+		if( a.isError()){
+			return a;
+		}
 		//type check pass by value
 		if (!result.isRetByRef())
 		{
@@ -692,7 +701,9 @@ class MyParser extends parser
 
 	STO DoExitExpr(STO a)
 	{
-
+		if(a.isError()){
+			return a;
+		}
 		Type aType = a.getType();
 		if (!(aType.isAssignableTo(new intType("int", 4))))
 		{
