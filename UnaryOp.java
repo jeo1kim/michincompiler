@@ -28,7 +28,7 @@ abstract class UnaryOp extends Operator {
         }
         if(!a.isModLValue() && !a.isError()){
             //      "Operand to %O is not a modifiable L-value.";
-            return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Lval,aType.getName()));
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Lval, opName));
         }
         else
         {
