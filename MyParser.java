@@ -504,7 +504,7 @@ class MyParser extends parser
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getTypeName(arg), param.getName(), getTypeName(param)));
 				flag = true;
-				return new ErrorSTO(sto.getName());
+
 			}
 			if(param.isRef() && !arg.getType().isEquivalentTo(param.getType())){
 				m_nNumErrors++;
