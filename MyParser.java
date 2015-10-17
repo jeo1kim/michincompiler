@@ -214,15 +214,15 @@ class MyParser extends parser
 			}
 		}
 		//case where var is an array
-		else if(array.size()>0){
-			System.out.print(array.get(0));
-			sto.setType(new ArrayType("array",array.size())); // double check array size
-			m_symtab.insert(sto);
-			return;
-		}
+//		else if(array.size()>0){
+//			System.out.print(array.get(0));
+//			sto.setType(new ArrayType("array",array.size())); // double check array size
+//			m_symtab.insert(sto);
+//			return;
+//		}
 		else{
 			m_symtab.insert(sto);
-
+			return;
 		}
 	}
 
@@ -503,6 +503,8 @@ class MyParser extends parser
 				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
 				flag = true;
 			}
+			System.out.println(param);
+			System.out.println(param.getType());
 			if(param.isRef() && arg.getType().isEquivalentTo(param.getType())){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
@@ -557,16 +559,16 @@ class MyParser extends parser
 	{
 		STO sto;
 		//check variable name in local scope
-		if ((sto = m_symtab.accessLocal(strID)) == null)
+		if ((sto = m_symtab.access(strID)) == null)
 		{
 			//if there is not variable name in local scope
 			//	then check the same name in global scope thus if u find
 			//	then return the global scope
-			if ((sto = m_symtab.accessGlobal(strID)) == null) {
+			//if ((sto = m_symtab.accessGlobal(strID)) == null) {
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
 				sto = new ErrorSTO(strID);
-			}
+			//}
 
 		}
 		return sto;
