@@ -5,7 +5,6 @@
 //---------------------------------------------------------------------
 
 
-import com.sun.tools.internal.jxc.ap.Const;
 import java_cup.runtime.*;
 import java.util.Iterator;
 import java.util.Map;
