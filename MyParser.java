@@ -503,7 +503,7 @@ class MyParser extends parser
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getTypeName(arg), param.getName(), getTypeName(param)));
 				flag = true;
-				return new ErrorSTO(sto.getName());
+
 			}
 			if(param.isRef() && !arg.getType().isEquivalentTo(param.getType())){
 				m_nNumErrors++;
@@ -512,8 +512,9 @@ class MyParser extends parser
 				return new ErrorSTO(sto.getName());
 			}
 			if(param.isRef() && !arg.isModLValue()){
+				System.out.println(param.getName());
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getTypeName(param), getTypeName(param)));
+				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, param.getName(), getTypeName(param)));
 				flag = true;
 				return new ErrorSTO(sto.getName());
 			}
@@ -521,15 +522,16 @@ class MyParser extends parser
 		if(flag){
 			return new ErrorSTO(sto.getName());
 		}
-
+		ExprSTO ret = new ExprSTO(sto.getName(), sto.getType());
 		// check if func sto was called by ref and assign R val or mod l val
 		if( func.isRef()) {
-			sto.markModLVal();
-			return sto;
+			ret.markModLVal();
+			ret.setRef(true);
+			return ret;
 		}else if(!func.isRef())
 		{
-			sto.markRVal();
-			return sto;
+			ret.markRVal();
+			return ret;
 		}
 
 		return sto;
