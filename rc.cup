@@ -108,7 +108,7 @@ non terminal
     ExternDecl,
     VarDecl,
     ConstDecl,
-    OptStatic,
+    //OptStatic,
     StructdefDecl,
     CtorDef,
     DtorDef,
@@ -121,8 +121,8 @@ non terminal
     OptFieldFuncsList,
     FieldFuncsList,
     FieldFuncDecl,
-    OptStmtList,
-    StmtList,
+    //OptStmtList,
+    //StmtList,
     Stmt,
     CodeBlock,
     IfStmt,
@@ -139,7 +139,7 @@ non terminal
     WritePair,
     ConstExpr,
     //ExprList,
-    UnarySign,
+    //UnarySign,   // is this op?
     //Equality, moved To Operator
     //Relation, moved To Operator
     OptInit,
@@ -148,8 +148,8 @@ non terminal
     OptPointerList,
     PointerList,
     Pointer,
-    OptArrayList,
-    ArrayList,
+    //OptArrayList,
+    //ArrayList,
     Array,
 
     NewStmt,
@@ -157,6 +157,7 @@ non terminal
     ;
 
 non terminal Boolean
+    OptStatic,
     OptRef
     ;
 
@@ -167,6 +168,7 @@ non terminal Operator
     AddOp,
     IncDecOp,
     MulOp,
+    UnarySign,      //movded
     Equality,       //moved
     Relation        //moved
     ;
@@ -198,8 +200,12 @@ non terminal Type
     ;
 
 non terminal Vector
+    OptArrayList,
+    ArrayList,
     OptExprList,
     ExprList,
+    StmtList,
+    OptStmtList,
     OptParamList,
     ParamList
     ;
@@ -250,12 +256,13 @@ ExternDecl ::=      T_EXTERN DecoratedBasicType:_2 T_ID:_3 OptArrayList:_4
 
 VarDecl ::=         OptStatic:_1 DecoratedType:_2 T_ID:_3 OptArrayList:_4 OptInit:_5
                     {:
-                        ((MyParser) parser).DoVarDeclwType (_3, _2);
+
+                        ((MyParser) parser).DoVarDeclwType (_3, _2, _1, _4, (STO)_5);
                     :}
                     T_SEMI
     |               OptStatic:_1 T_AUTO T_ID:_3 T_ASSIGN Expr:_5
                     {:
-                        ((MyParser) parser).DoVarDecl (_3);
+                        ((MyParser) parser).DoVarDeclwAuto (_3, _5, _1);
                     :}
                     T_SEMI
     |               OptStatic:_1 StructType:_2 T_ID:_3 OptArrayList:_4 OptCtorCall:_5
@@ -268,19 +275,24 @@ VarDecl ::=         OptStatic:_1 DecoratedType:_2 T_ID:_3 OptArrayList:_4 OptIni
 
 ConstDecl ::=       OptStatic:_1 T_CONST TypecType:_2 T_ID:_3 T_ASSIGN ConstExpr:_5
                     {:
-                        ((MyParser) parser).DoConstDecl (_3);
+                        ((MyParser) parser).DoConstDecl (_3, _2, (STO)_5, _1 );
                     :}
                     T_SEMI
     |               OptStatic:_1 T_CONST T_AUTO T_ID:_3 T_ASSIGN ConstExpr:_5
                     {:
-                        ((MyParser) parser).DoConstDecl (_3);
+                        ((MyParser) parser).DoConstDeclwAuto (_3,(STO)_5,_1);
                     :}
                     T_SEMI
     ;
 
 
 OptStatic ::=       T_STATIC
-    |               /* empty */
+                    {:
+                        RESULT = true;
+                    :}
+    |               {:
+                        RESULT = false;
+                    :}
     ;
 
 
@@ -371,19 +383,24 @@ FieldFuncDecl ::=   FuncDef
 FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
                     {:
                         ((MyParser) parser).SaveLineNum ();
-                        // FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
-                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1); // id, rettype, ref '&' or empty? null
+                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1, _2); // id, rettype, ref '&' or empty? null
                     :}
                     T_LPAREN OptParamList:_4 T_RPAREN
                     {:
                         ((MyParser) parser).DoFormalParams(_4);
                     :}
-                    T_LBRACE OptStmtList
+                    T_LBRACE OptStmtList:_5
                     {:
+<<<<<<< HEAD
+=======
+                        ((MyParser) parser).DoNoReturn(_5); //added check if there is return stmt
+
+>>>>>>> 9bae538166f63aac6f4daf52b0eac40d99f01275
                         ((MyParser) parser).DoFuncDecl_2();
                     :}
                     T_RBRACE
     ;
+
 
 
 FuncDecl ::=        T_EXTERN T_FUNCTION T_COLON ReturnType:_1 T_ID:_3
@@ -455,6 +472,9 @@ ReturnType ::=      Type:_1
                         RESULT = _1;
                     :}
     |               T_VOID
+                    {:
+                        RESULT = new VoidType("void",1);
+                    :}
     ;
 
 
@@ -471,18 +491,32 @@ Pointer ::=         T_STAR
     ;
 
 
-OptArrayList ::=    ArrayList
-    |               /* empty */
+OptArrayList ::=    ArrayList:_1
+                    {:
+                        RESULT = _1;
+                    :}
+    |               {:
+                        RESULT = new Vector();
+                    :}
     ;
 
-ArrayList ::=       Array
-    |               ArrayList Array
+ArrayList ::=       Array:_1
+                    {:
+                        RESULT = new Vector ();
+                        RESULT.addElement (_1);
+                    :}
+    |               ArrayList:_1 Array:_2
+                    {:
+                        _1.addElement (_2);
+                        RESULT = _1;
+
+                    :}
     ;
 
 Array ::=           T_LBRACKET ConstExpr:_1 T_RBRACKET
-                    //{:
-                    //    RESULT = new VarSTO(
-                    //:}
+                    {:
+                        RESULT = _1;
+                    :}
     ;
 
 
@@ -494,13 +528,26 @@ CodeBlock ::=       T_LBRACE
     ;
 
 
-OptStmtList ::=     StmtList
-    |               /* empty */
+OptStmtList ::=     StmtList:_1
+                    {:
+                        RESULT = _1;
+                    :}
+    |               {:
+                        RESULT = new Vector();
+                    :}
     ;
 
 
-StmtList ::=        Stmt
-    |               StmtList Stmt
+StmtList ::=        Stmt:_2
+                    {:
+                        RESULT = new Vector ();
+                        RESULT.addElement (_2);
+                    :}
+    |               StmtList:_1 Stmt:_2
+                    {:
+                        RESULT = _1;
+                        RESULT.addElement (_2);
+                    :}
     ;
 
 
@@ -514,7 +561,7 @@ Stmt ::=            VarDecl
     |               BreakStmt
     |               ContinueStmt
     |               ExitStmt
-    |               ReturnStmt
+    |               ReturnStmt:_1 {: RESULT = _1;   :}
     |               ReadStmt
     |               WriteStmt
     |               NewStmt                 // added
@@ -547,7 +594,6 @@ ParamList ::=       ParamDecl:_2
 
 ParamDecl ::=       Type:_1 OptRef:_2 T_ID:_3 OptArrayList:_4
                     {:
-                        //System.out.println("print id "+_3);
                         RESULT = new VarSTO(_3, _1, _2);
                     :}
     ;
@@ -563,7 +609,10 @@ OptRef ::=          T_AMPERSAND
     ;
 
 
-OptInit ::=         T_ASSIGN Expr
+OptInit ::=         T_ASSIGN Expr:_1
+                    {:
+                        RESULT = _1;
+                    :}
     |               /* empty */
     ;
 
@@ -636,11 +685,11 @@ ExitStmt ::=        T_EXIT T_LPAREN Expr:_1 T_RPAREN T_SEMI
 
 ReturnStmt ::=      T_RETURN T_SEMI
                     {:
-                        ((MyParser) parser).DoVoidReturn();
+                        RESULT = ((MyParser) parser).DoVoidReturn();
                     :}
     |               T_RETURN Expr:_1 T_SEMI
                     {:
-                        ((MyParser) parser).DoExprReturn(_1);
+                        RESULT = ((MyParser) parser).DoExprReturn(_1);
                     :}
 
 
@@ -665,7 +714,10 @@ WritePair ::=       Expr
     ;
 
 
-ConstExpr ::=       Expr
+ConstExpr ::=       Expr:_1
+                    {:
+                        RESULT = _1;
+                    :}
     ;
 
 
@@ -873,11 +925,11 @@ IncDecOp ::=        T_PLUSPLUS
 
 UnarySign ::=       T_PLUS
                     {:
-                        RESULT = "+";
+                        RESULT = new AddOp("+");
                     :}
     |               T_MINUS
                     {:
-                        RESULT = "-";
+                        RESULT = new MinusOp("-");
                     :}
     ;
 
@@ -890,13 +942,13 @@ Designator ::=      T_STAR Designator:_1
                     {:
                         RESULT = _1;
                     :}
-    |               UnarySign Designator:_2
+    |               UnarySign:_1 Designator:_2
                     {:
                         RESULT = _2;
                     :}
     |               T_NOT Designator:_1
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoUnaryOp(_1, new NotOp("!"));
                     :}
     |               T_SIZEOF T_LPAREN Designator:_2 T_RPAREN
                     {:
@@ -912,7 +964,7 @@ Designator ::=      T_STAR Designator:_1
                     :}
     |               IncDecOp:_1 Designator:_2
                     {:
-                        RESULT = ((MyParser) parser).DoUnaryOp(_2, _1);
+                        RESULT = ((MyParser) parser).DoIncDecOp(_2, _1);
                     :}
     |               Designator2:_1 
                     {:
@@ -935,7 +987,7 @@ Designator2 ::=     Designator2:_1 T_DOT T_ID:_3
                     :}
     |               Designator2:_1 IncDecOp:_2
                     {:
-                        RESULT = ((MyParser) parser).DoUnaryOp(_1, _2);
+                        RESULT = ((MyParser) parser).DoIncDecOp(_1, _2);
                     :}
     |               Designator2:_1 T_LPAREN OptExprList:_2 T_RPAREN
                     {:
@@ -955,12 +1007,12 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_INT_LITERAL:_1
                     {:
-                        RESULT = new ConstSTO (_1, new intType("int", 4) , 0 );    // fix me!
+                        RESULT = new ConstSTO (_1, new intType("int", 4) , Integer.parseInt(_1) );    // fix me!
 
                     :}
     |               T_FLOAT_LITERAL:_1
                     {:
-                        RESULT = new ConstSTO (_1, new FloatType("float", 4), 0.00);  // fix me!
+                        RESULT = new ConstSTO (_1, new FloatType("float", 4), Double.parseDouble(_1));  // fix me!
                     :}
     |               T_STR_LITERAL:_1
                     {:

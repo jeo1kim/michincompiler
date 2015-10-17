@@ -9,7 +9,6 @@ import java.util.Vector;
 
 class FuncSTO extends STO
 {
-	private Type m_returnType;
 	private String m_strName;
 	private Type m_type;
 	private boolean m_isAddressable;
@@ -27,6 +26,10 @@ class FuncSTO extends STO
 	public FuncSTO(String strName)
 	{
 		super (strName);
+<<<<<<< HEAD
+=======
+		setType(new VoidType("void",1));
+>>>>>>> 9bae538166f63aac6f4daf52b0eac40d99f01275
 		setName(strName);
 		setType(new VoidType(strName, 4));
 		m_return_top_level = false;
@@ -241,7 +244,7 @@ class FuncSTO extends STO
 	//----------------------------------------------------------------
 	public void setReturnType(Type typ)
 	{
-		m_returnType = typ;
+		m_type = typ;
 	}
 
 	//----------------------------------------------------------------
@@ -249,6 +252,6 @@ class FuncSTO extends STO
 	//----------------------------------------------------------------
 	public Type getReturnType ()
 	{
-		return m_returnType;
+		return m_type;
 	}
 }

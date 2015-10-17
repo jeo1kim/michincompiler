@@ -21,11 +21,11 @@ abstract class BitwiseOp extends BinaryOp {
         Type bType = b.getType();
 
 
-        if( !(aType instanceof intType))
+        if( !(aType instanceof intType) && !a.isError())
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, aType.getName(),opName, "int"));
         }
-        if(!(bType instanceof intType))
+        if(!(bType instanceof intType) && !b.isError())
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, bType.getName(), opName, "int"));
         }

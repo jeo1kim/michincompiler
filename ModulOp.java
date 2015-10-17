@@ -31,11 +31,11 @@ public class ModulOp extends ArithmeticOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
-        if(!(aType instanceof intType))
+        if(!(aType.isInt()))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, aType.getName(), m_OpName , "int"));
         }
-        if(!(bType instanceof intType))
+        else if(!(bType.isInt()))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, bType.getName(), m_OpName, "int"));
         }

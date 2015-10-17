@@ -20,11 +20,11 @@ abstract class BooleanOp extends BinaryOp {
         Type bType = b.getType();
 
 
-        if(!(aType instanceof BoolType))
+        if(!(aType instanceof BoolType) && !a.isError())
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, a.getType().getName(),opName, "bool"));
         }
-        if(!(bType instanceof BoolType))
+        if(!(bType instanceof BoolType) && !b.isError())
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, b.getType().getName(), opName, "bool"));
         }

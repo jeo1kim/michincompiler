@@ -111,7 +111,7 @@ class ArrayVarSTO extends VarSTO{
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setType(Type type)
+    public void setType(Type type)
     {
         m_type = type;
     }
@@ -161,6 +161,9 @@ class ArrayVarSTO extends VarSTO{
     //----------------------------------------------------------------
     public boolean isVar()
     {
+        return true;
+    }
+    public boolean isArrayVar(){
         return true;
     }
 }

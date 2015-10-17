@@ -18,6 +18,7 @@ class VarSTO extends STO
 	private boolean m_ref  = false;
 	private BigDecimal m_value;
 
+	private boolean m_static;
 	private STO m_array;
 
 	//----------------------------------------------------------------
@@ -76,8 +77,11 @@ class VarSTO extends STO
 		setType(typ);
 		setIsAddressable(true);
 		setIsModifiable(true);
+		setStatic(false);
 	}
 
+	public void setStatic(boolean stat){ m_static = stat;}
+	public boolean isStatic(){ return m_static; }
 	public void setRef(boolean ref){ m_ref = ref; }
 	public boolean isRef(){ return m_ref;}
 
@@ -127,7 +131,17 @@ class VarSTO extends STO
 	}
 
 	// return true only if both are false
-	public boolean isRValue() { return !(getIsAddressable() || getIsModifiable()); } // double check this,
+	public boolean isRValue() { return !(getIsAddressable() || getIsModifiable()); }
+	public void markRVal(){
+		setIsModifiable(false); setIsAddressable(false);
+	}
+	public void markModVal(){
+		setIsModifiable(true); setIsAddressable(true);
+	}
+	public void markModLVal(){
+		setIsModifiable(false); setIsAddressable(true);
+	}
+
 
 	public String getName()
 	{
@@ -153,7 +167,7 @@ class VarSTO extends STO
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	private void setType(Type type)
+	public void setType(Type type)
 	{
 		m_type = type;
 	}

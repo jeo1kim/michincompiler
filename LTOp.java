@@ -28,7 +28,7 @@ public class LTOp extends ComparisonOp {
     //with returning Bollean
     STO checkOperands(STO a, STO b)
     {
-        return super.checkOperands(a,b, getName() );
+        return checkOperands(a,b, getName() );
     }
 
     //----------------------------------------------------------------

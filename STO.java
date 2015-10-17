@@ -18,6 +18,7 @@ abstract class STO
 	private BigDecimal m_value;
 	private int m_paramCount;
 	private Vector<STO> paramSTO;
+	private boolean m_return_top_level = false;
 
 	private STO m_array;
 
@@ -158,4 +159,11 @@ abstract class STO
 	public boolean isFunc() { return false; }
 	public boolean isStructdef() { return false; }
 	public boolean isError() { return false; }
+
+	String getName(Type typ){
+		return typ.getName();
+	}
+	String getName(STO sto){
+		return sto.getType().getName();
+	}
 }
