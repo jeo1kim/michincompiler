@@ -5,8 +5,8 @@
 //---------------------------------------------------------------------
 
 
-import com.sun.tools.internal.jxc.ap.Const;
 import java_cup.runtime.*;
+import sun.tools.jstat.Identifier;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
@@ -159,7 +159,6 @@ class MyParser extends parser
 	void DoProgramStart()
 	{
 		// Opens the global scope.
-
 		m_symtab.openScope();
 	}
 
@@ -185,67 +184,15 @@ class MyParser extends parser
 		VarSTO sto = new VarSTO(id);
 		m_symtab.insert(sto);
 	}
-	void DoVarDeclwType(String id, Type typ, boolean stat, Vector<STO> array, STO init)
+	void DoVarDeclwType(String id, Type typ)
 	{
-//		if (init.isError()){
-//			return;    // might wanan change with !init.isError()
-//		}
 		if (m_symtab.accessLocal(id) != null)
 		{
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
 		VarSTO sto = new VarSTO(id, typ);
-		if(stat){
-			sto.setStatic(stat); // set Variable static
-		}
-		if (array.size() == 0 && (init != null)){ // indicates that this var is not an array and init exp exist
-			// do the type check with init if it exist
-			if( !init.getType().isAssignableTo(sto.getType()) && !init.isError()){
-				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getName(init), getName(sto)));
-				return;
-			}
-			else{ // exp is assignable to this varSto type. so
-				m_symtab.insert(sto);
-				return;
-			}
-		}
-		//case where var is an array
-		else{
-			//sto.setType(new ArrayType("array",array.size())); // double check array size
-			m_symtab.insert(sto);
-		}
-	}
-
-	void DoVarDeclwAuto(String id, STO expr, boolean stat)
-	{
-		if (expr.isError()){
-			return;
-		}
-		if (m_symtab.accessLocal(id) != null)
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-		}
-
-		if (!expr.isConst()){
-			VarSTO sto = new VarSTO(id, expr.getType());
-			if(stat){
-				sto.setStatic(stat); // set variable static
-			}
-			m_symtab.insert(sto);
-
-		}
-		else{
-			ConstSTO sto = new ConstSTO(id, expr.getType());
-			if(stat){
-				sto.setStatic(stat); // set variable static
-			}
-			m_symtab.insert(sto);
-		}
-
-		//m_symtab.insert(sto);
+		m_symtab.insert(sto);
 	}
 	//----------------------------------------------------------------
 	//
@@ -265,41 +212,15 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	void DoConstDecl(String id, Type typ, STO exp, boolean stat)
+	void DoConstDecl(String id)
 	{
-		if (exp.isError()){
-			return;
-		}
 		if (m_symtab.accessLocal(id) != null)
 		{
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
 
-<<<<<<< HEAD
 		ConstSTO sto = new ConstSTO(id, null, 0);   // fix me
-=======
-		ConstSTO sto = new ConstSTO(id, typ, 0);   // fix me
-		sto.markModLVal();
-		m_symtab.insert(sto);
-	}
-	//----------------------------------------------------------------
-	//
-	//----------------------------------------------------------------
-	void DoConstDeclwAuto(String id, STO exp, boolean stat)
-	{
-		if (exp.isError()){
-			return;
-		}
-		if (m_symtab.accessLocal(id) != null)
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-		}
-
-		ConstSTO sto = new ConstSTO(id, exp.getType(), 0);   // fix me
-		sto.markModLVal();
->>>>>>> 9bae538166f63aac6f4daf52b0eac40d99f01275
 		m_symtab.insert(sto);
 	}
 
@@ -339,7 +260,6 @@ class MyParser extends parser
 	}
 
 	void DoFuncDecl_1_param(String id, Type ret)
-
 	{
 
 		if (m_symtab.accessLocal(id) != null)
@@ -356,69 +276,34 @@ class MyParser extends parser
 		sto.setLevel(m_symtab.getLevel());
 
 	}
-	void DoFuncDecl_1_param(String id, Type ret, boolean ref)
-	{
-		if (m_symtab.accessLocal(id) != null)
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-		}
-
-		FuncSTO sto = new FuncSTO(id, ret);
-		sto.setRef(ref);
-		m_symtab.insert(sto);
-
-		m_symtab.openScope();
-		m_symtab.setFunc(sto);
-	}
 
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
 	void DoFuncDecl_2()
 	{
-<<<<<<< HEAD
 		DoNoRerutn();
-=======
-		//System.out.println("DoFuncDecl2"+m_symtab.getFunc().getName());
->>>>>>> 9bae538166f63aac6f4daf52b0eac40d99f01275
 		m_symtab.closeScope();
 		m_symtab.setFunc(null);
 	}
-
 
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
 	void DoFormalParams(Vector<STO> params)
 	{
-<<<<<<< HEAD
 		if (m_symtab.getFunc() == null)
-=======
-		FuncSTO func = m_symtab.getFunc();
-		//System.out.print(params.get(0));
-		if (func == null)
->>>>>>> 9bae538166f63aac6f4daf52b0eac40d99f01275
 		{
 			m_nNumErrors++;
 			m_errors.print ("internal: DoFormalParams says no proc!");
 		}
 
-<<<<<<< HEAD
 		FuncSTO func = m_symtab.getFunc();
 		if( params != null) {
 			func.setParamVec(params);
 			func.setParamCount(params.size()); // set the
 		}
 		func.setParamCount(0);
-=======
-		for(STO param : params){
-			m_symtab.insert(param);
-		}
-		func.setParamVec(params);
-		func.setParamCount(params.size()); // set the
-
->>>>>>> 9bae538166f63aac6f4daf52b0eac40d99f01275
 			// insert parameters here
 	}
 
@@ -459,10 +344,9 @@ class MyParser extends parser
 			// Good place to do the assign checks
 			return new ErrorSTO(ErrorMsg.error3a_Assign);
 		}
-		if( !expr.getType().isAssignableTo(stoDes.getType()) && !expr.isError()){
+		if( !stoDes.getType().isAssignableTo(expr.getType())){
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getName(expr), getName(stoDes)));
-			return new ErrorSTO(ErrorMsg.error3a_Assign); // do we need this?
 		}
 		//error3b_Assign ="Value of type %T not assignable to variable of type %T.";
 
@@ -499,31 +383,24 @@ class MyParser extends parser
 		Iterator<STO> it2;
 		Vector<STO> paramList = ((FuncSTO) func).getParamVec();
 
-		Boolean flag = false;
-		for( it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
+		it1 = paramTyp.iterator();
+		it2 = paramList.iterator();
+		for( it1 = paramTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
 			STO arg =  it1.next();
 			STO param =  it2.next();
 
 			if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())  ){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
-				flag = true;
 			}
 			if(param.isRef() && arg.getType().isEquivalentTo(param.getType())){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
-				flag = true;
 			}
 			if(param.isRef() && !arg.isModLValue()){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getName(param), getName(param)));
-<<<<<<< HEAD
-=======
-				flag = true;
 			}
-		}
-		if(flag){
-			return new ErrorSTO(sto.getName());
 		}
 
 		// check if func sto was called by ref and assign R val or mod l val
@@ -565,6 +442,7 @@ class MyParser extends parser
 	STO DoDesignator3_ID(String strID)
 	{
 		STO sto;
+
 		//check variable name in local scope
 		if ((sto = m_symtab.accessLocal(strID)) == null)
 		{
@@ -578,6 +456,7 @@ class MyParser extends parser
 			}
 
 		}
+
 		return sto;
 	}
 
@@ -608,9 +487,6 @@ class MyParser extends parser
 	STO DoConditionCheck(STO condition)
 	{
 		Type conType = condition.getType();
-		if(condition.isError()){
-			return condition;
-		}
 		if (!conType.isBool()) {
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error4_Test, conType.getName()));
@@ -635,43 +511,20 @@ class MyParser extends parser
 
 	STO DoBinaryExpr(STO a, Operator o, STO b)
 	{
-		if(b.isError()){
-			return b;
-		}
-		if(a.isError()){
-			return a;
-		}
-		STO result = o.checkOperands(a, b);
-		if (result.isError())
+
+
+		if (o.checkOperands(a, b).isError())
 		{
 			m_nNumErrors++;
-			m_errors.print(result.getName());
-			return new ErrorSTO(result.getName());
+			m_errors.print(o.checkOperands(a, b).getName());
+			return new ErrorSTO(o.checkOperands(a, b).getName());
 		}
-		return result;
+		return o.checkOperands(a, b);
 	}
 
-
-	STO DoIncDecOp(STO a, Operator o) {
-		STO result = o.checkOperands(a);
-
-		if(a.isError()){
-			return a;
-		}
-		if (result.isError()) {
-			m_nNumErrors++;
-			m_errors.print(result.getName());
-			return new ErrorSTO(result.getName());
-		}
-
-		return result;
-	}
 
 	STO DoUnaryOp(STO a, Operator o) {
 		STO result = o.checkOperands(a);
-		if(a.isError()){
-			return a;
-		}
 		if (result.isError()) {
 			m_nNumErrors++;
 			m_errors.print(result.getName());
@@ -681,59 +534,68 @@ class MyParser extends parser
 		return result;
 	}
 
-	// this function is called on void return type functions
 	STO DoVoidReturn()
 	{
-		FuncSTO result = m_symtab.getFunc();
+		FuncSTO result;
 
-		if(!(result.getType().isVoid())) {
+		//get current funcSTO
+		result =  m_symtab.getFunc();
+
+		//if this return Key is in top level
+		if(result.getLevel() == m_symtab.getLevel())
+		{
+			result.setReturn_top_level(true);
+		}
+
+
+		if(result.getReturnType() instanceof VoidType)
+			return null;
+		else
+		{
 			m_nNumErrors++;
 			m_errors.print(ErrorMsg.error6a_Return_expr);
 			return new ErrorSTO(result.getName());
-		}
-		else {
-			m_symtab.setFunc(null);
-			return new ExprSTO(result.getName()); //
 		}
 	}
 
 	STO DoExprReturn(STO a)
 	{
-		FuncSTO result = m_symtab.getFunc();
-		Type resultType = result.getType();
-		Type exprType = a.getType();
+		FuncSTO result;
+		result = m_symtab.getFunc();
+		Type resultType = result.getReturnType();
+		Type aType = a.getType();
 
 		//if this return Key is in top level
-
-		if( a.isError()){
-			return a;
+		if(result.getLevel() == m_symtab.getLevel())
+		{
+			result.setReturn_top_level(true);
 		}
+
 		//type check pass by value
 		if (!result.isRetByRef())
 		{
-			if(resultType != exprType)
+			if(resultType != aType)
 			{
 				//if type is different but is assignable ex) int to float
-				if (!exprType.isAssignableTo(resultType))
+				if (aType.isAssignableTo(resultType))
 				{
+					return a;
+				}
+				else {
+
 					//error6a_Return_type =
 					//"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
 					m_nNumErrors++;
-					m_errors.print(Formatter.toString(ErrorMsg.error6a_Return_type,
-							getName(resultType), getName(a)));
+					m_errors.print(Formatter.toString(
+							ErrorMsg.error6a_Return_type,
+							result.getReturnType().getName(),
+							a.getType().getName()));
 
 					return new ErrorSTO(a.getName());
 				}
-				else {
-					//System.out.println("clearing func");
-					//m_symtab.setFunc(null);
-					return new ExprSTO(result.getName());
-				}
-
-
 			}
 		}
-		else if(result.isRetByRef()) // sane check
+		else
 		//pass by reference
 		//the type of the return expression is not equivalent to the return type of the function
 		{
@@ -748,43 +610,32 @@ class MyParser extends parser
 			}
 
 
-<<<<<<< HEAD
 			else if (resultType != aType) {
-=======
-			if (!resultType.isEquivalentTo(exprType)){  //resultType != exprType) {
->>>>>>> 9bae538166f63aac6f4daf52b0eac40d99f01275
 				//error6b_Return_equiv =
 				//"Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
-						getName(a), getName(result)));
-
+				m_errors.print(Formatter.toString(
+						ErrorMsg.error6b_Return_equiv,
+						a.getType().getName(),
+						result.getReturnType().getName()));
 				return new ErrorSTO(a.getName());
 			}
 			else
 			{
-				//System.out.println("clearing func2");
-				//m_symtab.setFunc(null);
-				return new ExprSTO(result.getName());
+				return a;
 			}
 
 		}
-		System.out.println("In DoExpReturn this should never reach");
-		m_symtab.setFunc(null);
-		return new ExprSTO(result.getName());
+		return a;
 	}
 
 
-<<<<<<< HEAD
 	STO DoNoRerutn() {
 
-=======
-	STO DoNoReturn(Vector<STO> ret) {
->>>>>>> 9bae538166f63aac6f4daf52b0eac40d99f01275
 		FuncSTO result = m_symtab.getFunc();
 		Type resultType = result.getReturnType();
+
 		//if there is no ReturnType in Top-level
-<<<<<<< HEAD
 		if(!(result.getReturn_top_level()))
 		{
 			if (resultType instanceof VoidType )
@@ -792,30 +643,22 @@ class MyParser extends parser
 
 				return null;
 			}
-=======
-
-		// ret should be null if return is empty.
-		if (!resultType.isVoid() && result.getLevel() == 0 && ret == null)
-		{
-			//check for return
->>>>>>> 9bae538166f63aac6f4daf52b0eac40d99f01275
 			m_nNumErrors++;
 			m_errors.print(ErrorMsg.error6c_Return_missing);
 			return new ErrorSTO(result.getName());
 		}
-		else {
-			//if there is return stmt and correspond to retunType
-			return new ExprSTO(result.getName());
+		else{ //if there is return stmt and correspond to retunType
+			return null;
 		}
+
+
 	}
 
 	STO DoExitExpr(STO a)
 	{
-		if(a.isError()){
-			return a;
-		}
+
 		Type aType = a.getType();
-		if (!(aType.isAssignableTo(new intType("int", 4))))
+		if (!(aType.isAssignableTo(new intType("intType", 4))))
 		{
 			//error7_Exit  =
 			//"Exit expression (type %T) is not assignable to int.";
@@ -824,8 +667,7 @@ class MyParser extends parser
 		}
 
 		//if assignable to int then return expr
-		// double check what to return when you exit
-		return new ExprSTO(a.getName());
+		return a;
 	}
 
 	// Helper Function
