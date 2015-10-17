@@ -205,7 +205,7 @@ class MyParser extends parser
 			// do the type check with init if it exist
 			if( !init.getType().isAssignableTo(sto.getType()) && !init.isError()){
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getName(init), getName(sto)));
+				m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getTypeName(init), getTypeName(sto)));
 				return;
 			}
 			else{ // exp is assignable to this varSto type. so
@@ -432,7 +432,9 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	STO DoAssignExpr(STO stoDes, STO expr)
 	{
-
+		if(expr.isError()){
+			return expr;
+		}
 		if (!stoDes.isModLValue())
 		{
 			if ( expr instanceof ErrorSTO){
@@ -449,7 +451,7 @@ class MyParser extends parser
 		}
 		if( !expr.getType().isAssignableTo(stoDes.getType()) && !expr.isError()){
 			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getName(expr), getName(stoDes)));
+			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getTypeName(expr), getTypeName(stoDes)));
 			return new ErrorSTO(ErrorMsg.error3a_Assign); // do we need this?
 		}
 		//error3b_Assign ="Value of type %T not assignable to variable of type %T.";
@@ -483,7 +485,7 @@ class MyParser extends parser
 		}
 		else if ( argTyp.size() != func.getParamCount()){
 			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.error5n_Call,sto.getName(), func.getName()));
+			m_errors.print(Formatter.toString(ErrorMsg.error5n_Call, argTyp.size(), func.getParamCount() ));
 			return new ErrorSTO(sto.getName());
 		}
 
@@ -500,18 +502,21 @@ class MyParser extends parser
 
 			if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())  ){
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
+				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getTypeName(arg), param.getName(), getTypeName(param)));
 				flag = true;
+				return new ErrorSTO(sto.getName());
 			}
-			if(param.isRef() && arg.getType().isEquivalentTo(param.getType())){
+			if(param.isRef() && !arg.getType().isEquivalentTo(param.getType())){
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
+				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getTypeName(arg), param.getName(), getTypeName(param)));
 				flag = true;
+				return new ErrorSTO(sto.getName());
 			}
 			if(param.isRef() && !arg.isModLValue()){
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getName(param), getName(param)));
+				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getTypeName(param), getTypeName(param)));
 				flag = true;
+				return new ErrorSTO(sto.getName());
 			}
 		}
 		if(flag){
@@ -527,6 +532,7 @@ class MyParser extends parser
 			sto.markRVal();
 			return sto;
 		}
+
 		return sto;
 	}
 
@@ -557,7 +563,7 @@ class MyParser extends parser
 	{
 		STO sto;
 		//check variable name in local scope
-		if ((sto = m_symtab.access(strID)) == null)
+		if ((sto = m_symtab.accessLocal(strID)) == null)
 		{
 			//if there is not variable name in local scope
 			//	then check the same name in global scope thus if u find
@@ -603,6 +609,7 @@ class MyParser extends parser
 			return condition;
 		}
 		if (!conType.isBool()) {
+
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error4_Test, conType.getName()));
 			return new ErrorSTO(condition.getName());
@@ -711,7 +718,7 @@ class MyParser extends parser
 					//"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
 					m_nNumErrors++;
 					m_errors.print(Formatter.toString(ErrorMsg.error6a_Return_type,
-							getName(resultType), getName(a)));
+							getTypeName(resultType), getTypeName(a)));
 
 					return new ErrorSTO(a.getName());
 				}
@@ -744,7 +751,7 @@ class MyParser extends parser
 				//"Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
-						getName(a), getName(result)));
+						getTypeName(a), getTypeName(result)));
 
 				return new ErrorSTO(a.getName());
 			}
@@ -801,10 +808,11 @@ class MyParser extends parser
 	}
 
 	// Helper Function
-	String getName(Type typ){
+	String getTypeName(Type typ){
 		return typ.getName();
 	}
-	String getName(STO sto){
+	String getTypeName(STO sto){
 		return sto.getType().getName();
 	}
 }
+

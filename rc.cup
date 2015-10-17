@@ -519,7 +519,7 @@ Array ::=           T_LBRACKET ConstExpr:_1 T_RBRACKET
 
 CodeBlock ::=       T_LBRACE
                     {: ((MyParser) parser).DoBlockOpen(); :}
-                    OptStmtList:_1 {: RESULT = _1; :}
+                    OptStmtList
                     {: ((MyParser) parser).DoBlockClose(); :}
                     T_RBRACE
     ;
@@ -548,12 +548,12 @@ StmtList ::=        Stmt:_2
     ;
 
 
-Stmt ::=            VarDecl:_1 {: RESULT = _1; :}
+Stmt ::=            VarDecl
     |               ConstDecl
     |               CodeBlock
     |               Expr T_SEMI
     |               IfStmt
-    |               WhileStmt:_1 {: RESULT = _1; :}
+    |               WhileStmt
     |               ForeachStmt
     |               BreakStmt
     |               ContinueStmt
@@ -646,9 +646,8 @@ OptElse ::=         T_ELSE CodeBlock
     ;
 
 
-WhileStmt ::=       T_WHILE  Expr:_1  CodeBlock:_2
+WhileStmt ::=       T_WHILE Expr:_1 CodeBlock
                      {:
-
                         ((MyParser) parser).DoConditionCheck(_1);
                      :}
     ;
@@ -989,8 +988,7 @@ Designator2 ::=     Designator2:_1 T_DOT T_ID:_3
                     :}
     |               Designator2:_1 T_LPAREN OptExprList:_2 T_RPAREN
                     {:
-                        ((MyParser) parser).DoFuncCall (_1, _2);
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoFuncCall (_1, _2);
                     :}
     |               Designator3:_1
                     {:
