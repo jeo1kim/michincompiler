@@ -503,8 +503,6 @@ class MyParser extends parser
 				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
 				flag = true;
 			}
-			System.out.println(param);
-			System.out.println(param.getType());
 			if(param.isRef() && arg.getType().isEquivalentTo(param.getType())){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
@@ -564,11 +562,11 @@ class MyParser extends parser
 			//if there is not variable name in local scope
 			//	then check the same name in global scope thus if u find
 			//	then return the global scope
-			//if ((sto = m_symtab.accessGlobal(strID)) == null) {
+			if ((sto = m_symtab.accessGlobal(strID)) == null) {
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
 				sto = new ErrorSTO(strID);
-			//}
+			}
 
 		}
 		return sto;
