@@ -106,7 +106,7 @@ class ExprSTO extends STO
 	//----------------------------------------------------------------
 	public boolean isModLValue()
 	{
-		return getIsModifiable() && getIsAddressable();
+		return !getIsModifiable() && getIsAddressable();
 	}
 
 	// return true only if both are false
