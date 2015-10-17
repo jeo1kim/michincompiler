@@ -515,7 +515,7 @@ class MyParser extends parser
 			if(param.isRef() && !arg.isModLValue()){
 				System.out.println(param.getName());
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getTypeName(param), getTypeName(param)));
+				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, param.getName(), getTypeName(param)));
 				flag = true;
 				return new ErrorSTO(sto.getName());
 			}
