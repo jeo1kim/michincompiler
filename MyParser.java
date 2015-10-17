@@ -564,7 +564,7 @@ class MyParser extends parser
 	{
 		STO sto;
 		//check variable name in local scope
-		if ((sto = m_symtab.accessLocal(strID)) == null)
+		if ((sto = m_symtab.access(strID)) == null)
 		{
 			//if there is not variable name in local scope
 			//	then check the same name in global scope thus if u find
