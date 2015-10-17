@@ -494,7 +494,7 @@ class MyParser extends parser
 		Iterator<STO> it1;
 		Iterator<STO> it2;
 
-		Boolean flag = false;
+		Boolean flag = true;
 		for( it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
 			STO arg =  it1.next();
 			STO param =  it2.next();
@@ -505,17 +505,20 @@ class MyParser extends parser
 				flag = true;
 
 			}
-			if(param.isRef() && !arg.getType().isEquivalentTo(param.getType())){
+			Boolean ref = true;
+			if(param.isRef() && !arg.getType().isEquivalentTo(param.getType()) ){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getTypeName(arg), param.getName(), getTypeName(param)));
 				flag = true;
-				return new ErrorSTO(sto.getName());
+				ref = false;
+				//return new ErrorSTO(sto.getName());
 			}
-			if(param.isRef() && !arg.isModLValue()){
+			if(param.isRef() && !arg.isModLValue() && ref){
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, param.getName(), getTypeName(param)));
 				flag = true;
-				return new ErrorSTO(sto.getName());
+
+				//return new ErrorSTO(sto.getName());
 			}
 		}
 		if(flag){
@@ -532,7 +535,7 @@ class MyParser extends parser
 			ret.markRVal();
 			return ret;
 		}
-
+		System.out.println("here");
 		return sto;
 	}
 
