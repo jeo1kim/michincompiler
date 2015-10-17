@@ -178,6 +178,7 @@ class MyParser extends parser
 	void DoVarDecl(String id)
 	{
 		if (m_symtab.accessLocal(id) != null)
+		if (m_symtab.accessLocal(id) != null)
 		{
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
@@ -213,9 +214,15 @@ class MyParser extends parser
 			}
 		}
 		//case where var is an array
-		else{
-			//sto.setType(new ArrayType("array",array.size())); // double check array size
+		else if(array.size()>0){
+			System.out.print(array.get(0));
+			sto.setType(new ArrayType("array",array.size())); // double check array size
 			m_symtab.insert(sto);
+			return;
+		}
+		else{
+			m_symtab.insert(sto);
+
 		}
 	}
 
