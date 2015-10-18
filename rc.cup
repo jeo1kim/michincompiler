@@ -383,10 +383,10 @@ FieldFuncDecl ::=   FuncDef
 FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
                     {:
                         ((MyParser) parser).SaveLineNum ();
-                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1, _2); // id, rettype, ref '&' or empty? null
                     :}
                     T_LPAREN OptParamList:_4 T_RPAREN
                     {:
+                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1, _2, _4); // id, rettype, ref '&' or empty? null
                         ((MyParser) parser).DoFormalParams(_4);
                     :}
                     T_LBRACE OptStmtList:_5
@@ -400,12 +400,9 @@ FuncDef ::=         T_FUNCTION T_COLON ReturnType:_1 OptRef:_2 T_ID:_3
 
 
 
-FuncDecl ::=        T_EXTERN T_FUNCTION T_COLON ReturnType:_1 T_ID:_3
+FuncDecl ::=        T_EXTERN T_FUNCTION T_COLON ReturnType:_1 T_ID:_3 T_LPAREN OptParamList:_4 T_RPAREN
                     {:
-                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1);
-                    :}
-                    T_LPAREN OptParamList:_4 T_RPAREN
-                    {:
+                        ((MyParser) parser).DoFuncDecl_1_param(_3,_1,_4);
                         ((MyParser) parser).DoFormalParams(_4);
                         ((MyParser) parser).DoFuncDecl_2();
                     :}
