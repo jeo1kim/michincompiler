@@ -18,6 +18,9 @@ public class NotOp extends UnaryOp {
 
     STO checkOperands(STO a)
     {
+        if (a.isError()){
+            return a;
+        }
         //System.out.println(a.getType().isNumeric());
         Type aType = a.getType();
 

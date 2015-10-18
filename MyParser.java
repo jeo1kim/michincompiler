@@ -675,14 +675,15 @@ class MyParser extends parser
 	}
 
 	STO DoUnaryOp(STO a, Operator o) {
-		STO result = o.checkOperands(a);
+
 		if(a.isError()){
-			return a;
+			return new ErrorSTO("DoUnaryOp"+a.getName()+o.getName());
 		}
+		STO result = o.checkOperands(a);
 		if (result.isError()) {
 			m_nNumErrors++;
 			m_errors.print(result.getName());
-			return new ErrorSTO(result.getName());
+			return new ErrorSTO("DoUnaryOp"+a.getName()+o.getName());
 		}
 
 		return result;

@@ -19,6 +19,11 @@ abstract class BooleanOp extends BinaryOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
+        if (b.isError()){
+            return b;
+        }if (a.isError()){
+            return a;
+        }
 
         if(!(aType instanceof BoolType) && !a.isError())
         {
