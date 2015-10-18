@@ -14,6 +14,7 @@ class FuncSTO extends STO
 	private boolean m_isAddressable;
 	private boolean m_isModifiable;
 	private boolean m_isRetByRef;
+	private boolean m_ref;
 	private int m_paramCount;
 	private Vector<STO> paramSTO;
 	private int m_level;
@@ -46,7 +47,9 @@ class FuncSTO extends STO
 	public FuncSTO(String strName, Type retType, Vector<STO> params)
 	{
 		super (strName);
-		initSTO(strName,retType, params, false);
+		setName(strName);
+		setType(retType);
+		setParamVec(params);
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
@@ -75,7 +78,7 @@ class FuncSTO extends STO
 		setReturnType(retType);
 		setType(retType);
 		setName(strName);
-		setReference(ref);
+		setRef(ref);
 		setParamCount(params.size());
 	}
 
@@ -226,8 +229,8 @@ class FuncSTO extends STO
 		// fields as necessary
 	}
 
-	public void setReference(boolean ref){ m_isRetByRef = ref; }
-	public boolean isRetByRef(){ return m_isRetByRef;}
+	public void setRef(boolean ref){ m_ref = ref; }
+	public boolean isRef(){ return m_ref;}
 
 	//----------------------------------------------------------------
 	// This is the return type of the function. This is different from 

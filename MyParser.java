@@ -375,6 +375,7 @@ class MyParser extends parser {
 		}
 
 		FuncSTO sto = new FuncSTO(id, ret, params, ref); //
+		//sto.setRef(ref);
 
 		if (isThereOverloadedFunction) {
 			sto.setOverloaded(true);
@@ -732,7 +733,7 @@ class MyParser extends parser {
 				return a;
 			}
 			//type check pass by value
-			if (!result.isRetByRef()) {
+			if (!result.isRef()) {
 				if (resultType != exprType) {
 					//if type is different but is assignable ex) int to float
 					if (!exprType.isAssignableTo(resultType)) {
@@ -750,7 +751,7 @@ class MyParser extends parser {
 
 
 				}
-			} else if (result.isRetByRef()) // sane check
+			} else if (result.isRef()) // sane check
 			//pass by reference
 			//the type of the return expression is not equivalent to the return type of the function
 			{
