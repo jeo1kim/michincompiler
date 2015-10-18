@@ -394,8 +394,17 @@ class MyParser extends parser {
 	//
 	//----------------------------------------------------------------
 	void DoFuncDecl_2() {
-		m_symtab.closeScope();
-		m_symtab.setFunc(null);
+		FuncSTO result = m_symtab.getFunc();
+		Type resultType = result.getReturnType();
+
+			if (resultType.isVoid())
+			{
+				m_symtab.closeScope();
+				m_symtab.setFunc(null);
+				return;
+			}
+		return;
+
 	}
 
 
@@ -717,7 +726,7 @@ class MyParser extends parser {
 				m_errors.print(ErrorMsg.error6a_Return_expr);
 				return new ErrorSTO(result.getName());
 			} else {
-				m_symtab.setFunc(null);
+				//m_symtab.setFunc(null);
 				return new ExprSTO(result.getName()); //
 			}
 		}
