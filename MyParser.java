@@ -397,7 +397,6 @@ class MyParser extends parser {
 
 		m_symtab.closeScope();
 		m_symtab.setFunc(null);
-
 	}
 
 
@@ -718,9 +717,9 @@ class MyParser extends parser {
 				m_nNumErrors++;
 				m_errors.print(ErrorMsg.error6a_Return_expr);
 				return new ErrorSTO(result.getName());
-			} else {
+			}else {
 				//m_symtab.setFunc(null);
-				return new ExprSTO("return"); //
+				return new ExprSTO(result.getName()); //
 			}
 		}
 
@@ -753,7 +752,7 @@ class MyParser extends parser {
 						return new ErrorSTO(a.getName());
 					} else {
 						//m_symtab.setFunc(null);
-						return new ExprSTO("return");
+						return new ExprSTO(result.getName());
 					}
 
 
@@ -790,7 +789,7 @@ class MyParser extends parser {
 				} else {
 					//System.out.println("clearing func2");
 					//m_symtab.setFunc(null);
-					ExprSTO ret = new ExprSTO("return");
+					ExprSTO ret = new ExprSTO("result of "+result.getName());
 					ret.setRef(true);
 					return ret;
 				}
@@ -820,23 +819,28 @@ class MyParser extends parser {
 //		}
 
 
-	void DoNoReturn(Vector<STO> stmtlist) {
+	STO DoNoReturn() {
 
 		FuncSTO result = m_symtab.getFunc();
 		Type resultType = result.getReturnType();
 
 		//if there is no ReturnType in Top-level
+		if(!(result.getReturn_top_level()))
+		{
 			if (resultType instanceof VoidType )
 			{
-				for(STO ret : stmtlist){
-					if (ret.getName() == "return"){
-						return;
-					}
-				}
+
+				return null;
 			}
 			m_nNumErrors++;
 			m_errors.print(ErrorMsg.error6c_Return_missing);
-			return;
+			return new ErrorSTO(result.getName());
+		}
+		else{ //if there is return stmt and correspond to retunType
+			return null;
+		}
+
+
 	}
 
 
