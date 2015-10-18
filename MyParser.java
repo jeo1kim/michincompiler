@@ -398,14 +398,15 @@ class MyParser extends parser {
 		Type resultType = result.getReturnType();
 
 		//if there is no ReturnType in Top-level
-			if (!resultType.isVoid())
+			if (resultType.isVoid())
 			{
-				m_nNumErrors++;
-				m_errors.print(ErrorMsg.error6c_Return_missing);
-				return; //new ErrorSTO(result.getName());
+				m_symtab.closeScope();
+				m_symtab.setFunc(null);
 			}
-		m_symtab.closeScope();
-		m_symtab.setFunc(null);
+
+		m_nNumErrors++;
+		m_errors.print(ErrorMsg.error6c_Return_missing);
+		return; //new ErrorSTO(result.getName());
 	}
 
 
