@@ -7,6 +7,8 @@
 
 import com.sun.tools.internal.jxc.ap.Const;
 import java_cup.runtime.*;
+
+import javax.swing.text.Style;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Iterator;
@@ -327,6 +329,7 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	void DoFuncDecl_1(String id)
 	{
+		boolean isThereOverloadedFunction = false;
 		STO a = m_symtab.accessLocal(id);
 		if (a != null && !(a.isFunc())) //if found STO is not function
 		{
@@ -336,50 +339,91 @@ class MyParser extends parser
 			//error9_Decl
 			// "Duplicate declaration of overloaded function %S.";
 		}
+		else if (a != null && a.isFunc())
+		{
+			if (DoOverloadedFuncCheck(id, null) == null)
+			{
+				isThereOverloadedFunction = true;
+			}
+		}
 
-	
 		FuncSTO sto = new FuncSTO(id);
 
-		m_symtab.insert(sto);
+		if (isThereOverloadedFunction)
+		{
+			sto.setOverloaded(true);
+		}
 
+		m_symtab.insert(sto);
+		m_symtab.insertOverloadedFunc(id, sto); //all funcSTO goes into HashMap
 		m_symtab.openScope();
 		m_symtab.setFunc(sto);
 		sto.setLevel(m_symtab.getLevel());
 	}
 
-	void DoFuncDecl_1_param(String id, Type ret)
+	void DoFuncDecl_1_param(String id, Type ret, Vector<STO> params)
 
 	{
-
+		boolean isThereOverloadedFunction = false;
 		STO a = m_symtab.accessLocal(id);
 		if (a != null && !(a.isFunc())) //if found STO is not function
 		{
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
+		else if (a != null && a.isFunc())
+		{
+			if (DoOverloadedFuncCheck(id, params) == null)
+			{
+				isThereOverloadedFunction = true;
+			}
+		}
 
 		FuncSTO sto = new FuncSTO(id, ret);
+
+		if (isThereOverloadedFunction)
+		{
+			sto.setOverloaded(true);
+		}
+
+		String hKey = makeHKey(id, params);
+
 		m_symtab.insert(sto);
-
-
+		m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
 		m_symtab.openScope();
 		m_symtab.setFunc(sto);
 		sto.setLevel(m_symtab.getLevel());
 
 	}
-	void DoFuncDecl_1_param(String id, Type ret, boolean ref)
+	void DoFuncDecl_1_param(String id, Type ret, boolean ref, Vector<STO> params)
 	{
+		boolean isThereOverloadedFunction = false;
 		STO a = m_symtab.accessLocal(id);
 		if (a != null && !(a.isFunc())) //if found STO is not function
 		{
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+		}
+		else if (a != null && a.isFunc())
+		{
+			if (DoOverloadedFuncCheck(id, params) == null)
+			{
+				isThereOverloadedFunction = true;
+			}
 		}
 
 		FuncSTO sto = new FuncSTO(id, ret);
 		sto.setRef(ref);
-		m_symtab.insert(sto);
 
+		if (isThereOverloadedFunction)
+		{
+			sto.setOverloaded(true);
+		}
+
+		String hKey = makeHKey(id, params);
+
+		m_symtab.insert(sto);
+		m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
 		m_symtab.openScope();
 		m_symtab.setFunc(sto);
 	}
@@ -471,69 +515,78 @@ class MyParser extends parser
 	STO DoFuncCall(STO sto, Vector<STO> argTyp)
 	{
 		// func holds expected param
+
+		System.out.println(argTyp.get(0).getType());
+
 		STO func =  m_symtab.access(sto.getName());
 		Vector<STO> paramList = func.getParamVec(); //<--- error case if undeclared function-call then
 													//		then throw nullpointerException
 
+		String hKey = makeHKey(sto.getName(), argTyp); //u can use it for anyother func call
 
+		FuncSTO funcSTO = func.isFunc() ? (FuncSTO) func : null;
 
-		if (!sto.isFunc())
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_function, sto.getName()));
-			return new ErrorSTO(sto.getName());
+		//if func is OverLoaded Function then check 9b
+		if (funcSTO != null && funcSTO.isOverloaded()) {
+			return(DoOverloadedFuncCall(funcSTO, hKey));
 		}
-		else if(!func.isFunc() || func == null)
-		{
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.not_function, func.getName()));
-			return new ErrorSTO(sto.getName());
-		}
-		else if ( argTyp.size() != func.getParamCount()){
-			m_nNumErrors++;
-			m_errors.print(Formatter.toString(ErrorMsg.error5n_Call,sto.getName(), func.getName()));
-			return new ErrorSTO(sto.getName());
-		}
+		//if func is not Overloaded then check 5
+		else {
 
 
-		//chech 0 parm
-		// paramType has arguments
-		Iterator<STO> it1;
-		Iterator<STO> it2;
-
-		Boolean flag = false;
-		for( it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
-			STO arg =  it1.next();
-			STO param =  it2.next();
-
-			if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())  ){
+			if (!sto.isFunc()) {
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
-				flag = true;
-			}
-			if(param.isRef() && arg.getType().isEquivalentTo(param.getType())){
+				m_errors.print(Formatter.toString(ErrorMsg.not_function, sto.getName()));
+				return new ErrorSTO(sto.getName());
+			} else if (!func.isFunc() || func == null) {
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
-				flag = true;
-			}
-			if(param.isRef() && !arg.isModLValue()){
+				m_errors.print(Formatter.toString(ErrorMsg.not_function, func.getName()));
+				return new ErrorSTO(sto.getName());
+			} else if (argTyp.size() != func.getParamCount()) {
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getName(param), getName(param)));
-				flag = true;
+				m_errors.print(Formatter.toString(ErrorMsg.error5n_Call, sto.getName(), func.getName()));
+				return new ErrorSTO(sto.getName());
 			}
-		}
-		if(flag){
-			return new ErrorSTO(sto.getName());
-		}
 
-		// check if func sto was called by ref and assign R val or mod l val
-		if( func.isRef()) {
-			sto.markModLVal();
-			return sto;
-		}else if(!func.isRef())
-		{
-			sto.markRVal();
-			return sto;
+
+			//chech 0 parm
+			// paramType has arguments
+			Iterator<STO> it1;
+			Iterator<STO> it2;
+
+			Boolean flag = false;
+			for (it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext(); ) {  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
+				STO arg = it1.next();
+				STO param = it2.next();
+
+				if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())) {
+					m_nNumErrors++;
+					m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getName(arg), getName(param), getName(param)));
+					flag = true;
+				}
+				if (param.isRef() && arg.getType().isEquivalentTo(param.getType())) {
+					m_nNumErrors++;
+					m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getName(arg), getName(param), getName(param)));
+					flag = true;
+				}
+				if (param.isRef() && !arg.isModLValue()) {
+					m_nNumErrors++;
+					m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, getName(param), getName(param)));
+					flag = true;
+				}
+			}
+			if (flag) {
+				return new ErrorSTO(sto.getName());
+			}
+
+			// check if func sto was called by ref and assign R val or mod l val
+			if (func.isRef()) {
+				sto.markModLVal();
+				return sto;
+			} else if (!func.isRef()) {
+				sto.markRVal();
+				return sto;
+			}
 		}
 		return sto;
 	}
@@ -835,28 +888,96 @@ class MyParser extends parser
 		return new ExprSTO(a.getName());
 	}
 
+	//check 9a
 	STO DoOverloadedFuncCheck(String id, Vector<STO> param)
 	{
-		STO a = m_symtab.access(id);
+
+		String hKey = makeHKey(id, param);
+		//since already checked in DoFuncDecl_1_param
+		FuncSTO a = (m_symtab.isInHMap(hKey)) ? (m_symtab.getOverLoadedFuncs(hKey))
+												: (FuncSTO)m_symtab.access(id);
+
 		Vector<STO> aParam = a.getParamVec();
 
+		//if void call
+		if (param == null)
+		{
+			param = new Vector<STO>();
+		}
 
-		if (a != null) {
-			if (aParam.size() == param.size()) {
-				for (int i = 0; i < aParam.size(); i++)
+
+		//System.out.println("caught here");
+
+		//if hashcode is same then exactly same function (even names too)
+		//thus save time to check other details
+		if (m_symtab.isInHMap(hKey)) {
+			//error9_Decl  =
+			//"Duplicate declaration of overloaded function %S.";
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.error9_Decl, id));
+			ErrorSTO err = new ErrorSTO(id);
+			return err;
+		}
+		//most overloaded cases goes to this (even if same function
+		//but param is different names then goes here
+		else
+		{
+			//System.out.println("caught here != hash");
+			if (aParam.size() == param.size())
+			{
+				//System.out.println("caught here == param size");
+				boolean same = true;
+				for (int i = 0; i < param.size(); i++)
 				{
-					if ( aParam.get(i).getType() != param.get(i).getType())
+					if(aParam.get(i).getType().getName() != param.get(i).getType().getName())
 					{
-						m_nNumErrors++;
-						m_errors.print(Formatter.toString(ErrorMsg.error9_Decl, id));
-						ErrorSTO err = new ErrorSTO(id);
+						same = false;
 					}
 				}
-
+				if (same) //have same param list re declared
+				{
+					m_nNumErrors++;
+					m_errors.print(Formatter.toString(ErrorMsg.error9_Decl, id));
+					ErrorSTO err = new ErrorSTO(id);
+					return err;
+				}
+				else
+				{
+					//System.out.println("caught here same = false");
+					a.setOverloaded(true);
+					return null; //if its overloaed function then return null
+				}
+			}
+			else
+			{
+				//System.out.println("caught here != size");
+				//if size is different then number of param is different thus
+				//it's overloaded function of id
+				a.setOverloaded(true);
+				return null; //if its overloaed function then return null
 			}
 		}
-		return (new FuncSTO(id));
 	}
+
+	//check 9b
+	STO DoOverloadedFuncCall(FuncSTO func, String hKey)
+	{
+		if (m_symtab.isInHMap(hKey))
+		{
+			return func;
+		}
+		else
+		{
+			//error9_Illegal  =
+			//		"Illegal call to overloaded function %S.";
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.error9_Illegal, func.getName()));
+			ErrorSTO err = new ErrorSTO(func.getName());
+			return err;
+		}
+	}
+
+
 
 	// Helper Function
 	String getName(Type typ){
@@ -864,5 +985,21 @@ class MyParser extends parser
 	}
 	String getName(STO sto){
 		return sto.getType().getName();
+	}
+	//its for making HashMap Key
+	String makeHKey(String id, Vector<STO> param)
+	{
+		String paramKey = id;
+
+		//set up H_Map key
+		if (param != null) {
+			for (int i = 0; i < param.size(); i++) {
+				paramKey += param.get(i).getType().getName();
+			}
+		}
+
+
+
+		return paramKey;
 	}
 }

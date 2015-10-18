@@ -12,6 +12,8 @@ class SymbolTable
 	private int m_nLevel;
 	private Scope m_scopeGlobal;
 	private FuncSTO m_func = null;
+	private HashMap<String, FuncSTO> hMap_OverloadedF;
+
     
 	//----------------------------------------------------------------
 	//
@@ -21,6 +23,7 @@ class SymbolTable
 		m_nLevel = 0;
 		m_stkScopes = new Stack<Scope>();
 		m_scopeGlobal = null;
+		hMap_OverloadedF = new HashMap<String, FuncSTO>();
 	}
 
 	//----------------------------------------------------------------
@@ -115,4 +118,19 @@ class SymbolTable
 	//----------------------------------------------------------------
 	public FuncSTO getFunc() { return m_func; }
 	public void setFunc(FuncSTO sto) { m_func = sto; }
+
+	public void insertOverloadedFunc(String key, FuncSTO fn)
+	{
+		hMap_OverloadedF.put(key, fn);
+	}
+
+	public FuncSTO getOverLoadedFuncs(String name_Type)
+	{
+		return hMap_OverloadedF.get(name_Type);
+	}
+
+	public boolean isInHMap (String key)
+	{
+		return hMap_OverloadedF.containsKey(key);
+	}
 }

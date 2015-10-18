@@ -18,6 +18,7 @@ class FuncSTO extends STO
 	private Vector<STO> paramSTO;
 	private int m_level;
 	private boolean m_return_top_level = false;
+	private boolean m_isOverloaded = false;
 
 	//----------------------------------------------------------------
 	//
@@ -26,7 +27,7 @@ class FuncSTO extends STO
 	public FuncSTO(String strName)
 	{
 		super (strName);
-		setType(new VoidType("void",1));
+		setType(new VoidType("void", 1));
 		setName(strName);
 		m_return_top_level = false;
 
@@ -129,6 +130,15 @@ class FuncSTO extends STO
 	public void setLevel(int level)
 	{
 		m_level = level;
+	}
+
+	public void setOverloaded(boolean ovr)
+	{
+		m_isOverloaded = ovr;
+	}
+	public boolean isOverloaded()
+	{
+		return m_isOverloaded;
 	}
 
 	public int getParamCount(){ return m_paramCount; }
