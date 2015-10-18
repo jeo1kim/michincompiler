@@ -352,6 +352,7 @@ class MyParser extends parser
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
 
+
 		FuncSTO sto = new FuncSTO(id, ret);
 		m_symtab.insert(sto);
 
@@ -368,7 +369,6 @@ class MyParser extends parser
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
-
 		FuncSTO sto = new FuncSTO(id, ret);
 		sto.setRef(ref);
 		m_symtab.insert(sto);
@@ -382,7 +382,6 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	void DoFuncDecl_2()
 	{
-		//System.out.println("DoFuncDecl2"+m_symtab.getFunc().getName());
 		m_symtab.closeScope();
 		m_symtab.setFunc(null);
 	}
@@ -465,11 +464,16 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	STO DoFuncCall(STO sto, Vector<STO> argTyp)
 	{
+
+
+
+		FuncSTO recurFunc = m_symtab.getFunc();
+		if(sto == recurFunc){
+			return sto;
+		}
 		// func holds expected param
 		STO func =  m_symtab.access(sto.getName());
 		Vector<STO> paramList = func.getParamVec();
-
-
 
 		if (!sto.isFunc())
 		{
@@ -502,6 +506,7 @@ class MyParser extends parser
 
 			if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())  ){
 				m_nNumErrors++;
+
 				m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getTypeName(arg), param.getName(), getTypeName(param)));
 				flag = true;
 
@@ -522,9 +527,10 @@ class MyParser extends parser
 				}
 			}
 		}
-		if(flag){
-			return new ErrorSTO(sto.getName());
-		}
+//		if(flag){
+//			System.out.println(sto.getName());
+//			return new ErrorSTO(sto.getName());
+//		}
 		ExprSTO ret = new ExprSTO(sto.getName(), sto.getType());
 		// check if func sto was called by ref and assign R val or mod l val
 		if( func.isRef()) {
@@ -572,6 +578,7 @@ class MyParser extends parser
 			//if there is not variable name in local scope
 			//	then check the same name in global scope thus if u find
 			//	then return the global scope
+
 			if ((sto = m_symtab.accessGlobal(strID)) == null) {
 				m_nNumErrors++;
 				m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
@@ -727,7 +734,6 @@ class MyParser extends parser
 					return new ErrorSTO(a.getName());
 				}
 				else {
-					//System.out.println("clearing func");
 					//m_symtab.setFunc(null);
 					return new ExprSTO(result.getName());
 				}
