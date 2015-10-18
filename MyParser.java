@@ -501,9 +501,14 @@ class MyParser extends parser
 
 		Boolean flag = false;
 		for( it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
+
+
 			STO arg =  it1.next();
 			STO param =  it2.next();
 
+			if (arg.isError()){
+				return arg;
+			}
 			if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())  ){
 				m_nNumErrors++;
 
