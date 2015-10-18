@@ -394,19 +394,26 @@ class MyParser extends parser {
 	//
 	//----------------------------------------------------------------
 	void DoFuncDecl_2() {
+
+		m_symtab.closeScope();
 		FuncSTO result = m_symtab.getFunc();
 		Type resultType = result.getReturnType();
 
 		//if there is no ReturnType in Top-level
-			if (resultType.isVoid())
+		if(!(result.getReturn_top_level()))
+		{
+			if (resultType instanceof VoidType )
 			{
-				m_symtab.closeScope();
-				m_symtab.setFunc(null);
-			}
 
-		m_nNumErrors++;
-		m_errors.print(ErrorMsg.error6c_Return_missing);
-		return; //new ErrorSTO(result.getName());
+				return;
+			}
+			m_nNumErrors++;
+			m_errors.print(ErrorMsg.error6c_Return_missing);
+			return;
+		}
+
+
+		m_symtab.setFunc(null);
 	}
 
 
@@ -811,26 +818,26 @@ class MyParser extends parser {
 		}
 
 
-		STO DoNoReturn (Vector < STO > ret) {
-			FuncSTO result = m_symtab.getFunc();
-			Type resultType = result.getReturnType();
-			//if there is no ReturnType in Top-level
+//		STO DoNoReturn (Vector < STO > ret) {
+//			FuncSTO result = m_symtab.getFunc();
+//			Type resultType = result.getReturnType();
+//			//if there is no ReturnType in Top-level
+//
+//			// ret should be null if return is empty.
+//			if (!resultType.isVoid() && result.getLevel() == 0 && ret == null) {
+//				//check for return
+//				m_nNumErrors++;
+//				m_errors.print(ErrorMsg.error6c_Return_missing);
+//				return new ErrorSTO(result.getName());
+//			} else {
+//				//if there is return stmt and correspond to retunType
+//				return new ExprSTO(result.getName());
+//			}
+//		}
 
-			// ret should be null if return is empty.
-			if (!resultType.isVoid() && result.getLevel() == 0 && ret == null) {
-				//check for return
-				m_nNumErrors++;
-				m_errors.print(ErrorMsg.error6c_Return_missing);
-				return new ErrorSTO(result.getName());
-			} else {
-				//if there is return stmt and correspond to retunType
-				return new ExprSTO(result.getName());
-			}
-		}
 
 
-	/*
-	* STO DoNoRerutn() {
+	 STO DoNoReturn() {
 
 		FuncSTO result = m_symtab.getFunc();
 		Type resultType = result.getReturnType();
@@ -853,7 +860,7 @@ class MyParser extends parser {
 
 
 	}
-	* */
+
 
 		STO DoExitExpr (STO a)
 		{
