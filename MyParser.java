@@ -194,6 +194,7 @@ class MyParser extends parser {
 				m_errors.print(Formatter.toString(ErrorMsg.error8_Assign, getTypeName(init), getTypeName(typ)));
 				return;
 			} else { // exp is assignable to this varSto type. so
+				sto.setValue(init.getValue()); // set the value
 				m_symtab.insert(sto);
 				return;
 			}
@@ -255,17 +256,30 @@ class MyParser extends parser {
 	//
 	//----------------------------------------------------------------
 	void DoConstDecl(String id, Type typ, STO exp, boolean stat) {
-		if (exp.isError()) {
-			return;
+
+		if (exp != null && exp.isError()) {
+			m_nNumErrors++;
+			return;    // might wanan change with !init.isError()
 		}
 		if (m_symtab.accessLocal(id) != null) {
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
 
-		ConstSTO sto = new ConstSTO(id, typ, 0);   // fix me
-		sto.markModLVal();
-		m_symtab.insert(sto);
+		ConstSTO sto = new ConstSTO(id, typ );   // fix me
+		if (!exp.getType().isAssignableTo(typ)) {
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.error8_Assign, getTypeName(exp), getTypeName(typ)));
+			return;
+		} else { // exp is assignable to this varSto type. so
+			sto.setValue(exp.getValue());
+			sto.markModLVal();
+			m_symtab.insert(sto);
+			return;
+		}
+
+
+
 	}
 
 	//----------------------------------------------------------------
@@ -478,9 +492,9 @@ class MyParser extends parser {
 	STO DoFuncCall(STO sto, Vector<STO> argTyp) {
 		// recursive case? calling main inside main;
 		FuncSTO recurFunc = m_symtab.getFunc();
-		if (sto == recurFunc) {
-			return sto;
-		}
+
+
+
 		// func holds expected param
 
 
@@ -554,6 +568,9 @@ class MyParser extends parser {
 			if (flag) {
 				return new ErrorSTO(sto.getName());
 			}
+//			if (sto == recurFunc) {   // check recursion
+//				return sto;
+//			}
 			ExprSTO ret = new ExprSTO(sto.getName(), sto.getType());
 			// check if func sto was called by ref and assign R val or mod l val
 			if (func.isRef()) {

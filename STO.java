@@ -145,6 +145,8 @@ abstract class STO
 	public void markModLVal(){
 		setIsModifiable(false); setIsAddressable(true);
 	}
+
+
 	public boolean isAssignableTo(Type t) { return false; }
 	public boolean isEquivalentTo(Type t) { return false; }
 	//----------------------------------------------------------------
@@ -165,5 +167,39 @@ abstract class STO
 	}
 	String getName(STO sto){
 		return sto.getType().getName();
+	}
+
+
+	public void setValue(BigDecimal value){
+		m_value = value;
+	}
+
+	public BigDecimal getValue()
+	{
+		return m_value;
+	}
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public int getIntValue()
+	{
+		return m_value.intValue();
+	}
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public float getFloatValue()
+	{
+		return m_value.floatValue();
+	}
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public boolean getBoolValue()
+	{
+		return !BigDecimal.ZERO.equals(m_value);
 	}
 }

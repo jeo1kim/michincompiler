@@ -5,9 +5,11 @@
 //---------------------------------------------------------------------
 
 
+import java.math.BigDecimal;
+
 class ExprSTO extends STO
 {
-
+	private BigDecimal		m_value;
 	private String m_strName;
 	private Type m_type;
 	private boolean m_isAddressable;
@@ -120,6 +122,41 @@ class ExprSTO extends STO
 	}
 	public void markModLVal(){
 		setIsModifiable(false); setIsAddressable(true);
+	}
+	public void setValue(BigDecimal value){
+		m_value = value;
+	}
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public BigDecimal getValue()
+	{
+		return m_value;
+	}
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public int getIntValue()
+	{
+		return m_value.intValue();
+	}
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public float getFloatValue()
+	{
+		return m_value.floatValue();
+	}
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public boolean getBoolValue()
+	{
+		return !BigDecimal.ZERO.equals(m_value);
 	}
 
 	//----------------------------------------------------------------

@@ -180,6 +180,10 @@ class VarSTO extends STO
 		return true;
 	}
 
+	public void setValue(BigDecimal value){
+		m_value = value;
+	}
+
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
