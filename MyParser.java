@@ -505,20 +505,20 @@ class MyParser extends parser
 				flag = true;
 
 			}
-			Boolean ref = true;
-			if(param.isRef() && !arg.getType().isEquivalentTo(param.getType()) ){
-				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getTypeName(arg), param.getName(), getTypeName(param)));
-				flag = true;
-				ref = false;
-				//return new ErrorSTO(sto.getName());
-			}
-			if(param.isRef() && !arg.isModLValue() && ref){
-				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, param.getName(), getTypeName(param)));
-				flag = true;
+			if(param.isRef()){
+				if (!arg.getType().isEquivalentTo(param.getType()) ) {
+					m_nNumErrors++;
+					m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getTypeName(arg), param.getName(), getTypeName(param)));
+					flag = true;
 
-				//return new ErrorSTO(sto.getName());
+				}//return new ErrorSTO(sto.getName());
+				else if(!arg.isModLValue()){
+					m_nNumErrors++;
+					m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, param.getName(), getTypeName(param)));
+					flag = true;
+
+					//return new ErrorSTO(sto.getName());
+				}
 			}
 		}
 		if(flag){
