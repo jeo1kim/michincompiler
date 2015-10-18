@@ -687,7 +687,6 @@ ReturnStmt ::=      T_RETURN T_SEMI
                         RESULT = ((MyParser) parser).DoExprReturn(_1);
                     :}
 
-
     ;
 
 
@@ -935,7 +934,7 @@ Designator ::=      T_STAR Designator:_1
                     :}
     |               T_AMPERSAND Designator:_1
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).markAmpersand(_1);
                     :}
     |               UnarySign:_1 Designator:_2
                     {:

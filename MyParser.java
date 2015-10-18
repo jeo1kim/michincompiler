@@ -724,6 +724,9 @@ class MyParser extends parser {
 
 		STO DoExprReturn (STO a)
 		{
+			if (a.isError()) {
+				return a;
+			}
 			FuncSTO result = m_symtab.getFunc();
 			if (a == result) {
 				return a;
@@ -733,9 +736,7 @@ class MyParser extends parser {
 
 			//if this return Key is in top level
 
-			if (a.isError()) {
-				return a;
-			}
+
 			//type check pass by value
 			if (!result.isRef()) {
 				if (resultType != exprType) {
@@ -774,11 +775,16 @@ class MyParser extends parser {
 				if (!resultType.isEquivalentTo(exprType)) {  //resultType != exprType) {
 					//error6b_Return_equiv =
 					//"Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
+					if(a.isRef()){
+						m_nNumErrors++;
+						m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
+								getTypeName(a)+"*", getTypeName(result)));
+					}
 					m_nNumErrors++;
 					m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
-							getTypeName(a)+"*", getTypeName(result)));
+							getTypeName(a), getTypeName(result)));
 
-					return new ErrorSTO(a.getName());
+					return new ErrorSTO("DoExprReturn"+a.getName());
 				} else {
 					//System.out.println("clearing func2");
 					//m_symtab.setFunc(null);
@@ -956,5 +962,15 @@ class MyParser extends parser {
 
 			return paramKey;
 		}
+	STO markAmpersand(STO expr){
+		if(expr.isError()){
+			return expr;
+		}
+
+		expr.setRef(true);
+		return expr;
+	}
+
+
 
 }
