@@ -725,6 +725,9 @@ class MyParser extends parser {
 		STO DoExprReturn (STO a)
 		{
 			FuncSTO result = m_symtab.getFunc();
+			if (a == result) {
+				return a;
+			}
 			Type resultType = result.getType();
 			Type exprType = a.getType();
 
@@ -752,7 +755,9 @@ class MyParser extends parser {
 
 
 				}
-			} else if (result.isRef()) // sane check
+			}
+
+			else if (result.isRef()) // sane check
 			//pass by reference
 			//the type of the return expression is not equivalent to the return type of the function
 			{
@@ -771,13 +776,15 @@ class MyParser extends parser {
 					//"Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
 					m_nNumErrors++;
 					m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
-							getTypeName(a), getTypeName(result)));
+							getTypeName(a)+"*", getTypeName(result)));
 
 					return new ErrorSTO(a.getName());
 				} else {
 					//System.out.println("clearing func2");
 					//m_symtab.setFunc(null);
-					return new ExprSTO(result.getName());
+					ExprSTO ret = new ExprSTO("result of "+result.getName());
+					ret.setRef(true);
+					return ret;
 				}
 
 			}
