@@ -189,23 +189,27 @@ class MyParser extends parser
 	}
 	void DoVarDeclwType(String id, Type typ, boolean stat, Vector<STO> array, STO init)
 	{
-//		if (init.isError()){
-//			return;    // might wanan change with !init.isError()
-//		}
+		if (init != null && init.isError()){
+			m_nNumErrors++;
+			return;    // might wanan change with !init.isError()
+		}
 		if (m_symtab.accessLocal(id) != null)
 		{
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+			return;
 		}
+
+
 		VarSTO sto = new VarSTO(id, typ);
 		if(stat){
 			sto.setStatic(stat); // set Variable static
 		}
 		if (array.size() == 0 && (init != null)){ // indicates that this var is not an array and init exp exist
 			// do the type check with init if it exist
-			if( !init.getType().isAssignableTo(sto.getType()) && !init.isError()){
+			if( !init.getType().isAssignableTo(sto.getType())){
 				m_nNumErrors++;
-				m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getTypeName(init), getTypeName(sto)));
+				m_errors.print(Formatter.toString(ErrorMsg.error8_Assign, getTypeName(init), getTypeName(typ)));
 				return;
 			}
 			else{ // exp is assignable to this varSto type. so
@@ -429,14 +433,16 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	STO DoAssignExpr(STO stoDes, STO expr)
-	{
-		if(expr.isError()){
+	STO DoAssignExpr(STO stoDes, STO expr) {
+		if (expr.isError()) {
+			m_nNumErrors++;
 			return expr;
+		}if (stoDes.isError()) {
+			m_nNumErrors++;
+			return stoDes;
 		}
-		if (!stoDes.isModLValue())
-		{
-			if ( expr instanceof ErrorSTO){
+		if (!stoDes.isModLValue()) {
+			if (expr instanceof ErrorSTO) {
 				return new ErrorSTO(ErrorMsg.error3a_Assign);
 			}
 			m_nNumErrors++;
@@ -448,7 +454,8 @@ class MyParser extends parser
 			// Good place to do the assign checks
 			return new ErrorSTO(ErrorMsg.error3a_Assign);
 		}
-		if( !expr.getType().isAssignableTo(stoDes.getType()) && !expr.isError()){
+		if( !expr.getType().isAssignableTo(stoDes.getType())){
+
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getTypeName(expr), getTypeName(stoDes)));
 			return new ErrorSTO(ErrorMsg.error3a_Assign); // do we need this?
@@ -464,8 +471,6 @@ class MyParser extends parser
 	//----------------------------------------------------------------
 	STO DoFuncCall(STO sto, Vector<STO> argTyp)
 	{
-
-
 
 		FuncSTO recurFunc = m_symtab.getFunc();
 		if(sto == recurFunc){
