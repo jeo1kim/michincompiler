@@ -394,25 +394,7 @@ class MyParser extends parser {
 	//
 	//----------------------------------------------------------------
 	void DoFuncDecl_2() {
-
 		m_symtab.closeScope();
-		FuncSTO result = m_symtab.getFunc();
-		Type resultType = result.getReturnType();
-
-		//if there is no ReturnType in Top-level
-		if(!(result.getReturn_top_level()))
-		{
-			if (resultType instanceof VoidType )
-			{
-
-				return;
-			}
-			m_nNumErrors++;
-			m_errors.print(ErrorMsg.error6c_Return_missing);
-			return;
-		}
-
-
 		m_symtab.setFunc(null);
 	}
 
@@ -836,8 +818,7 @@ class MyParser extends parser {
 //		}
 
 
-
-	 STO DoNoReturn() {
+	STO DoNoReturn() {
 
 		FuncSTO result = m_symtab.getFunc();
 		Type resultType = result.getReturnType();
