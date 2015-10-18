@@ -394,6 +394,16 @@ class MyParser extends parser {
 	//
 	//----------------------------------------------------------------
 	void DoFuncDecl_2() {
+		FuncSTO result = m_symtab.getFunc();
+		Type resultType = result.getReturnType();
+
+		//if there is no ReturnType in Top-level
+			if (!resultType.isVoid())
+			{
+				m_nNumErrors++;
+				m_errors.print(ErrorMsg.error6c_Return_missing);
+				return; //new ErrorSTO(result.getName());
+			}
 		m_symtab.closeScope();
 		m_symtab.setFunc(null);
 	}
@@ -779,11 +789,11 @@ class MyParser extends parser {
 						m_nNumErrors++;
 						m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
 								getTypeName(a)+"*", getTypeName(result)));
+					}else {
+						m_nNumErrors++;
+						m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
+								getTypeName(a), getTypeName(result)));
 					}
-					m_nNumErrors++;
-					m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
-							getTypeName(a), getTypeName(result)));
-
 					return new ErrorSTO("DoExprReturn"+a.getName());
 				} else {
 					//System.out.println("clearing func2");
