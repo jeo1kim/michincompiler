@@ -499,7 +499,7 @@ class MyParser extends parser
 		Iterator<STO> it1;
 		Iterator<STO> it2;
 
-		Boolean flag = true;
+		Boolean flag = false;
 		for( it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext();){  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
 			STO arg =  it1.next();
 			STO param =  it2.next();
@@ -527,10 +527,9 @@ class MyParser extends parser
 				}
 			}
 		}
-//		if(flag){
-//			System.out.println(sto.getName());
-//			return new ErrorSTO(sto.getName());
-//		}
+		if(flag){
+			return new ErrorSTO(sto.getName());
+		}
 		ExprSTO ret = new ExprSTO(sto.getName(), sto.getType());
 		// check if func sto was called by ref and assign R val or mod l val
 		if( func.isRef()) {
