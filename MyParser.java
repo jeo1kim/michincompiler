@@ -742,7 +742,7 @@ class MyParser extends parser {
 						//"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
 						m_nNumErrors++;
 						m_errors.print(Formatter.toString(ErrorMsg.error6a_Return_type,
-								getTypeName(resultType), getTypeName(a)));
+								getTypeName(a), getTypeName(resultType)));
 
 						return new ErrorSTO(a.getName());
 					} else {

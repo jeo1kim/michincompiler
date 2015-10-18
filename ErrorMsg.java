@@ -98,10 +98,10 @@ class ErrorMsg
       "Return in function requires a result expression, none found.";
 
     public static final String error6a_Return_type =
-      "Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
+      "Type of return expression (%T), not assignment compatible with function's return type (%T).";
 
     public static final String error6b_Return_equiv =
-      "Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
+      "Type of return expression (%T) is not equivalent to the function's return type (%T).";
 
     // NOTE!  You don't need to use the formatter with this message
     public static final String error6b_Return_modlval =
