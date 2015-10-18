@@ -18,10 +18,13 @@ public class NotOp extends UnaryOp {
 
     STO checkOperands(STO a)
     {
+        if(!a.isError()){
+            return a;
+        }
         //System.out.println(a.getType().isNumeric());
         Type aType = a.getType();
 
-        if( !aType.isBool() && !a.isError() )
+        if( !aType.isBool() )
         {
             // "Incompatible type %T to operator %O, equivalent to int, float, or pointer expected.";
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1u_Expr, aType.getName(),getName(), "bool"));

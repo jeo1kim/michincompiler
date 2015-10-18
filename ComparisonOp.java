@@ -20,12 +20,19 @@ abstract class ComparisonOp extends BinaryOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
+        if (b.isError()){
+            return b;
+        }
+        if (a.isError()){
+            return a;
+        }
 
-        if(!(aType instanceof NumericType) && !b.isError())
+
+        if(!(aType instanceof NumericType))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, aType.getName(),opName));
         }
-        if(!(bType instanceof NumericType) && !a.isError())
+        if(!(bType instanceof NumericType))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, bType.getName(), opName));
         }
