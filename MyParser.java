@@ -752,9 +752,10 @@ class MyParser extends parser {
             return a;
         }
         FuncSTO result = m_symtab.getFunc();
-        if (a == result) {
-            return a;
-        }
+//        if (a == result) {
+//
+//            return a;
+//        }
         Type resultType = result.getType();
         Type exprType = a.getType();
 
@@ -763,23 +764,21 @@ class MyParser extends parser {
 
         //type check pass by value
         if (!result.isRef()) {
-            if (resultType != exprType) {
-                //if type is different but is assignable ex) int to float
-                if (!exprType.isAssignableTo(resultType)) {
-                    //error6a_Return_type =
-                    //"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
-                    m_nNumErrors++;
-                    m_errors.print(Formatter.toString(ErrorMsg.error6a_Return_type,
-                            getTypeName(a), getTypeName(resultType)));
+            //if type is different but is assignable ex) int to float
+            if (!exprType.isAssignableTo(resultType)) {
+                //error6a_Return_type =
+                //"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error6a_Return_type,
+                        getTypeName(a), getTypeName(resultType)));
 
-                    return new ErrorSTO(a.getName());
-                } else {
-                    //m_symtab.setFunc(null);
-                    return new ExprSTO(result.getName());
-                }
-
-
+                return new ErrorSTO(a.getName());
+            } else {
+                //m_symtab.setFunc(null);
+                return new ExprSTO(result.getName());
             }
+
+
         } else if (result.isRef()) // sane check
         //pass by reference
         //the type of the return expression is not equivalent to the return type of the function
@@ -857,8 +856,7 @@ class MyParser extends parser {
             m_nNumErrors++;
             m_errors.print(ErrorMsg.error6c_Return_missing);
             return;
-        }
-        else {
+        } else {
             return;
         }
     }
