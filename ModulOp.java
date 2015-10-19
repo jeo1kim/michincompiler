@@ -49,6 +49,10 @@ public class ModulOp extends ArithmeticOp {
 
         else if (aType.isInt() && bType.isInt()) {
             if (a.isConst() && b.isConst()) {
+
+                if ((b.getType().isInt() && b.getIntValue() == 0) || (b.getType().isFloat() && b.getFloatValue() == 0.0)) {
+                    return new ErrorSTO(ErrorMsg.error8_Arithmetic);
+                }
                 BigDecimal result = a.getValue().remainder(b.getValue());
 
                 ConstSTO ret = new ConstSTO(Integer.toString(result.intValue()), b.getType(), result.intValue());

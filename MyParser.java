@@ -279,7 +279,6 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error8_Assign, getTypeName(exp), getTypeName(typ)));
             return;
         } else { // exp is assignable to this varSto type. so
-            System.out.println(exp.isConst());
             if (exp.getValue() == null) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error8_CompileTime, id));
