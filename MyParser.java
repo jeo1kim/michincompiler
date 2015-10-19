@@ -755,7 +755,6 @@ class MyParser extends parser {
         if (a == result) {
             return a;
         }
-        System.out.println(result.getName());
         Type resultType = result.getType();
         Type exprType = a.getType();
 
