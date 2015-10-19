@@ -1,5 +1,6 @@
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Created by jinyongsuk on 10/8/15.
@@ -84,7 +85,7 @@ public abstract class ArithmeticOp extends BinaryOp {
                     break;
             case "*": result = a.multiply(b);
                     break;
-            case "/": result = a.divide(b);
+            case "/": result = a.divide(b, 1, RoundingMode.CEILING);
 
 
                 break;

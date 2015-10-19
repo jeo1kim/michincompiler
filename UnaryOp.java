@@ -35,13 +35,15 @@ abstract class UnaryOp extends Operator {
         }
         else
         {
-            int val = calculate(a.getIntValue(), opName);
-            STO result = new ConstSTO( a.getName() , a.getType(), val); // do i make a new STO or return the old one.
             if (a.isConst()){
+                int val = calculate(a.getIntValue(), opName);
+                ConstSTO result = new ConstSTO( a.getName() , a.getType(), val); // do i make a new STO or return the old one.
                 result.markRVal();
                 return result;
             }
             else{
+                ExprSTO result = new ExprSTO( a.getName() , a.getType()); // do i make a new STO or return the old one.
+                result.markRVal();
                 return result;
             }
         }

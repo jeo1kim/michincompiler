@@ -870,11 +870,14 @@ class MyParser extends parser {
             return a;
         }
         Type aType = a.getType();
+
         if (!(aType.isAssignableTo(new intType("int", 4)))) {
             //error7_Exit  =
             //"Exit expression (type %T) is not assignable to int.";
+
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error7_Exit, aType.getName()));
+            return new ErrorSTO(a.getName());
         }
 
         //if assignable to int then return expr
