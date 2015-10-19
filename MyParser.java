@@ -266,11 +266,19 @@ class MyParser extends parser {
 		}
 
 		ConstSTO sto = new ConstSTO(id, typ );   // fix me
+		if (stat) {
+			sto.setStatic(stat); // set Variable static
+		}
 		if (!exp.getType().isAssignableTo(typ)) {
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.error8_Assign, getTypeName(exp), getTypeName(typ)));
 			return;
 		} else { // exp is assignable to this varSto type. so
+			if(exp.getValue() == null){
+				m_nNumErrors++;
+				m_errors.print(Formatter.toString(ErrorMsg.error8_CompileTime, id));
+				return;
+			}
 			sto.setValue(exp.getValue());
 			sto.markModLVal();
 			m_symtab.insert(sto);
@@ -285,17 +293,28 @@ class MyParser extends parser {
 	//
 	//----------------------------------------------------------------
 	void DoConstDeclwAuto(String id, STO exp, boolean stat) {
-		if (exp.isError()) {
-			return;
+		if (exp != null && exp.isError()) {
+			m_nNumErrors++;
+			return;    // might wanan change with !init.isError()
 		}
 		if (m_symtab.accessLocal(id) != null) {
 			m_nNumErrors++;
 			m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
 		}
 
-		ConstSTO sto = new ConstSTO(id, exp.getType(), 0);   // fix me
+		ConstSTO sto = new ConstSTO(id, exp.getType() );   // fix me
+		if (stat) {
+			sto.setStatic(stat); // set Variable static
+		}
+		if(exp.getValue() == null){
+			m_nNumErrors++;
+			m_errors.print(Formatter.toString(ErrorMsg.error8_CompileTime, id));
+			return;
+		}
+		sto.setValue(exp.getValue());
 		sto.markModLVal();
 		m_symtab.insert(sto);
+		return;
 	}
 
 	//----------------------------------------------------------------
