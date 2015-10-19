@@ -266,6 +266,11 @@ class MyParser extends parser {
         }
 
         ConstSTO sto = new ConstSTO(id, typ);   // fix me
+        if( !exp.isConst()){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error8_CompileTime, id));
+            return;
+        }
         if (stat) {
             sto.setStatic(stat); // set Variable static
         }
@@ -274,6 +279,7 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error8_Assign, getTypeName(exp), getTypeName(typ)));
             return;
         } else { // exp is assignable to this varSto type. so
+            System.out.println(exp.isConst());
             if (exp.getValue() == null) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error8_CompileTime, id));
