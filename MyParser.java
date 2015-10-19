@@ -366,8 +366,8 @@ class MyParser extends parser {
         sto.setLevel(m_symtab.getLevel());
     }
 
+    //func decl
     void DoFuncDecl_1_param(String id, Type ret, Vector<STO> params)
-
     {
         boolean isThereOverloadedFunction = false;
         STO a = m_symtab.accessLocal(id);
@@ -375,7 +375,8 @@ class MyParser extends parser {
         {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-        } else if (a != null && a.isFunc()) {
+        }
+        else if (a != null && a.isFunc()) {
             if (DoOverloadedFuncCheck(id, params) == null) {
                 isThereOverloadedFunction = true;
             }
@@ -398,21 +399,30 @@ class MyParser extends parser {
 
     }
 
+    // funcdef
     void DoFuncDecl_1_param(String id, Type ret, boolean ref, Vector<STO> params) {
         boolean isThereOverloadedFunction = false;
+
         STO a = m_symtab.accessLocal(id);
+
         if (a != null && !(a.isFunc())) //if found STO is not function
         {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-        } else if (a != null && a.isFunc()) {
-            if (DoOverloadedFuncCheck(id, params) == null) {
-                isThereOverloadedFunction = true;
-            }
         }
+
+
+//        else if (a != null && a.isFunc()) {
+//            if (DoOverloadedFuncCheck(id, params) == null) {
+//                isThereOverloadedFunction = true;
+//            }
+//        }
 
         FuncSTO sto = new FuncSTO(id, ret, params, ref); //
         //sto.setRef(ref);
+        String key = makeHKey(id, params);
+        sto.addOverload(key, sto);
+
 
         if (isThereOverloadedFunction) {
             sto.setOverloaded(true);
@@ -982,11 +992,9 @@ class MyParser extends parser {
         //set up H_Map key
         if (param != null) {
             for (int i = 0; i < param.size(); i++) {
-                paramKey += param.get(i).getType().getName();
+                paramKey += param.get(i).getType().getName()+".";
             }
         }
-
-
         return paramKey;
     }
 

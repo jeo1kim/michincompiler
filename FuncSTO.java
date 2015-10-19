@@ -3,6 +3,8 @@
 // Copyright (C) 2008-2015 Garo Bournoutian and Rick Ord
 // University of California, San Diego
 //---------------------------------------------------------------------
+import java.beans.VetoableChangeListener;
+import java.util.HashMap;
 import java.util.Vector;
 
 import java.util.Vector;
@@ -20,6 +22,9 @@ class FuncSTO extends STO
 	private int m_level;
 	private boolean m_return_top_level = false;
 	private boolean m_isOverloaded = false;
+
+	private HashMap<String, FuncSTO> m_overLoadFuncName;
+
 
 	//----------------------------------------------------------------
 	//
@@ -64,15 +69,7 @@ class FuncSTO extends STO
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
-	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref, int level)
-	{
-		super (strName);
-		setLevel(level);
-		initSTO(strName,retType, params, ref);
-		m_return_top_level = false;
-		// You may want to change the isModifiable and isAddressable
-		// fields as necessary
-	}
+
 
 	public void initSTO(String strName, Type retType, Vector<STO> params, boolean ref){
 		setReturnType(retType);
@@ -80,6 +77,15 @@ class FuncSTO extends STO
 		setName(strName);
 		setRef(ref);
 		setParamCount(params.size());
+	}
+
+
+	public void addOverload(String overloadName, FuncSTO func){
+			m_overLoadFuncName.put(overloadName, func );
+	}
+
+	public FuncSTO getOverloaded(String key){
+		return m_overLoadFuncName.get(key);
 	}
 
 	public void setParamVec(Vector<STO> paraList){
