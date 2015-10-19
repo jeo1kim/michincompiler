@@ -175,10 +175,7 @@ class VarSTO extends STO
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	public boolean isConst()
-	{
-		return true;
-	}
+
 
 	public void setValue(BigDecimal value){
 		m_value = value;

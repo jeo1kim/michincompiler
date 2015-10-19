@@ -1,3 +1,5 @@
+import java.math.BigDecimal;
+
 /**
  * Created by jinyongsuk on 10/8/15.
  */
@@ -41,20 +43,39 @@ abstract class ComparisonOp extends BinaryOp {
         // operands must be numeric and resulting type must be bool
         if( (aType instanceof NumericType) && (bType instanceof NumericType))
         {
-            //System.out.println(a.getName()+b.getName() +" has typ: "+ a.getType().toString());
-            return new ExprSTO(a.getName()+b.getName(), new BoolType());
+            if (a.isConst() && b.isConst())
+            {
+                int result = calculate(a.getValue(), b.getValue(),opName);
+                ConstSTO ret = new ConstSTO( a.getName()+ getName() + b.getName() , new BoolType(), result);
+                ret.markRVal();
+                return ret;
+            }
+            ExprSTO ret = new ExprSTO(a.getName() + getName()+ b.getName(), new BoolType());
+            return ret;
         }
         else {
             STO err = (!(aType instanceof NumericType)) ? a : b;
-            // should increment m_nNumErrors++; in MyParser
-
-            /*
-            public static final String error1n_Expr  =
-                "Incompatible type %T to binary operator %O, numeric expected.";
-            * */
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, err.getType().getName(), opName));
         }
 
+    }
+
+    public int calculate (BigDecimal a, BigDecimal b, String opname){
+
+        int result = 9999999;
+
+        switch (opname) {
+            case "<": result = a.compareTo(b);
+                break;
+            case "<=": result =  a.compareTo(b);
+                break;
+            case ">": result = a.compareTo(b);
+                break;
+            case ">=": result = a.compareTo(b);
+                break;
+        }
+
+        return result;
     }
 
     //----------------------------------------------------------------

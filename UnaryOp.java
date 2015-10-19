@@ -28,15 +28,15 @@ abstract class UnaryOp extends Operator {
             //      "Operand to %O is not a modifiable L-value.";
             return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Lval, opName));
         }
-        if( !(aType instanceof NumericType) && !a.isError())
+        if( !(aType instanceof NumericType))
         {
             // "Incompatible type %T to operator %O, equivalent to int, float, or pointer expected.";
             return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(),opName));
         }
-
         else
         {
-            STO result = new ConstSTO( a.getName() , a.getType()); // do i make a new STO or return the old one.
+            int val = calculate(a.getIntValue(), opName);
+            STO result = new ConstSTO( a.getName() , a.getType(), val); // do i make a new STO or return the old one.
             if (a.isConst()){
                 result.markRVal();
                 return result;
@@ -45,6 +45,20 @@ abstract class UnaryOp extends Operator {
                 return result;
             }
         }
+    }
+    public int calculate (int a, String opname){
+
+        int result= a;
+
+        switch (opname) {
+            case "++": result = a++;
+                break;
+            case "--": result = a--;
+                break;
+
+        }
+
+        return result;
     }
     //----------------------------------------------------------------
     //

@@ -1,3 +1,5 @@
+import java.math.BigDecimal;
+
 /**
  * Created by jinyongsuk on 10/8/15.
  */
@@ -20,12 +22,17 @@ abstract class BitwiseOp extends BinaryOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
+        if (b.isError()){
+            return b;
+        }if (a.isError()){
+            return a;
+        }
 
-        if( !(aType instanceof intType) && !a.isError())
+        if( !(aType instanceof intType))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, aType.getName(),opName, "int"));
         }
-        if(!(bType instanceof intType) && !b.isError())
+        if(!(bType instanceof intType))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, bType.getName(), opName, "int"));
         }
@@ -34,9 +41,14 @@ abstract class BitwiseOp extends BinaryOp {
             //errro
             if (a.isConst() && b.isConst())
             {
-                return new ConstSTO( a.getName()+ getName() + b.getName() , b.getType());
+                int val = calculate(a.getIntValue(), b.getIntValue(), opName);
+                ConstSTO ret =  new ConstSTO( Integer.toString(val) , b.getType(), val);
+                ret.markRVal();
+                return ret;
             }
-            return new ExprSTO(a.getName() + getName()+ b.getName(), a.getType());
+            ExprSTO ret = new ExprSTO(a.getName() + getName()+ b.getName(), a.getType());
+            ret.markRVal();
+            return ret;
         } else {
             //if it's not both integer then return error STO
             STO err = (!(aType instanceof intType)) ? b : a;
@@ -45,6 +57,21 @@ abstract class BitwiseOp extends BinaryOp {
         }
     }
 
+    public int calculate (int a, int b, String opname){
+
+        int result= 999;
+
+        switch (opname) {
+            case "|": result = a|b;
+                break;
+            case "&": result =  a&b;
+                break;
+            case "^": result = a^b;
+                break;
+        }
+
+        return result;
+    }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

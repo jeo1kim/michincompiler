@@ -51,9 +51,13 @@ public class ModulOp extends ArithmeticOp {
             if (a.isConst() && b.isConst()) {
                 BigDecimal result = a.getValue().remainder(b.getValue());
 
-                return new ConstSTO(Integer.toString(result.intValue()), b.getType(), result.intValue());
+                ConstSTO ret = new ConstSTO(Integer.toString(result.intValue()), b.getType(), result.intValue());
+                ret.markRVal();
+                return ret;
             }
-            return new ExprSTO(a.getName()+ b.getName(), a.getType());
+            ExprSTO ret = new ExprSTO(a.getName()+ b.getName(), a.getType());
+            ret.markRVal();
+            return ret;
         }
         else{
             STO c = !(aType instanceof intType) ? b : a;
