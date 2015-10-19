@@ -53,8 +53,9 @@ public abstract class ArithmeticOp extends BinaryOp {
                 return ret;
             }
             // when one of them are float return float
-            else if((aType.isInt() && bType.isFloat()) || (aType.isFloat() && bType.isInt())){
-                ConstSTO ret = new ConstSTO( Double.toString(result.doubleValue()), bType, result.doubleValue());
+            else if((aType.isInt() && bType.isFloat()) || (aType.isFloat() && bType.isInt())) {
+                STO c = !(aType instanceof intType) ? a : b;
+                ConstSTO ret = new ConstSTO(Double.toString(result.doubleValue()), c.getType(), result.doubleValue());
                 ret.markRVal();
                 return ret;
             }
