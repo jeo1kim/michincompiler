@@ -42,8 +42,10 @@ public abstract class ArithmeticOp extends BinaryOp {
         // if both are const do the calculation
         if (a.isConst() && b.isConst()) {
             // need to check float <=> int
-            if ( (b.getType().isInt() && b.getIntValue() == 0) || (b.getType().isFloat() && b.getFloatValue() ==0.0 )){
-                return new ErrorSTO(ErrorMsg.error8_Arithmetic);
+            if(opName == "/") {
+                if ((b.getType().isInt() && b.getIntValue() == 0) || (b.getType().isFloat() && b.getFloatValue() == 0.0)) {
+                    return new ErrorSTO(ErrorMsg.error8_Arithmetic);
+                }
             }
             // do the calculation
             BigDecimal result = calculate(a.getValue(), b.getValue(), opName);
