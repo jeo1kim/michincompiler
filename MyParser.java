@@ -785,14 +785,6 @@ class MyParser extends parser {
         //pass by reference
         //the type of the return expression is not equivalent to the return type of the function
         {
-            //Expression is not ModLValue
-            if (!(a.isModLValue())) {
-                //error6b_Return_modlval =
-                //		"Return expression is not a modifiable L-value for function that returns by reference.";
-                m_nNumErrors++;
-                m_errors.print(ErrorMsg.error6b_Return_modlval);
-                return new ErrorSTO(a.getName());
-            }
 
 
             if (!resultType.isEquivalentTo(exprType)) {  //resultType != exprType) {
@@ -808,13 +800,22 @@ class MyParser extends parser {
                             getTypeName(a), getTypeName(result)));
                 }
                 return new ErrorSTO("DoExprReturn" + a.getName());
-            } else {
+            }
+            else if(!(a.isModLValue())) {
+                //error6b_Return_modlval =
+                //		"Return expression is not a modifiable L-value for function that returns by reference.";
+                m_nNumErrors++;
+                m_errors.print(ErrorMsg.error6b_Return_modlval);
+                return new ErrorSTO(a.getName());
+            }
+            else {
                 //System.out.println("clearing func2");
                 //m_symtab.setFunc(null);
                 ExprSTO ret = new ExprSTO("result of " + result.getName());
                 ret.setRef(true);
                 return ret;
             }
+
 
         }
         System.out.println("In DoExpReturn this should never reach");
