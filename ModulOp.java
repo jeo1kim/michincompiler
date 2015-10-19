@@ -1,3 +1,5 @@
+import java.math.BigDecimal;
+
 /**
  * Created by jinyongsuk on 10/8/15.
  */
@@ -27,7 +29,12 @@ public class ModulOp extends ArithmeticOp {
     //both operands must be integer otherwise return error
     STO checkOperands(STO a, STO b) {
 
-
+        if (b.isError()){
+            return b;
+        }if (a.isError()){
+            return a;
+        }
+        //System.out.println(a.getType().isNumeric());
         Type aType = a.getType();
         Type bType = b.getType();
 
@@ -40,14 +47,12 @@ public class ModulOp extends ArithmeticOp {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1w_Expr, bType.getName(), m_OpName, "int"));
         }
 
-        else if (aType instanceof intType && bType instanceof intType) {
+        else if (aType.isInt() && bType.isInt()) {
+            if (a.isConst() && b.isConst()) {
+                BigDecimal result = a.getValue().remainder(b.getValue());
 
-            if (a.isConst() && b.isConst())
-            {
-
-                return new ConstSTO( a.getName() + b.getName() , b.getType());
+                return new ConstSTO(Integer.toString(result.intValue()), b.getType(), result.intValue());
             }
-
             return new ExprSTO(a.getName()+ b.getName(), a.getType());
         }
         else{

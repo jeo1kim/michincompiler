@@ -40,6 +40,7 @@ public class DivideOp extends ArithmeticOp {
 
 
         }
+        result.setValue(a.getValue());
         return result;
     }
 

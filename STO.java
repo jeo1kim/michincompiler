@@ -41,6 +41,8 @@ abstract class STO
 		setIsModifiable(false);
 	}
 
+
+
 	public void setParamVec(Vector<STO> paraList){
 		paramSTO = paraList;
 	}

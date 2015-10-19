@@ -45,7 +45,7 @@ class ExprSTO extends STO
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	private void setName(String str)
+	public void setName(String str)
 	{
 		m_strName = str;
 	}
@@ -61,7 +61,7 @@ class ExprSTO extends STO
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	private void setType(Type type)
+	public void setType(Type type)
 	{
 		m_type = type;
 	}
