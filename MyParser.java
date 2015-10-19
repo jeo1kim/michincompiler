@@ -631,9 +631,11 @@ class MyParser extends parser {
             //	then return the global scope
 
             if ((sto = m_symtab.accessGlobal(strID)) == null) {
-                m_nNumErrors++;
-                m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
-                sto = new ErrorSTO(strID);
+                if ((sto = m_symtab.access(strID)) == null) {
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
+                    sto = new ErrorSTO(strID);
+                }
             }
 
         }

@@ -545,12 +545,12 @@ StmtList ::=        Stmt:_2
     ;
 
 
-Stmt ::=            VarDecl:_1 {: RESULT = _1; :}
+Stmt ::=            VarDecl:_1 {: RESULT = "varDecl"; :}
     |               ConstDecl
     |               CodeBlock
-    |               Expr:_1 T_SEMI {: RESULT = _1; :}
+    |               Expr:_1 T_SEMI {: RESULT = "Expr"; :}
     |               IfStmt
-    |               WhileStmt:_1 {: RESULT = _1; :}
+    |               WhileStmt:_1 {: RESULT = "while"; :}
     |               ForeachStmt
     |               BreakStmt
     |               ContinueStmt
