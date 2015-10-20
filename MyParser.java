@@ -406,7 +406,6 @@ class MyParser extends parser {
 
 
         String key = makeHKey(id, params);
-        System.out.println(key);
 
         FuncSTO sto = new FuncSTO(id, ret, params, ref); //
 
@@ -522,16 +521,19 @@ class MyParser extends parser {
         FuncSTO func = (FuncSTO) m_symtab.access(sto.getName());
 
         String hKey = makeHKey(sto.getName(), argTyp); //u can use it for anyother func call
-
+        Vector<STO> paramList;
         //if func is OverLoaded Function then check 9b
-        if (func != null && func.getOverloaded(hKey) == null) {
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error9_Illegal, func.getName()));
-            return new ErrorSTO(sto.getName());
+        if (func.m_overLoadFuncName.size() > 1) {
+            if (func != null && func.getOverloaded(hKey) == null) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error9_Illegal, func.getName()));
+                return new ErrorSTO(sto.getName());
+            }
+            func = func.getOverloaded(hKey);
         }
 
-        func = func.getOverloaded(hKey);
-        Vector<STO> paramList = func.getParamVec(); //<--- error case if undeclared function-call then
+        paramList = func.getParamVec();
+         //<--- error case if undeclared function-call then
 
 
         //if func is not Overloaded then check 5
@@ -887,10 +889,12 @@ class MyParser extends parser {
         //set up H_Map key
         if (param != null) {
             for (STO para : param) {
-                paramKey += "."+para.getType().getName();
+//                System.out.println(id +para.getType().getName() );
+
+                paramKey += "." + para.getType().getName();
             }
         }
-        return id+paramKey;
+        return id + paramKey;
     }
 
     STO markAmpersand(STO expr) {

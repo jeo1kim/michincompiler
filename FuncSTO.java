@@ -18,7 +18,7 @@ class FuncSTO extends STO
 	private boolean m_isRetByRef;
 	private boolean m_ref;
 	private int m_paramCount;
-	private Vector<STO> paramSTO;
+	private Vector<STO> paramSTO = new Vector<>();
 	private int m_level;
 	private boolean m_return_top_level = false;
 	private boolean m_isOverloaded = false;
