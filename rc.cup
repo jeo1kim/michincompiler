@@ -298,7 +298,7 @@ OptStatic ::=       T_STATIC
 
 StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
                     {:
-                        ((MyParser) parser).DoBlockOpen();
+                        ((MyParser) parser).DoBlockOpen("struct");
                     :}
                     FieldVarsList
                     OptCtorDtorList
@@ -516,7 +516,7 @@ Array ::=           T_LBRACKET ConstExpr:_1 T_RBRACKET
 
 
 CodeBlock ::=       T_LBRACE
-                    {: ((MyParser) parser).DoBlockOpen(); :}
+                    {: ((MyParser) parser).DoBlockOpen("codeblock"); :}
                     OptStmtList:_1 {: RESULT = _1; :}
                     {: ((MyParser) parser).DoBlockClose(); :}
                     T_RBRACE
@@ -656,7 +656,7 @@ WhileStmt ::=       T_WHILE Expr:_1
 ForeachStmt ::=     T_FOREACH T_LPAREN Type:_1 OptRef:_2 T_ID:_3 T_COLON Expr:_4 T_RPAREN
                     {:
                         ((MyParser) parser).ForeachCheck(_1, _2, _3, _4);
-                        ((MyParser) parser).DoBlockOpen();
+                        ((MyParser) parser).DoBlockOpen("foreach");
                         ((MyParser) parser).DoVarDecl (_3);
                     :}
                     CodeBlock:_5
@@ -670,7 +670,7 @@ ForeachStmt ::=     T_FOREACH T_LPAREN Type:_1 OptRef:_2 T_ID:_3 T_COLON Expr:_4
 
 BreakStmt ::=       T_BREAK T_SEMI
                     {:
-                        ((MyParser) parser).BreakorCont("break");
+                        ((MyParser) parser).BreakorCont();
                         RESULT = "break";
                     :}
     ;
@@ -678,7 +678,7 @@ BreakStmt ::=       T_BREAK T_SEMI
 
 ContinueStmt ::=    T_CONTINUE T_SEMI
                     {:
-                        ((MyParser) parser).BreakorCont("continue");
+                        ((MyParser) parser).BreakorCont();
                         RESULT = "continue";
                     :}
     ;

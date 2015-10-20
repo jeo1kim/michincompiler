@@ -286,18 +286,20 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error8_CompileTime, id));
             return;
         }
-        if (stat) {
-            sto.setStatic(stat); // set Variable static
-        }
+
         if (!exp.getType().isAssignableTo(typ)) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error8_Assign, getTypeName(exp), getTypeName(typ)));
             return;
-        } else { // exp is assignable to this varSto type. so
+        }
+        else { // exp is assignable to this varSto type. so
             if (exp.getValue() == null) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error8_CompileTime, id));
                 return;
+            }
+            if (stat) {
+                sto.setStatic(stat); // set Variable static
             }
             sto.setValue(exp.getValue());
             sto.markModLVal();
@@ -473,9 +475,10 @@ class MyParser extends parser {
     //----------------------------------------------------------------
     // Opens the Scope, global, function, brackets.
     //----------------------------------------------------------------
-    void DoBlockOpen() {
+    void DoBlockOpen(String sName) {
         // Open a scope.
         m_symtab.openScope();
+        m_symtab.setScopeName(sName);
     }
 
     //----------------------------------------------------------------
@@ -483,6 +486,7 @@ class MyParser extends parser {
     //----------------------------------------------------------------
     void DoBlockClose() {
         m_symtab.closeScope();
+        m_symtab.setScopeName(null);
     }
 
 
@@ -504,16 +508,16 @@ class MyParser extends parser {
 
     }
 
-    void BreakorCont(String stmt) {
+    void BreakorCont() {
 
-        STO func = m_symtab.getFunc();
+        String scope = m_symtab.getScopeName();
 
-        if (stmt == "break") {
+        if (scope != "break" ) {
             m_nNumErrors++;
             m_errors.print(ErrorMsg.error12_Break);
             return;
         }
-        if (stmt == "continue") {
+        if (scope != "continue") {
             m_nNumErrors++;
             m_errors.print(ErrorMsg.error12_Continue);
             return;
@@ -782,12 +786,12 @@ class MyParser extends parser {
         if (a.getType().isNumeric()) {
 
             if (unary == "-") {
-                a.setName("-" + a.getName());
+                a.setName(a.getName());
                 a.setType(a.getType());
                 a.setValue(a.getValue().multiply(BigDecimal.valueOf(-1)));
                 return a;
             } else {
-                a.setName("+" + a.getName());
+                a.setName(a.getName());
                 a.setType(a.getType());
                 return a;
             }
