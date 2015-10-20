@@ -14,7 +14,9 @@ class SymbolTable
 	private FuncSTO m_func = null;
 	private HashMap<String, FuncSTO> hMap_OverloadedF;
 
-    
+	private String ScopeName;
+
+
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
@@ -86,7 +88,6 @@ class SymbolTable
 	public void openScope()
 	{
 		Scope scope = new Scope();
-
 		// The first scope created will be the global scope.
 		if (m_scopeGlobal == null)
 			m_scopeGlobal = scope;
@@ -94,6 +95,7 @@ class SymbolTable
 		m_stkScopes.push(scope);
 		m_nLevel++;
 	}
+
 
 	//----------------------------------------------------------------
 	//

@@ -124,13 +124,10 @@ non terminal
     //OptStmtList,
     //StmtList,
     Stmt,
-    CodeBlock,
     IfStmt,
     OptElse,
     ForeachStmt,
     WhileStmt,
-    BreakStmt,
-    ContinueStmt,
     ExitStmt,
     ReturnStmt,
     ReadStmt,
@@ -162,6 +159,8 @@ non terminal Boolean
     ;
 
 non terminal String
+    BreakStmt,
+    ContinueStmt,
     UnarySign
     ;
 
@@ -200,6 +199,7 @@ non terminal Type
     ;
 
 non terminal Vector
+    CodeBlock,
     OptArrayList,
     ArrayList,
     OptExprList,
@@ -553,8 +553,8 @@ Stmt ::=            VarDecl:_1 {: RESULT = "varDecl"; :}
     |               IfStmt
     |               WhileStmt:_1 {: RESULT = "while"; :}
     |               ForeachStmt
-    |               BreakStmt
-    |               ContinueStmt
+    |               BreakStmt:_1 {: RESULT = _1; :}
+    |               ContinueStmt:_1 {: RESULT = _1; :}
     |               ExitStmt
     |               ReturnStmt:_1 {: RESULT = _1;   :}
     |               ReadStmt
@@ -659,19 +659,28 @@ ForeachStmt ::=     T_FOREACH T_LPAREN Type:_1 OptRef:_2 T_ID:_3 T_COLON Expr:_4
                         ((MyParser) parser).DoBlockOpen();
                         ((MyParser) parser).DoVarDecl (_3);
                     :}
-                    CodeBlock
+                    CodeBlock:_5
 
                     {:
+
                         ((MyParser) parser).DoBlockClose();
                     :}
     ;
 
 
 BreakStmt ::=       T_BREAK T_SEMI
+                    {:
+                        ((MyParser) parser).BreakorCont("break");
+                        RESULT = "break";
+                    :}
     ;
 
 
 ContinueStmt ::=    T_CONTINUE T_SEMI
+                    {:
+                        ((MyParser) parser).BreakorCont("continue");
+                        RESULT = "continue";
+                    :}
     ;
 
 

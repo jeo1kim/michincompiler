@@ -486,25 +486,40 @@ class MyParser extends parser {
     }
 
 
-    void ForeachCheck(Type type, boolean ref, String id, STO expr){
+    void ForeachCheck(Type type, boolean ref, String id, STO expr) {
 
-        if (!expr.getType().isArray()){
+        if (!expr.getType().isArray()) {
             m_nNumErrors++;
             m_errors.print(ErrorMsg.error12a_Foreach);
             return;
-        }
-        else if(!ref && expr.getType().isAssignableTo(type)){
+        } else if (!ref && expr.getType().isAssignableTo(type)) {
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error12v_Foreach, getTypeName(expr), id , getTypeName(type) ));
+            m_errors.print(Formatter.toString(ErrorMsg.error12v_Foreach, getTypeName(expr), id, getTypeName(type)));
             return;
-        }
-        else if(ref && expr.getType().isEquivalentTo(type)){
+        } else if (ref && expr.getType().isEquivalentTo(type)) {
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error12r_Foreach, getTypeName(expr), id , getTypeName(type)));
+            m_errors.print(Formatter.toString(ErrorMsg.error12r_Foreach, getTypeName(expr), id, getTypeName(type)));
             return;
         }
 
     }
+
+    void BreakorCont(String stmt) {
+
+        STO func = m_symtab.getFunc();
+
+        if (stmt == "break") {
+            m_nNumErrors++;
+            m_errors.print(ErrorMsg.error12_Break);
+            return;
+        }
+        if (stmt == "continue") {
+            m_nNumErrors++;
+            m_errors.print(ErrorMsg.error12_Continue);
+            return;
+        }
+    }
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
