@@ -664,10 +664,11 @@ WhileStmt ::=       T_WHILE Expr:_1
 
 ForeachStmt ::=     T_FOREACH T_LPAREN Type:_1 OptRef:_2 T_ID:_3 T_COLON Expr:_4 T_RPAREN
                     {:
-                        ((MyParser) parser).ForeachCheck(_1, _2, _3, _4);
                         ((MyParser) parser).DoBlockOpen();
                         ((MyParser) parser).pushLoop("for");
-                        ((MyParser) parser).DoVarDecl (_3);
+                        ((MyParser) parser).DoVarDeclwType (_3, _1, false, new Vector(), null );
+                        ((MyParser) parser).ForeachCheck(_1, _2, _3, _4);
+
                     :}
                     CodeBlock:_5
 

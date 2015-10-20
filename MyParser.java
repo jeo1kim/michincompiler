@@ -496,11 +496,11 @@ class MyParser extends parser {
             m_nNumErrors++;
             m_errors.print(ErrorMsg.error12a_Foreach);
             return;
-        } else if (!ref && expr.getType().isAssignableTo(type)) {
+        } else if (!ref && !expr.getType().isAssignableTo(type)) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error12v_Foreach, getTypeName(expr), id, getTypeName(type)));
             return;
-        } else if (ref && expr.getType().isEquivalentTo(type)) {
+        } else if (ref && !expr.getType().isEquivalentTo(type)) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error12r_Foreach, getTypeName(expr), id, getTypeName(type)));
             return;
