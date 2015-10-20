@@ -206,12 +206,15 @@ class MyParser extends parser {
                 if (!(arr.getType() instanceof intType)) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error10i_Array, getTypeName(arr)));
+                    return;
                 } else if (!arr.isConst()) {
                     m_nNumErrors++;
                     m_errors.print(ErrorMsg.error10c_Array);
+                    return;
                 } else if (arr.getIntValue() <= 0) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error10z_Array, arr.getIntValue()));
+                    return;
                 }
             }
             sto.setType(new ArrayType("array", array.size())); // double check array size
