@@ -485,6 +485,26 @@ class MyParser extends parser {
         m_symtab.closeScope();
     }
 
+
+    void ForeachCheck(Type type, boolean ref, String id, STO expr){
+
+        if (!expr.getType().isArray()){
+            m_nNumErrors++;
+            m_errors.print(ErrorMsg.error12a_Foreach);
+            return;
+        }
+        else if(!ref && expr.getType().isAssignableTo(type)){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error12v_Foreach, getTypeName(expr), id , getTypeName(type) ));
+            return;
+        }
+        else if(ref && expr.getType().isEquivalentTo(type)){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error12r_Foreach, getTypeName(expr), id , getTypeName(type)));
+            return;
+        }
+
+    }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -804,9 +824,6 @@ class MyParser extends parser {
         Type resultType = result.getType();
         Type exprType = a.getType();
 
-        //if this return Key is in top level
-
-
         //type check pass by value
         if (!result.isRef()) {
             //if type is different but is assignable ex) int to float
@@ -828,8 +845,6 @@ class MyParser extends parser {
         //pass by reference
         //the type of the return expression is not equivalent to the return type of the function
         {
-
-
             if (!resultType.isEquivalentTo(exprType)) {  //resultType != exprType) {
                 //error6b_Return_equiv =
                 //"Type.Type of return expression (%T) is not equivalent to the function's return type (%T).";
@@ -924,7 +939,6 @@ class MyParser extends parser {
         //set up H_Map key
         if (param != null) {
             for (STO para : param) {
-                System.out.println(id + para.getType() + paramKey);
 
                 paramKey += "." + para.getType().getName();
             }

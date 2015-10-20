@@ -150,10 +150,10 @@ class ErrorMsg
 
     // Check 11 //
     public static final String error11t_ArrExp =
-      "Type.Type of expression referenced by array subscript (%T) is not of array or pointer type.";
+      "Type of expression referenced by array subscript (%T) is not of array or pointer type.";
 
     public static final String error11i_ArrExp =
-      "Type.Type of index expression in array reference (%T) not equivalent to int.";
+      "Type of index expression in array reference (%T) not equivalent to int.";
 
     // NOTE: The notation '[' means up to and including, ')' means up to and NOT including
     public static final String error11b_ArrExp =
@@ -162,7 +162,7 @@ class ErrorMsg
     // Check 12 //
     // NOTE!  You don't need to use the formatter with this message
     public static final String error12a_Foreach =
-      "Type.Type of expression referenced in foreach is not of array type.";
+      "Type of expression referenced in foreach is not of array type.";
 
     public static final String error12v_Foreach = 
       "Foreach array element of type %T not assignable to value iteration variable %S, of type %T.";
