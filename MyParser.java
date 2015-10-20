@@ -512,7 +512,7 @@ class MyParser extends parser {
 
         String scope = m_symtab.getScopeName();
 
-        if (scope != "foreach" || scope != "while" ) {
+        if (scope == "foreach" || scope == "while" ) {
 
             if( borc == "break") {
                 m_nNumErrors++;
