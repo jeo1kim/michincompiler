@@ -368,19 +368,23 @@ class MyParser extends parser {
         {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-        } else if (a != null && a.isFunc()) {
-            if (DoOverloadedFuncCheck(id, params) == null) {
-                isThereOverloadedFunction = true;
-            }
         }
 
         String key = makeHKey(id, params);
 
-        FuncSTO sto = new FuncSTO(id, ret);
-        if (sto.m_overLoadFuncName.size() == 0) {
-            System.out.println("am i in size");
-            sto.addOverload(key, sto);
+        FuncSTO sto = new FuncSTO(id, ret, params); //
+
+        if (a != null && a.isFunc()) {  // function exist check for overload.
+            FuncSTO exist = (FuncSTO) a;
+
+            if (exist.getOverloaded(key) != null) { // overload function doesnt exist add.
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error9_Decl, id));
+            } else { // function exist throw error
+                exist.addOverload(key, sto);
+            }
         }
+        sto.addOverload(key, sto);
 
         m_symtab.insert(sto);
         //m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
@@ -402,6 +406,7 @@ class MyParser extends parser {
 
 
         String key = makeHKey(id, params);
+        System.out.println(key);
 
         FuncSTO sto = new FuncSTO(id, ret, params, ref); //
 
@@ -524,6 +529,7 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error9_Illegal, func.getName()));
             return new ErrorSTO(sto.getName());
         }
+
         func = func.getOverloaded(hKey);
         Vector<STO> paramList = func.getParamVec(); //<--- error case if undeclared function-call then
 
@@ -584,10 +590,8 @@ class MyParser extends parser {
         if (flag) {
             return new ErrorSTO(sto.getName());
         }
-//			if (sto == recurFunc) {   // check recursion
-//				return sto;
-//			}
-        ExprSTO ret = new ExprSTO(func.getName(), func.getType());
+
+        ExprSTO ret = new ExprSTO(sto.getName(), func.getType());
         // check if func sto was called by ref and assign R val or mod l val
         if (func.isRef()) {
             ret.markModLVal();
@@ -824,24 +828,6 @@ class MyParser extends parser {
     }
 
 
-//		STO DoNoReturn (Vector < STO > ret) {
-//			FuncSTO result = m_symtab.getFunc();
-//			Type resultType = result.getReturnType();
-//			//if there is no ReturnType in Top-level
-//
-//			// ret should be null if return is empty.
-//			if (!resultType.isVoid() && result.getLevel() == 0 && ret == null) {
-//				//check for return
-//				m_nNumErrors++;
-//				m_errors.print(ErrorMsg.error6c_Return_missing);
-//				return new ErrorSTO(result.getName());
-//			} else {
-//				//if there is return stmt and correspond to retunType
-//				return new ExprSTO(result.getName());
-//			}
-//		}
-
-
     void DoNoReturn(Vector<String> stmts) {
 
         FuncSTO result = m_symtab.getFunc();
@@ -885,82 +871,6 @@ class MyParser extends parser {
         return new ExprSTO(a.getName());
     }
 
-    //check 9a
-    STO DoOverloadedFuncCheck(String id, Vector<STO> param) {
-
-        String hKey = makeHKey(id, param);
-        //since already checked in DoFuncDecl_1_param
-        FuncSTO a = (m_symtab.isInHMap(hKey)) ? (m_symtab.getOverLoadedFuncs(hKey))
-                : (FuncSTO) m_symtab.access(id);
-
-        Vector<STO> aParam = a.getParamVec();
-
-        //if void call
-        if (param == null) {
-            param = new Vector<STO>();
-        }
-
-
-        //System.out.println("caught here");
-
-        //if hashcode is same then exactly same function (even names too)
-        //thus save time to check other details
-        if (m_symtab.isInHMap(hKey)) {
-            //error9_Decl  =
-            //"Duplicate declaration of overloaded function %S.";
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error9_Decl, id));
-            ErrorSTO err = new ErrorSTO(id);
-            return err;
-        }
-        //most overloaded cases goes to this (even if same function
-        //but param is different names then goes here
-        else {
-            //System.out.println("caught here != hash");
-            if (aParam.size() == param.size()) {
-                //System.out.println("caught here == param size");
-                boolean same = true;
-                for (int i = 0; i < param.size(); i++) {
-                    if (aParam.get(i).getType().getName() != param.get(i).getType().getName()) {
-                        same = false;
-                    }
-                }
-                if (same) //have same param list re declared
-                {
-                    m_nNumErrors++;
-                    m_errors.print(Formatter.toString(ErrorMsg.error9_Decl, id));
-                    ErrorSTO err = new ErrorSTO(id);
-                    return err;
-                } else {
-                    //System.out.println("caught here same = false");
-                    a.setOverloaded(true);
-                    return null; //if its overloaed function then return null
-                }
-            } else {
-                //System.out.println("caught here != size");
-                //if size is different then number of param is different thus
-                //it's overloaded function of id
-                a.setOverloaded(true);
-                return null; //if its overloaed function then return null
-            }
-        }
-    }
-
-    //check 9b
-    STO DoOverloadedFuncCall(FuncSTO func, String hKey) {
-        if (m_symtab.isInHMap(hKey)) {
-            return func;
-        } else {
-            //error9_Illegal  =
-            //		"Illegal call to overloaded function %S.";
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error9_Illegal, func.getName()));
-            ErrorSTO err = new ErrorSTO(func.getName());
-            return err;
-        }
-    }
-
-
     // Helper Function
     String getTypeName(Type typ) {
         return typ.getName();
@@ -976,12 +886,11 @@ class MyParser extends parser {
 
         //set up H_Map key
         if (param != null) {
-            for (int i = 0; i < param.size(); i++) {
-                paramKey = "."+param.get(i).getType().getName();
+            for (STO para : param) {
+                paramKey += "."+para.getType().getName();
             }
-            paramKey = id+paramKey;
         }
-        return paramKey;
+        return id+paramKey;
     }
 
     STO markAmpersand(STO expr) {
