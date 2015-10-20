@@ -298,7 +298,7 @@ OptStatic ::=       T_STATIC
 
 StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
                     {:
-                        ((MyParser) parser).DoBlockOpen("struct");
+                        ((MyParser) parser).DoBlockOpen();
                     :}
                     FieldVarsList
                     OptCtorDtorList
@@ -516,7 +516,7 @@ Array ::=           T_LBRACKET ConstExpr:_1 T_RBRACKET
 
 
 CodeBlock ::=       T_LBRACE
-                    {: ((MyParser) parser).DoBlockOpen("codeblock"); :}
+                    {: ((MyParser) parser).DoBlockOpen(); :}
                     OptStmtList:_1 {: RESULT = _1; :}
                     {: ((MyParser) parser).DoBlockClose(); :}
                     T_RBRACE
@@ -648,13 +648,16 @@ OptElse ::=         T_ELSE CodeBlock
 WhileStmt ::=       T_WHILE Expr:_1
                      {:
                         ((MyParser) parser).DoConditionCheck(_1);
-                        ((MyParser) parser).DoBlockOpen("while");
+                        ((MyParser) parser).DoBlockOpen();
+                        ((MyParser) parser).pushLoop("while");
 
                      :}
                      CodeBlock:_2
                      {:
 
                         ((MyParser) parser).DoBlockClose();
+                        ((MyParser) parser).popLoop();
+
                      :}
     ;
 
@@ -662,7 +665,8 @@ WhileStmt ::=       T_WHILE Expr:_1
 ForeachStmt ::=     T_FOREACH T_LPAREN Type:_1 OptRef:_2 T_ID:_3 T_COLON Expr:_4 T_RPAREN
                     {:
                         ((MyParser) parser).ForeachCheck(_1, _2, _3, _4);
-                        ((MyParser) parser).DoBlockOpen("foreach");
+                        ((MyParser) parser).DoBlockOpen();
+                        ((MyParser) parser).pushLoop("for");
                         ((MyParser) parser).DoVarDecl (_3);
                     :}
                     CodeBlock:_5
@@ -670,6 +674,7 @@ ForeachStmt ::=     T_FOREACH T_LPAREN Type:_1 OptRef:_2 T_ID:_3 T_COLON Expr:_4
                     {:
 
                         ((MyParser) parser).DoBlockClose();
+                        ((MyParser) parser).popLoop();
                     :}
     ;
 

@@ -13,6 +13,7 @@ class SymbolTable
 	private Scope m_scopeGlobal;
 	private FuncSTO m_func = null;
 
+	private Stack<String> m_stkLooop = new Stack<>();
 
 	private String m_scopeName = null;
 
@@ -119,6 +120,12 @@ class SymbolTable
 	//----------------------------------------------------------------
 	public FuncSTO getFunc() { return m_func; }
 	public void setFunc(FuncSTO sto) { m_func = sto; }
+
+	public void pushLoop(String name){
+		m_stkLooop.push(name);
+	}
+	public void popLoop(){ m_stkLooop.pop();}
+	public int getLoopSize(){ return m_stkLooop.size();}
 
 	public String getScopeName() { return m_scopeName;}
 	public void setScopeName(String name) { m_scopeName = name; }

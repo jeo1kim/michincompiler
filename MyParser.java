@@ -291,8 +291,7 @@ class MyParser extends parser {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error8_Assign, getTypeName(exp), getTypeName(typ)));
             return;
-        }
-        else { // exp is assignable to this varSto type. so
+        } else { // exp is assignable to this varSto type. so
             if (exp.getValue() == null) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error8_CompileTime, id));
@@ -475,14 +474,11 @@ class MyParser extends parser {
     //----------------------------------------------------------------
     // Opens the Scope, global, function, brackets.
     //----------------------------------------------------------------
-    void DoBlockOpen(String sName) {
+    void DoBlockOpen() {
         // Open a scope.
-        if(m_symtab.getScopeName() == "foreach" || m_symtab.getScopeName() == "while"){
-            m_symtab.openScope();
-            return;
-        }
+
         m_symtab.openScope();
-        m_symtab.setScopeName(sName);
+        //m_symtab.setScopeName(sName);
     }
 
     //----------------------------------------------------------------
@@ -490,7 +486,7 @@ class MyParser extends parser {
     //----------------------------------------------------------------
     void DoBlockClose() {
         m_symtab.closeScope();
-        m_symtab.setScopeName(null);
+        //m_symtab.setScopeName(null);
     }
 
 
@@ -510,19 +506,24 @@ class MyParser extends parser {
             return;
         }
 
+
     }
 
+    void pushLoop(String name ){
+        m_symtab.pushLoop(name);
+    }
+    void popLoop(){
+        m_symtab.popLoop();
+    }
     void BreakorCont(String borc) {
 
-        String scope = m_symtab.getScopeName();
-        if (scope != "foreach" && scope != "while" ) {
-
-            if( borc == "break") {
+        int size = m_symtab.getLoopSize();
+        if(size == 0) {
+            if (borc == "break") {
                 m_nNumErrors++;
                 m_errors.print(ErrorMsg.error12_Break);
                 return;
-            }
-            else{
+            } else {
                 m_nNumErrors++;
                 m_errors.print(ErrorMsg.error12_Continue);
                 return;
