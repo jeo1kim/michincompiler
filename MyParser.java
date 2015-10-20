@@ -477,6 +477,10 @@ class MyParser extends parser {
     //----------------------------------------------------------------
     void DoBlockOpen(String sName) {
         // Open a scope.
+        if(m_symtab.getScopeName() == "foreach" || m_symtab.getScopeName() == "while"){
+            m_symtab.openScope();
+            return;
+        }
         m_symtab.openScope();
         m_symtab.setScopeName(sName);
     }
@@ -511,8 +515,7 @@ class MyParser extends parser {
     void BreakorCont(String borc) {
 
         String scope = m_symtab.getScopeName();
-
-        if (scope == "foreach" || scope == "while" ) {
+        if (scope != "foreach" || scope != "while" ) {
 
             if( borc == "break") {
                 m_nNumErrors++;

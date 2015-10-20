@@ -648,8 +648,14 @@ OptElse ::=         T_ELSE CodeBlock
 WhileStmt ::=       T_WHILE Expr:_1
                      {:
                         ((MyParser) parser).DoConditionCheck(_1);
+                        ((MyParser) parser).DoBlockOpen("while");
+
                      :}
-                     CodeBlock
+                     CodeBlock:_2
+                     {:
+
+                        ((MyParser) parser).DoBlockClose();
+                     :}
     ;
 
 
