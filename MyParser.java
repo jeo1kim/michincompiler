@@ -515,7 +515,8 @@ class MyParser extends parser {
     void BreakorCont(String borc) {
 
         String scope = m_symtab.getScopeName();
-        if (scope != "foreach" || scope != "while" ) {
+        if (scope != "foreach" && scope != "while" ) {
+            System.out.println("why");
 
             if( borc == "break") {
                 m_nNumErrors++;
