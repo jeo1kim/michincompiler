@@ -23,7 +23,7 @@ class FuncSTO extends STO
 	private boolean m_return_top_level = false;
 	private boolean m_isOverloaded = false;
 
-	private HashMap<String, FuncSTO> m_overLoadFuncName;
+	private HashMap<String, FuncSTO> m_overLoadFuncName = new HashMap<>();
 
 
 	//----------------------------------------------------------------

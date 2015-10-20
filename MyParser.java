@@ -340,6 +340,7 @@ class MyParser extends parser {
     void DoFuncDecl_1(String id) {
         boolean isThereOverloadedFunction = false;
         STO a = m_symtab.accessLocal(id);
+
         if (a != null && !(a.isFunc())) //if found STO is not function
         {
             m_nNumErrors++;
@@ -347,23 +348,16 @@ class MyParser extends parser {
             return;
             //error9_Decl
             // "Duplicate declaration of overloaded function %S.";
-        } else if (a != null && a.isFunc()) {
-            if (DoOverloadedFuncCheck(id, null) == null) {
-                isThereOverloadedFunction = true;
-            }
         }
 
         FuncSTO sto = new FuncSTO(id);
 
-        if (isThereOverloadedFunction) {
-            sto.setOverloaded(true);
-        }
 
         m_symtab.insert(sto);
-        m_symtab.insertOverloadedFunc(id, sto); //all funcSTO goes into HashMap
+        //m_symtab.insertOverloadedFunc(id, sto); //all funcSTO goes into HashMap
         m_symtab.openScope();
         m_symtab.setFunc(sto);
-        sto.setLevel(m_symtab.getLevel());
+        //sto.setLevel(m_symtab.getLevel());
     }
 
     //func decl
@@ -385,17 +379,11 @@ class MyParser extends parser {
 
         FuncSTO sto = new FuncSTO(id, ret);
 
-        if (isThereOverloadedFunction) {
-            sto.setOverloaded(true);
-        }
-
-        String hKey = makeHKey(id, params);
 
         m_symtab.insert(sto);
-        m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
+        //m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
         m_symtab.openScope();
         m_symtab.setFunc(sto);
-        sto.setLevel(m_symtab.getLevel());
 
     }
 
@@ -409,6 +397,7 @@ class MyParser extends parser {
         {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            return;
         }
 
 
@@ -420,18 +409,10 @@ class MyParser extends parser {
 
         FuncSTO sto = new FuncSTO(id, ret, params, ref); //
         //sto.setRef(ref);
-        String key = makeHKey(id, params);
-        sto.addOverload(key, sto);
 
-
-        if (isThereOverloadedFunction) {
-            sto.setOverloaded(true);
-        }
-
-        String hKey = makeHKey(id, params);
 
         m_symtab.insert(sto);
-        m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
+        //m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
         m_symtab.openScope();
         m_symtab.setFunc(sto);
     }
@@ -457,13 +438,25 @@ class MyParser extends parser {
             m_errors.print("internal: DoFormalParams says no proc!");
         }
 
+
         for (STO param : params) {
             m_symtab.insert(param);
         }
         func.setParamVec(params);
         func.setParamCount(params.size()); // set the
 
-        // insert parameters here
+        String key = makeHKey(func.getName(), params);
+        if(func.getOverloaded(key) == null){
+            //throw error
+            func.addOverload(key, func);
+
+        }
+        else{
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error9_Decl, func.getName()));
+            return;
+        }
+
     }
 
     //----------------------------------------------------------------
