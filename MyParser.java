@@ -587,7 +587,7 @@ class MyParser extends parser {
 //			if (sto == recurFunc) {   // check recursion
 //				return sto;
 //			}
-        ExprSTO ret = new ExprSTO(sto.getName(), sto.getType());
+        ExprSTO ret = new ExprSTO(func.getName(), func.getType());
         // check if func sto was called by ref and assign R val or mod l val
         if (func.isRef()) {
             ret.markModLVal();
@@ -972,13 +972,14 @@ class MyParser extends parser {
 
     //its for making HashMap Key
     String makeHKey(String id, Vector<STO> param) {
-        String paramKey = id;
+        String paramKey = null;
 
         //set up H_Map key
         if (param != null) {
             for (int i = 0; i < param.size(); i++) {
-                paramKey += param.get(i).getType().getName() + ".";
+                paramKey = "."+param.get(i).getType().getName();
             }
+            paramKey = id+paramKey;
         }
         return paramKey;
     }
