@@ -508,19 +508,22 @@ class MyParser extends parser {
 
     }
 
-    void BreakorCont() {
+    void BreakorCont(String borc) {
 
         String scope = m_symtab.getScopeName();
 
-        if (scope != "break" ) {
-            m_nNumErrors++;
-            m_errors.print(ErrorMsg.error12_Break);
-            return;
-        }
-        if (scope != "continue") {
-            m_nNumErrors++;
-            m_errors.print(ErrorMsg.error12_Continue);
-            return;
+        if (scope != "foreach" || scope != "while" ) {
+
+            if( borc == "break") {
+                m_nNumErrors++;
+                m_errors.print(ErrorMsg.error12_Break);
+                return;
+            }
+            else{
+                m_nNumErrors++;
+                m_errors.print(ErrorMsg.error12_Continue);
+                return;
+            }
         }
     }
 
