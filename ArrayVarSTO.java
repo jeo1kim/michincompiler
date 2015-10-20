@@ -95,7 +95,7 @@ class ArrayVarSTO extends VarSTO{
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setName(String str)
+    public void setName(String str)
     {
         m_strName = str;
     }

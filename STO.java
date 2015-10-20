@@ -68,7 +68,7 @@ abstract class STO
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	private void setName(String str)
+	public void setName(String str)
 	{
 		m_strName = str;
 	}
@@ -84,7 +84,7 @@ abstract class STO
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
-	private void setType(Type type)
+	public void setType(Type type)
 	{
 		m_type = type;
 	}

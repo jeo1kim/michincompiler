@@ -8,6 +8,7 @@
 import java_cup.runtime.*;
 
 import javax.swing.text.Style;
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Iterator;
@@ -199,27 +200,24 @@ class MyParser extends parser {
             }
         }
         //case where var is an array
-		else if(array.size()>0){
+        else if (array.size() > 0) {
 
-            for(STO arr : array){
-                if(!(arr.getType() instanceof  intType)){
+            for (STO arr : array) {
+                if (!(arr.getType() instanceof intType)) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error10i_Array, getTypeName(arr)));
-                }
-                else if(!arr.isConst()){
+                } else if (!arr.isConst()) {
                     m_nNumErrors++;
                     m_errors.print(ErrorMsg.error10c_Array);
-                }
-                else if(!(arr.getIntValue() >0)){
+                } else if (arr.getIntValue() <= 0) {
                     m_nNumErrors++;
-                    m_errors.print(Formatter.toString(ErrorMsg.error10z_Array , arr.getIntValue()));
+                    m_errors.print(Formatter.toString(ErrorMsg.error10z_Array, arr.getIntValue()));
                 }
             }
-			sto.setType(new ArrayType("array",array.size())); // double check array size
-			m_symtab.insert(sto);
-			return;
-		}
-        else {
+            sto.setType(new ArrayType("array", array.size())); // double check array size
+            m_symtab.insert(sto);
+            return;
+        } else {
             m_symtab.insert(sto);
             return;
         }
@@ -547,7 +545,7 @@ class MyParser extends parser {
         }
 
         paramList = func.getParamVec();
-         //<--- error case if undeclared function-call then
+        //<--- error case if undeclared function-call then
 
 
         //if func is not Overloaded then check 5
@@ -741,6 +739,26 @@ class MyParser extends parser {
         return result;
     }
 
+    STO MarkUnary(String unary, STO a) {
+
+        if (a.getType().isNumeric()) {
+
+            if (unary == "-") {
+                a.setName("-" + a.getName());
+                a.setType(a.getType());
+                a.setValue(a.getValue().multiply(BigDecimal.valueOf(-1)));
+                return a;
+            } else {
+                a.setName("+" + a.getName());
+                a.setType(a.getType());
+                return a;
+            }
+
+        }
+
+        return new ErrorSTO("error in mark unary");
+    }
+
     STO DoUnaryOp(STO a, Operator o) {
 
         if (a.isError()) {
@@ -903,7 +921,7 @@ class MyParser extends parser {
         //set up H_Map key
         if (param != null) {
             for (STO para : param) {
-             System.out.println(id +para.getType() +paramKey);
+                System.out.println(id + para.getType() + paramKey);
 
                 paramKey += "." + para.getType().getName();
             }
