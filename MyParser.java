@@ -199,12 +199,26 @@ class MyParser extends parser {
             }
         }
         //case where var is an array
-//		else if(array.size()>0){
-//			System.out.print(array.get(0));
-//			sto.setType(new ArrayType("array",array.size())); // double check array size
-//			m_symtab.insert(sto);
-//			return;
-//		}
+		else if(array.size()>0){
+
+            for(STO arr : array){
+                if(!(arr.getType() instanceof  intType)){
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error10i_Array, getTypeName(arr)));
+                }
+                else if(!arr.isConst()){
+                    m_nNumErrors++;
+                    m_errors.print(ErrorMsg.error10c_Array);
+                }
+                else if(!(arr.getIntValue() >0)){
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error10z_Array , arr.getIntValue()));
+                }
+            }
+			sto.setType(new ArrayType("array",array.size())); // double check array size
+			m_symtab.insert(sto);
+			return;
+		}
         else {
             m_symtab.insert(sto);
             return;
@@ -884,12 +898,12 @@ class MyParser extends parser {
 
     //its for making HashMap Key
     String makeHKey(String id, Vector<STO> param) {
-        String paramKey = null;
+        String paramKey = "";
 
         //set up H_Map key
         if (param != null) {
             for (STO para : param) {
-//                System.out.println(id +para.getType().getName() );
+             System.out.println(id +para.getType() +paramKey);
 
                 paramKey += "." + para.getType().getName();
             }
