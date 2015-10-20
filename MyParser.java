@@ -514,7 +514,7 @@ class MyParser extends parser {
         // recursive case? calling main inside main;
         FuncSTO recurFunc = m_symtab.getFunc();
 
-        if (recurFunc == sto || sto.isError()) {
+        if (sto.isError()) {
             return sto;
         }
         // func holds expected param
