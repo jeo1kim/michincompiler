@@ -223,8 +223,6 @@ class MyParser extends parser {
             }
 
             temp = DoArrayType(array, typ, arrType , 0);
-            System.out.println(temp.getNextType().getName());
-            System.out.println(temp +"  "+ temp.getNextType()+""+temp.getNextType().getNextType());
             ret.setType(temp);
             //sto.setType(new ArrayType("array", array.size())); // double check array size
             m_symtab.insert(ret);
