@@ -35,7 +35,7 @@ public class BoolType extends BasicType {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setName(String str)
+    public void setName(String str)
     {
         m_typeName = str;
     }
@@ -51,7 +51,7 @@ public class BoolType extends BasicType {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setSize(int size)
+    public void setSize(int size)
     {
         m_size = size;
     }

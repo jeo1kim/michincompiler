@@ -30,7 +30,7 @@ public class NullPointerType extends PointerType {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setName(String str)
+    public void setName(String str)
     {
         m_typeName = str;
     }
@@ -46,7 +46,7 @@ public class NullPointerType extends PointerType {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setSize(int size)
+    public void setSize(int size)
     {
         m_size = size;
     }

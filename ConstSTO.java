@@ -6,6 +6,7 @@
 
 
 import java.math.BigDecimal;
+import java.util.Vector;
 
 class ConstSTO extends STO
 {
@@ -26,55 +27,15 @@ class ConstSTO extends STO
 	private boolean m_isModifiable;
 	private boolean m_static;
 
-	//----------------------------------------------------------------
-	//
-	//----------------------------------------------------------------
-	public ConstSTO(String strName)
-	{
-		super(strName);
-		m_value = null; // fix this
-		m_strName = strName;
-		m_isAddressable = true;				// double value are constands non mod. L value
-		m_isModifiable = false;
-		// You may want to change the isModifiable and isAddressable
-		// fields as necessary
+	private Vector<STO> m_arrayElms = new Vector<>();
+	private ConstSTO m_innerArray;
+
+	public STO getArrayIndex(int index){
+		return m_arrayElms.get(index);
 	}
 
-	public ConstSTO(String strName, Type typ)
-	{
-		super(strName, typ);
-		m_strName = strName;
-		m_type = typ;
-		m_value = null; // fix this
-		m_isAddressable = true;				// double value are constands non mod. L value
-		m_isModifiable = false;
-		// You may want to change the isModifiable and isAddressable
-		// fields as necessary
-	}
 
-	public ConstSTO(String strName, Type typ, int val)
-	{
-		super(strName, typ);
-		m_strName = strName;
-		m_type = typ;
-		m_value = new BigDecimal(val);
-		m_isAddressable = true;				// double value are constands non mod. L value
-		m_isModifiable = false;
-		// You may want to change the isModifiable and isAddressable
-		// fields as necessary
-	}
 
-	public ConstSTO(String strName, Type typ, double val)
-	{
-		super(strName, typ);
-		m_strName = strName;
-		m_type = typ;
-		m_value = new BigDecimal(val);
-		m_isAddressable = true;				// double value are constands non mod. L value
-		m_isModifiable = false;
-		// You may want to change the isModifiable and isAddressable
-		// fields as necessary
-	}
 	public void setStatic(boolean stat){ m_static = stat;}
 	public boolean isStatic(){ return m_static; }
 	//----------------------------------------------------------------
@@ -208,4 +169,55 @@ class ConstSTO extends STO
 	public boolean isFunc() { return false; }
 	public boolean isStructdef() { return false; }
 	public boolean isError() { return false; }
+
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+	public ConstSTO(String strName)
+	{
+		super(strName);
+		m_value = null; // fix this
+		m_strName = strName;
+		m_isAddressable = true;				// double value are constands non mod. L value
+		m_isModifiable = false;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+
+	public ConstSTO(String strName, Type typ)
+	{
+		super(strName, typ);
+		m_strName = strName;
+		m_type = typ;
+		m_value = null; // fix this
+		m_isAddressable = true;				// double value are constands non mod. L value
+		m_isModifiable = false;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+
+	public ConstSTO(String strName, Type typ, int val)
+	{
+		super(strName, typ);
+		m_strName = strName;
+		m_type = typ;
+		m_value = new BigDecimal(val);
+		m_isAddressable = true;				// double value are constands non mod. L value
+		m_isModifiable = false;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+
+	public ConstSTO(String strName, Type typ, double val)
+	{
+		super(strName, typ);
+		m_strName = strName;
+		m_type = typ;
+		m_value = new BigDecimal(val);
+		m_isAddressable = true;				// double value are constands non mod. L value
+		m_isModifiable = false;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
 }

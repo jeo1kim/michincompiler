@@ -6,6 +6,7 @@ public abstract class CompositeType extends Type {
     private String m_typeName;
     private int m_size;
 
+    private  Type nextType;
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -18,6 +19,9 @@ public abstract class CompositeType extends Type {
     public boolean isAssignableTo(Type t) { return false; }
     public boolean isEquivalentTo(Type t) { return t.isComposite(); }
 
+    public Type getNextType(){ return nextType; }
+    public void setNextType(Type type){ nextType = type; }
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -29,7 +33,7 @@ public abstract class CompositeType extends Type {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setName(String str)
+    public void setName(String str)
     {
         m_typeName = str;
     }
@@ -45,7 +49,7 @@ public abstract class CompositeType extends Type {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setSize(int size)
+    public void setSize(int size)
     {
         m_size = size;
     }

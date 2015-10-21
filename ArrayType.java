@@ -1,3 +1,5 @@
+import java.util.Vector;
+
 /**
  * Created by jinyongsuk on 10/8/15.
  */
@@ -5,16 +7,32 @@ public class ArrayType extends CompositeType {
     // Name of the Type (e.g., int, bool, some structdef, etc.)
     private String m_typeName;
     private int m_size;
+    private Type nextType;
+
+    private Vector<Integer> dimensions = new Vector<>();
+
 
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    public ArrayType(String strName, int size)
+    public ArrayType(String strName,int size)
     {
         super(strName, size);
+        setNextType(this);
         setName(strName);
         setSize(size);
     }
+    public ArrayType(String strName, Type type ,int size)
+    {
+        super(strName, size);
+        setNextType(type);
+        setName(strName);
+        setSize(size);
+    }
+
+
+    public Type getNextType(){ return nextType; }
+    public void setNextType(Type type){ nextType = type; }
 
     public boolean isAssignableTo(Type t) { return t.isArray(); }
     public boolean isEquivalentTo(Type t) { return t.isArray(); }
@@ -30,7 +48,7 @@ public class ArrayType extends CompositeType {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setName(String str)
+    public void setName(String str)
     {
         m_typeName = str;
     }
@@ -46,7 +64,7 @@ public class ArrayType extends CompositeType {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setSize(int size)
+    public void setSize(int size)
     {
         m_size = size;
     }

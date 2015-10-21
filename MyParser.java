@@ -5,6 +5,7 @@
 //---------------------------------------------------------------------
 
 
+import com.sun.tools.internal.jxc.ap.Const;
 import java_cup.runtime.*;
 
 import javax.swing.text.Style;
@@ -201,7 +202,10 @@ class MyParser extends parser {
         }
         //case where var is an array
         else if (array.size() > 0) {
-
+            int size = array.size();
+            ConstSTO ret = new ConstSTO(id, new ArrayType("", array.size()));
+            Type arrType = new ArrayType("", 0);
+            Type temp = null;
             for (STO arr : array) {
                 if (!(arr.getType() instanceof intType)) {
                     m_nNumErrors++;
@@ -217,13 +221,35 @@ class MyParser extends parser {
                     return;
                 }
             }
-            sto.setType(new ArrayType("array", array.size())); // double check array size
-            m_symtab.insert(sto);
+
+            temp = DoArrayType(array, typ, arrType , 0);
+            System.out.println(temp.getNextType().getName());
+            System.out.println(temp +"  "+ temp.getNextType()+""+temp.getNextType().getNextType());
+            ret.setType(temp);
+            //sto.setType(new ArrayType("array", array.size())); // double check array size
+            m_symtab.insert(ret);
             return;
-        } else {
+        }
+        else {
             m_symtab.insert(sto);
             return;
         }
+    }
+
+    Type DoArrayType(Vector<STO> array , Type base, Type arrType, int n){
+
+        if(n == array.size()){
+            arrType.setNextType(base); // if base case my next type is the base type
+            arrType.getNextType().setName(base.getName());
+            arrType.setSize(array.get(array.size()-1).getIntValue());
+            return arrType;
+        }
+        Type type = new ArrayType( arrType.getName()+"["+array.get(n).getName()+"]",array.get(n).getIntValue() );
+        DoArrayType(array, base, type, n+1);
+
+        type.getNextType().setName(base.getName()+type.getName());
+        return type;
+
     }
 
     void DoVarDeclwAuto(String id, STO expr, boolean stat) {
@@ -496,13 +522,16 @@ class MyParser extends parser {
             m_nNumErrors++;
             m_errors.print(ErrorMsg.error12a_Foreach);
             return;
-        } else if (!ref && !expr.getType().isAssignableTo(type)) {
+        } else if (!ref && !expr.getType().getNextType().isAssignableTo(type)) {
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error12v_Foreach, getTypeName(expr), id, getTypeName(type)));
+            //      "Foreach array element of type %T not assignable to value iteration variable %S, of type %T.";
+
+            m_errors.print(Formatter.toString(ErrorMsg.error12v_Foreach, getTypeName(expr.getType().getNextType()), id, getTypeName(type)));
             return;
-        } else if (ref && !expr.getType().isEquivalentTo(type)) {
+        } else if (ref && !expr.getType().getNextType().isEquivalentTo(type)) {
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error12r_Foreach, getTypeName(expr), id, getTypeName(type)));
+            //      "Foreach array element of type %T not equivalent to reference iteration variable %S, of type %T.";
+            m_errors.print(Formatter.toString(ErrorMsg.error12r_Foreach, getTypeName(expr.getType().getNextType()), id, getTypeName(type)));
             return;
         }
 
