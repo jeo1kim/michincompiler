@@ -243,9 +243,10 @@ class MyParser extends parser {
             return arrType;
         }
         Type type = new ArrayType( arrType.getName()+"["+array.get(n).getName()+"]",array.get(n).getIntValue() );
-        DoArrayType(array, base, type, n+1);
+        DoArrayType(array, base, type, n + 1);
 
-        type.getNextType().setName(base.getName()+type.getName());
+        type.setName(base.getName()+type.getName());
+        //type.setName(base.getName()+type.getName());
         return type;
 
     }
