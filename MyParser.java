@@ -190,7 +190,7 @@ class MyParser extends parser {
         if (array.size() == 0 && (init != null)) { // indicates that this var is not an array and init exp exist
             // do the type check with init if it exist
             Type initType = init.getType();
-            if(init.getType().isArray()){
+            if (init.getType().isArray()) {
                 init.getType().getNextType();
             }
 
@@ -210,7 +210,7 @@ class MyParser extends parser {
             Type arrType = new ArrayType("", 0);
             Type temp;
             for (STO arr : array) {
-                if (arr.isError()){
+                if (arr.isError()) {
                     m_nNumErrors++;
                     return;
                 }
@@ -240,14 +240,14 @@ class MyParser extends parser {
         }
     }
 
-    STO makeArrayParam(Type typ, boolean ref, String id, Vector<STO> array){
+    STO makeArrayParam(Type typ, boolean ref, String id, Vector<STO> array) {
 
         VarSTO ret = new VarSTO(id, typ, ref);
-        if ( array.size() > 0){
+        if (array.size() > 0) {
             Type arrType = new ArrayType("", 0);
             Type temp;
             for (STO arr : array) {
-                if (arr.isError()){
+                if (arr.isError()) {
                     m_nNumErrors++;
                     return new ErrorSTO("makeArrayParam");
                 }
@@ -267,6 +267,10 @@ class MyParser extends parser {
             }
 
             temp = DoArrayType(array, typ, arrType, 0);
+//            if(array.size() ==1){
+//                temp.setName(typ.getName()+temp.getName());
+//            }
+            ret.setRef(ref);
             ret.setType(temp);
             ret.markModLVal();
         }
@@ -276,17 +280,17 @@ class MyParser extends parser {
 
     Type DoArrayType(Vector<STO> array, Type base, Type arrType, int n) {
 
-        if (n == array.size()-1) {
+        if (n == array.size() - 1) {
             arrType.setNextType(base); // if base case my next type is the base type
-            arrType.setName(base.getName() + "[" + array.get(n).getName() + "]");
+            arrType.setName(base.getName() + arrType.getName() + "[" + array.get(n).getName() + "]");
             arrType.setSize(array.get(array.size() - 1).getIntValue());
             return arrType;
         }
-        Type type = new ArrayType(  "[" + array.get(n).getName() + "]" +arrType.getName(), array.get(n).getIntValue());
+        Type type = new ArrayType("[" + array.get(n).getName() + "]" + arrType.getName(), array.get(n).getIntValue());
         arrType.setSize(array.get(n).getIntValue());
         arrType.setNextType(DoArrayType(array, base, type, n + 1));
 
-        arrType.setName(base.getName() + type.getName());
+        //arrType.setName(base.getName() + type.getName());
         return arrType;
 
     }
@@ -753,7 +757,7 @@ class MyParser extends parser {
     //----------------------------------------------------------------
     STO DoDesignator2_Array(STO sto, STO expr) {
         // Good place to do the array checks
-        if (expr.isError()){
+        if (expr.isError()) {
             return expr;
         }
         if (sto.isError()) {
@@ -770,29 +774,24 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error11i_ArrExp, expr.getType().getName()));
             return new ErrorSTO(sto.getName());
         }
-//        System.out.println(expr.getName());
-//        System.out.println(expr.getIntValue());
-
-
-        if (expr.isConst()){
+        if (expr.isConst()) {
             int ex = expr.getIntValue();
-            int des = sto.getType().getSize()-1;
-            if(ex > des ) {
+            int des = sto.getType().getSize() - 1;
+            if (ex > des || ex < 0) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
                 return new ErrorSTO(sto.getName());
             }
-            if(ex<0){
-                m_nNumErrors++;
-                m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
-                return new ErrorSTO(sto.getName());
-            }
+//            if (ex < 0) {
+//                m_nNumErrors++;
+//                m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
+//                return new ErrorSTO(sto.getName());
+//            }
         }
         VarSTO ret = new VarSTO(sto.getName(), sto.getType().getNextType());
         ret.setValue(expr.getValue());
         return ret;
     }
-
 
 
     //----------------------------------------------------------------
