@@ -210,12 +210,11 @@ class MyParser extends parser {
             Type arrType = new ArrayType("", 0);
             Type temp;
             for (STO arr : array) {
-//                if (!arr.isConst()){
-//                    m_nNumErrors++;
-//                    m_errors.print(Formatter.toString(ErrorMsg.error11i_ArrExp, arr.getType().getName()));
-//                    return;
-//                }
-                if (!(arr.getType() instanceof intType)) {
+                if (arr.isError()){
+                    m_nNumErrors++;
+                    return;
+                }
+                if (!(arr.getType().isInt())) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error10i_Array, getTypeName(arr)));
                     return;
