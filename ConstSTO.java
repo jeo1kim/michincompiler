@@ -169,6 +169,7 @@ class ConstSTO extends STO
 	public boolean isFunc() { return false; }
 	public boolean isStructdef() { return false; }
 	public boolean isError() { return false; }
+	public boolean isArray() { return false;}
 
 
 	//----------------------------------------------------------------

@@ -190,7 +190,12 @@ class MyParser extends parser {
         }
         if (array.size() == 0 && (init != null)) { // indicates that this var is not an array and init exp exist
             // do the type check with init if it exist
-            if (!init.getType().isAssignableTo(sto.getType())) {
+            Type initType = init.getType();
+            if(init.getType().isArray()){
+                init.getType().getNextType();
+            }
+
+            if (!initType.isAssignableTo(sto.getType())) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error8_Assign, getTypeName(init), getTypeName(typ)));
                 return;
@@ -202,11 +207,15 @@ class MyParser extends parser {
         }
         //case where var is an array
         else if (array.size() > 0) {
-            int size = array.size();
             ConstSTO ret = new ConstSTO(id, new ArrayType("", array.size()));
             Type arrType = new ArrayType("", 0);
-            Type temp = null;
+            Type temp;
             for (STO arr : array) {
+//                if (!arr.isConst()){
+//                    m_nNumErrors++;
+//                    m_errors.print(Formatter.toString(ErrorMsg.error11i_ArrExp, arr.getType().getName()));
+//                    return;
+//                }
                 if (!(arr.getType() instanceof intType)) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error10i_Array, getTypeName(arr)));
@@ -222,30 +231,30 @@ class MyParser extends parser {
                 }
             }
 
-            temp = DoArrayType(array, typ, arrType , 0);
+            temp = DoArrayType(array, typ, arrType, 0);
             ret.setType(temp);
+            //ret.markModLVal();
             //sto.setType(new ArrayType("array", array.size())); // double check array size
             m_symtab.insert(ret);
             return;
-        }
-        else {
+        } else {
             m_symtab.insert(sto);
             return;
         }
     }
 
-    Type DoArrayType(Vector<STO> array , Type base, Type arrType, int n){
+    Type DoArrayType(Vector<STO> array, Type base, Type arrType, int n) {
 
-        if(n == array.size()){
+        if (n == array.size()) {
             arrType.setNextType(base); // if base case my next type is the base type
             arrType.getNextType().setName(base.getName());
-            arrType.setSize(array.get(array.size()-1).getIntValue());
+            arrType.setSize(array.get(array.size() - 1).getIntValue());
             return arrType;
         }
-        Type type = new ArrayType( arrType.getName()+"["+array.get(n).getName()+"]",array.get(n).getIntValue() );
+        Type type = new ArrayType(arrType.getName() + "[" + array.get(n).getName() + "]", array.get(n).getIntValue());
         DoArrayType(array, base, type, n + 1);
 
-        type.setName(base.getName()+type.getName());
+        type.setName(base.getName() + type.getName());
         //type.setName(base.getName()+type.getName());
         return type;
 
@@ -537,16 +546,18 @@ class MyParser extends parser {
 
     }
 
-    void pushLoop(String name ){
+    void pushLoop(String name) {
         m_symtab.pushLoop(name);
     }
-    void popLoop(){
+
+    void popLoop() {
         m_symtab.popLoop();
     }
+
     void BreakorCont(String borc) {
 
         int size = m_symtab.getLoopSize();
-        if(size == 0) {
+        if (size == 0) {
             if (borc == "break") {
                 m_nNumErrors++;
                 m_errors.print(ErrorMsg.error12_Break);
@@ -709,11 +720,38 @@ class MyParser extends parser {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    STO DoDesignator2_Array(STO sto) {
+    STO DoDesignator2_Array(STO sto, STO expr) {
         // Good place to do the array checks
+        if (expr.isError()){
+            return expr;
+        }
+        if (sto.isError()) {
+            return sto;
+        }
 
-        return sto;
+        if (!sto.getType().isArray()) { // add pointer type
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error11t_ArrExp, getTypeName(sto)));
+            return new ErrorSTO(sto.getName());
+        }
+        if (!expr.getType().isInt()) {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error11i_ArrExp, expr.getType().getName()));
+            return new ErrorSTO(sto.getName());
+        }
+        int ex = expr.getIntValue();
+        int des = sto.getType().getSize()-1;
+        if (expr.isConst() && (ex > des || ex<0 )){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
+            return new ErrorSTO(sto.getName());
+        }
+        ConstSTO ret = new ConstSTO(sto.getName(), sto.getType().getNextType());
+        ret.setValue(BigDecimal.valueOf(ex));
+        return ret;
     }
+
+
 
     //----------------------------------------------------------------
     //	CASE: when there is no :: for assigning value to left
