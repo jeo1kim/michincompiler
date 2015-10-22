@@ -206,7 +206,7 @@ class MyParser extends parser {
         }
         //case where var is an array
         else if (array.size() > 0) {
-            ConstSTO ret = new ConstSTO(id, new ArrayType("", array.size()));
+            VarSTO ret = new VarSTO(id, new ArrayType("", array.size()));
             Type arrType = new ArrayType("", 0);
             Type temp;
             for (STO arr : array) {
@@ -244,18 +244,18 @@ class MyParser extends parser {
 
     Type DoArrayType(Vector<STO> array, Type base, Type arrType, int n) {
 
-        if (n == array.size()) {
+        if (n == array.size()-1) {
             arrType.setNextType(base); // if base case my next type is the base type
             arrType.getNextType().setName(base.getName());
             arrType.setSize(array.get(array.size() - 1).getIntValue());
             return arrType;
         }
         Type type = new ArrayType(arrType.getName() + "[" + array.get(n).getName() + "]", array.get(n).getIntValue());
-        DoArrayType(array, base, type, n + 1);
+        arrType.setNextType(DoArrayType(array, base, type, n + 1));
 
-        type.setName(base.getName() + type.getName());
+        arrType.setName(base.getName() + type.getName());
         //type.setName(base.getName()+type.getName());
-        return type;
+        return arrType;
 
     }
 
@@ -745,7 +745,7 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
             return new ErrorSTO(sto.getName());
         }
-        ConstSTO ret = new ConstSTO(sto.getName(), sto.getType().getNextType());
+        VarSTO ret = new VarSTO(sto.getName(), sto.getType().getNextType());
         ret.setValue(BigDecimal.valueOf(ex));
         return ret;
     }
