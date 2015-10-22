@@ -232,8 +232,7 @@ class MyParser extends parser {
 
             temp = DoArrayType(array, typ, arrType, 0);
             ret.setType(temp);
-            //ret.markModLVal();
-            //sto.setType(new ArrayType("array", array.size())); // double check array size
+            ret.markModLVal();
             m_symtab.insert(ret);
             return;
         } else {
@@ -246,13 +245,14 @@ class MyParser extends parser {
 
         if (n == array.size()-1) {
             arrType.setNextType(base); // if base case my next type is the base type
-            arrType.getNextType().setName(base.getName());
+            arrType.setName("[" + array.get(n).getName() + "]");
             arrType.setSize(array.get(array.size() - 1).getIntValue());
             return arrType;
         }
-        Type type = new ArrayType(arrType.getName() + "[" + array.get(n).getName() + "]", array.get(n).getIntValue());
+        Type type = new ArrayType(  "[" + array.get(n).getName() + "]" +arrType.getName(), array.get(n).getIntValue());
         arrType.setSize(array.get(n).getIntValue());
         arrType.setNextType(DoArrayType(array, base, type, n + 1));
+
         arrType.setName(base.getName() + type.getName());
         //type.setName(base.getName()+type.getName());
         return arrType;
