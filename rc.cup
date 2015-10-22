@@ -589,7 +589,7 @@ ParamList ::=       ParamDecl:_2
 
 ParamDecl ::=       Type:_1 OptRef:_2 T_ID:_3 OptArrayList:_4
                     {:
-                        RESULT = new VarSTO(_3, _1, _2);
+                        RESULT = ((MyParser) parser).makeArrayParam(_1, _2, _3, _4 );
                     :}
     ;
 

@@ -34,7 +34,35 @@ public class ArrayType extends CompositeType {
     public Type getNextType(){ return nextType; }
     public void setNextType(Type type){ nextType = type; }
 
-    public boolean isAssignableTo(Type t) { return t.isArray(); }
+    public boolean isAssignableTo(Type t) {
+
+        if(t.isArray()){
+            if ( this.getSize() != t.getSize()){
+                return false;
+            }
+            else{
+                Type thisTyp = this.getNextType();
+                Type thatTyp = t.getNextType();
+
+                if(thisTyp.isBasic() && thatTyp.isBasic())
+                {
+                    return thisTyp.isEquivalentTo(thatTyp);
+                }
+                else if (thisTyp.isArray() && thatTyp.isArray())
+                {
+                    return thisTyp.isEquivalentTo(thatTyp);
+                }
+                else {
+                    return false;
+                }
+            }
+
+        }
+
+        else{
+            return false;
+        }
+    }
     public boolean isEquivalentTo(Type t) { return t.isArray(); }
 
     //----------------------------------------------------------------

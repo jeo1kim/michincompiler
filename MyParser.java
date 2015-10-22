@@ -240,11 +240,45 @@ class MyParser extends parser {
         }
     }
 
+    STO makeArrayParam(Type typ, boolean ref, String id, Vector<STO> array){
+
+        VarSTO ret = new VarSTO(id, typ, ref);
+        if ( array.size() > 0){
+            Type arrType = new ArrayType("", 0);
+            Type temp;
+            for (STO arr : array) {
+                if (arr.isError()){
+                    m_nNumErrors++;
+                    return new ErrorSTO("makeArrayParam");
+                }
+                if (!(arr.getType().isInt())) {
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error10i_Array, getTypeName(arr)));
+                    return new ErrorSTO("makeArrayParam");
+                } else if (!arr.isConst()) {
+                    m_nNumErrors++;
+                    m_errors.print(ErrorMsg.error10c_Array);
+                    return new ErrorSTO("makeArrayParam");
+                } else if (arr.getIntValue() <= 0) {
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error10z_Array, arr.getIntValue()));
+                    return new ErrorSTO("makeArrayParam");
+                }
+            }
+
+            temp = DoArrayType(array, typ, arrType, 0);
+            ret.setType(temp);
+            ret.markModLVal();
+        }
+
+        return ret;
+    }
+
     Type DoArrayType(Vector<STO> array, Type base, Type arrType, int n) {
 
         if (n == array.size()-1) {
             arrType.setNextType(base); // if base case my next type is the base type
-            arrType.setName(base.getName()+"[" + array.get(n).getName() + "]");
+            arrType.setName(base.getName() + "[" + array.get(n).getName() + "]");
             arrType.setSize(array.get(array.size() - 1).getIntValue());
             return arrType;
         }
@@ -253,7 +287,6 @@ class MyParser extends parser {
         arrType.setNextType(DoArrayType(array, base, type, n + 1));
 
         arrType.setName(base.getName() + type.getName());
-        //type.setName(base.getName()+type.getName());
         return arrType;
 
     }
@@ -737,15 +770,26 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error11i_ArrExp, expr.getType().getName()));
             return new ErrorSTO(sto.getName());
         }
-        int ex = expr.getIntValue();
-        int des = sto.getType().getSize()-1;
-        if (expr.isConst() && (ex > des || ex<0 )){
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
-            return new ErrorSTO(sto.getName());
+//        System.out.println(expr.getName());
+//        System.out.println(expr.getIntValue());
+
+
+        if (expr.isConst()){
+            int ex = expr.getIntValue();
+            int des = sto.getType().getSize()-1;
+            if(ex > des ) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
+                return new ErrorSTO(sto.getName());
+            }
+            if(ex<0){
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
+                return new ErrorSTO(sto.getName());
+            }
         }
         VarSTO ret = new VarSTO(sto.getName(), sto.getType().getNextType());
-        ret.setValue(BigDecimal.valueOf(ex));
+        ret.setValue(expr.getValue());
         return ret;
     }
 
@@ -854,12 +898,11 @@ class MyParser extends parser {
 
     STO MarkUnary(String unary, STO a) {
 
-        if (a.getType().isNumeric()) {
-
+        if (a.getType().isNumeric() || a.isConst() || a.isExpr() || a.isVar()) {
             if (unary == "-") {
                 a.setName(a.getName());
                 a.setType(a.getType());
-                a.setValue(a.getValue().multiply(BigDecimal.valueOf(-1)));
+                a.setValue(a.getValue().negate());
                 return a;
             } else {
                 a.setName(a.getName());
