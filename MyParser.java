@@ -247,7 +247,7 @@ class MyParser extends parser {
         if (n == array.size()-1) {
             arrType.setNextType(base); // if base case my next type is the base type
             arrType.getNextType().setName(base.getName());
-            arrType.setSize(array.get(n-1).getIntValue());
+            arrType.setSize(array.get(array.size() - 1).getIntValue());
             return arrType;
         }
         Type type = new ArrayType(arrType.getName() + "[" + array.get(n).getName() + "]", array.get(n).getIntValue());
