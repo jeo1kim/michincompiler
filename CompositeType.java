@@ -5,6 +5,7 @@ public abstract class CompositeType extends Type {
     // Name of the Type (e.g., int, bool, some structdef, etc.)
     private String m_typeName;
     private int m_size;
+    private Scope m_structScope;
 
     private  Type nextType;
     //----------------------------------------------------------------
@@ -16,13 +17,23 @@ public abstract class CompositeType extends Type {
         setName(strName);
         setSize(size);
     }
+
+    public void insert(STO var){
+        m_structScope.InsertLocal(var);
+    }
     public boolean isAssignableTo(Type t) { return false; }
     public boolean isEquivalentTo(Type t) { return t.isComposite(); }
 
     public Type getNextType(){ return nextType; }
     public void setNextType(Type type){ nextType = type; }
 
-    //----------------------------------------------------------------
+    private String m_basetype;
+    public void setBaseName(String base){
+        m_basetype = base;
+    }
+    public void setSize() {
+    }
+        //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
     public String getName()

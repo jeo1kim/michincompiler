@@ -186,6 +186,7 @@ non terminal STO
     Designator,
     Designator2,
     Designator3,
+
     ParamDecl
     ;
 
@@ -298,11 +299,19 @@ OptStatic ::=       T_STATIC
 
 StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
                     {:
-                        ((MyParser) parser).DoBlockOpen();
+                        ((MyParser) parser).DoStructBlock();
+                        // do struct decl.
+                        //do struct open will insert struct into global
+                        //grab scope from symbol table and insert into struct
+                        //
                     :}
-                    FieldVarsList
+                    FieldVarsList                       // insert the vars into the symbol table it doesnt matter..... really nick?
                     OptCtorDtorList
                     {:
+
+                        //call method to check constructor flag in my parser
+                        //if so create a function to pass in funcdecl
+
                         // Put logic here to create default ctor if needed
                     :}
                     OptFieldFuncsList
@@ -314,12 +323,15 @@ StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
     ;
 
 
-FieldVarsList ::=   FieldVarDecl
-    |               FieldVarsList FieldVarDecl
+FieldVarsList ::=   FieldVarDecl:_1
+    |               FieldVarsList:_1 FieldVarDecl:_2
     ;
 
 
-FieldVarDecl ::=    DecoratedType T_ID OptArrayList T_SEMI
+FieldVarDecl ::=    DecoratedType:_1 T_ID:_2 OptArrayList:_3 T_SEMI   // use get struct to use variables here, variables inside the struct scope
+                    {:
+                        ((MyParser) parser).DoVarDeclwType(_2, _1, false, _3, null);  // this should make the var
+                    :}
     ;
 
 
@@ -340,7 +352,7 @@ CtorDtorDecl ::=    CtorDef
 
 CtorDef ::=         T_ID_U:_3
                     {:
-                        ((MyParser) parser).SaveLineNum ();
+                        ((MyParser) parser).SaveLineNum ();               // if the constructors are made.
                         ((MyParser) parser).DoFuncDecl_1(_3);
                     :}
                     T_LPAREN OptParamList:_4 T_RPAREN

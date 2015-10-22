@@ -6,6 +6,8 @@ public class StructType extends CompositeType {
     private String m_typeName;
     private int m_size;
 
+    private Scope m_structScope;
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -16,8 +18,33 @@ public class StructType extends CompositeType {
         setSize(size);
     }
 
+    public void insert(STO var){
+        m_structScope.InsertLocal(var);
+    }
+
+    public void setSize(){
+        for(STO var : m_structScope.getScopelist()){
+            if(var.getType().isBasic()){
+                m_size += 4;
+            }
+            else if(var.getType().isComposite()){
+                m_size += var.getType().getSize();
+            }
+        }
+    }
+
+
     public boolean isAssignableTo(Type t) { return false; }
     public boolean isEquivalentTo(Type t) { return t.isStruct(); }
+
+
+
+    public void setScope(Scope scope){
+        m_structScope = scope;
+    }
+    public Scope getScope(){
+        return m_structScope;
+    }
 
     //----------------------------------------------------------------
     //
@@ -50,6 +77,8 @@ public class StructType extends CompositeType {
     {
         m_size = size;
     }
+
+
 
     //----------------------------------------------------------------
     //	It will be helpful to ask a Type what specific Type it is.

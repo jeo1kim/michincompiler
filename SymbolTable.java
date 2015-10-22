@@ -18,6 +18,8 @@ class SymbolTable
 	private String m_scopeName = null;
 
 
+
+	private StructdefSTO m_struct;
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
@@ -121,13 +123,22 @@ class SymbolTable
 	public FuncSTO getFunc() { return m_func; }
 	public void setFunc(FuncSTO sto) { m_func = sto; }
 
+	public StructdefSTO getStruct() { return m_struct; }
+	public void setStruct( StructdefSTO struct){
+		m_struct = struct;
+	}
+
 	public void pushLoop(String name){
 		m_stkLooop.push(name);
 	}
 	public void popLoop(){ m_stkLooop.pop();}
 	public int getLoopSize(){ return m_stkLooop.size();}
 
-	public String getScopeName() { return m_scopeName;}
-	public void setScopeName(String name) { m_scopeName = name; }
+	// get the scope for structs
+	public Scope getScope() { return m_stkScopes.peek();}
+
+
+
+	public void setScope(String name) { m_scopeName = name; }
 
 }

@@ -230,6 +230,7 @@ class MyParser extends parser {
             }
 
             temp = DoArrayType(array, typ, arrType, 0);
+
             ret.setType(temp);
             ret.markModLVal();
             m_symtab.insert(ret);
@@ -270,6 +271,7 @@ class MyParser extends parser {
 //            if(array.size() ==1){
 //                temp.setName(typ.getName()+temp.getName());
 //            }
+            //temp.setName(typ.getName() + temp.getName());
             ret.setRef(ref);
             ret.setType(temp);
             ret.markModLVal();
@@ -281,16 +283,17 @@ class MyParser extends parser {
     Type DoArrayType(Vector<STO> array, Type base, Type arrType, int n) {
 
         if (n == array.size() - 1) {
+            //arrType.setBaseName(base.getName());
             arrType.setNextType(base); // if base case my next type is the base type
-            arrType.setName(base.getName() + arrType.getName() + "[" + array.get(n).getName() + "]");
+            arrType.setName( base.getName()+"[" + array.get(n).getName() + "]");
             arrType.setSize(array.get(array.size() - 1).getIntValue());
             return arrType;
         }
-        Type type = new ArrayType("[" + array.get(n).getName() + "]" + arrType.getName(), array.get(n).getIntValue());
+        Type type = new ArrayType("" , array.get(n).getIntValue());
         arrType.setSize(array.get(n).getIntValue());
-        arrType.setNextType(DoArrayType(array, base, type, n + 1));
 
-        //arrType.setName(base.getName() + type.getName());
+        arrType.setNextType(DoArrayType(array, base, type, n + 1));
+        arrType.setName( base.getName()+"[" + array.get(n).getName() + "]" +type.getName().replace(base.getName(),""));
         return arrType;
 
     }
@@ -318,7 +321,6 @@ class MyParser extends parser {
             }
             m_symtab.insert(sto);
         }
-
         //m_symtab.insert(sto);
     }
 
@@ -374,8 +376,6 @@ class MyParser extends parser {
             m_symtab.insert(sto);
             return;
         }
-
-
     }
 
     //----------------------------------------------------------------
@@ -410,12 +410,19 @@ class MyParser extends parser {
     //
     //----------------------------------------------------------------
     void DoStructdefDecl(String id) {
+
+
         if (m_symtab.accessLocal(id) != null) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
         }
 
         StructdefSTO sto = new StructdefSTO(id);
+
+        StructType stype = new StructType("struct", 0);  // size is 0 for now
+        stype.setScope( m_symtab.getScope());           // set the struct type scope to current scope.
+
+
         m_symtab.insert(sto);
     }
 
@@ -437,7 +444,6 @@ class MyParser extends parser {
 
         FuncSTO sto = new FuncSTO(id);
 
-
         m_symtab.insert(sto);
         //m_symtab.insertOverloadedFunc(id, sto); //all funcSTO goes into HashMap
         m_symtab.openScope();
@@ -456,7 +462,6 @@ class MyParser extends parser {
         }
 
         String key = makeHKey(id, params);
-
         FuncSTO sto = new FuncSTO(id, ret, params); //
 
         if (a != null && a.isFunc()) {  // function exist check for overload.
@@ -470,7 +475,6 @@ class MyParser extends parser {
             }
         }
         sto.addOverload(key, sto);
-
         m_symtab.insert(sto);
         //m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
         m_symtab.openScope();
@@ -489,9 +493,7 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
         }
 
-
         String key = makeHKey(id, params);
-
         FuncSTO sto = new FuncSTO(id, ret, params, ref); //
 
         if (a != null && a.isFunc()) {  // function exist check for overload.
@@ -540,6 +542,12 @@ class MyParser extends parser {
 
     }
 
+
+
+    void DoStructBlock(){
+        m_symtab.openScope();
+    }
+
     //----------------------------------------------------------------
     // Opens the Scope, global, function, brackets.
     //----------------------------------------------------------------
@@ -560,7 +568,6 @@ class MyParser extends parser {
 
 
     void ForeachCheck(Type type, boolean ref, String id, STO expr) {
-
         if (!expr.getType().isArray()) {
             m_nNumErrors++;
             m_errors.print(ErrorMsg.error12a_Foreach);
@@ -670,9 +677,7 @@ class MyParser extends parser {
         paramList = func.getParamVec();
         //<--- error case if undeclared function-call then
 
-
         //if func is not Overloaded then check 5
-
         if (!sto.isFunc()) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.not_function, sto.getName()));

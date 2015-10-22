@@ -15,7 +15,8 @@ abstract class Type
 	private String m_typeName;
 	private int m_size;
 
-	private  Type nextType;
+	private Type nextType;
+	private Scope m_structScope;
 
 	public Type(){}
 
@@ -26,6 +27,17 @@ abstract class Type
 	{
 		setName(strName);
 		setSize(size);
+	}
+
+	public String getbaseName(){
+		return m_basetype;
+	}
+	private String m_basetype;
+	public void setBaseName(String base){
+		m_basetype = base;
+	}
+	public void insert(STO var){
+		m_structScope.InsertLocal(var);
 	}
 
 	public Type getNextType(){ return nextType; }
