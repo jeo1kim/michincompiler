@@ -9,6 +9,7 @@ import java_cup.runtime.*;
 
 import javax.swing.text.Style;
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Iterator;
@@ -171,14 +172,118 @@ class MyParser extends parser {
         m_symtab.insert(sto);
     }
 
+    void DoFuncDecl_1_Ctor(String id, Vector<STO> params){
+
+        if ( (m_symtab.getStruct())  == null){
+            m_nNumErrors++;
+            m_errors.print("NOT IN STRUCT");
+            return;
+        }
+
+        STO a = m_symtab.accessLocal(id);
+        if (a != null && !a.isFunc()) //if found STO is not function
+        {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+        }
+        if (id != m_symtab.getStruct().getName()){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error13b_Ctor,id, m_symtab.getStruct().getName()));
+            return;
+        }
+
+        String key = makeHKey(id, params);
+        FuncSTO sto = new FuncSTO(id, params); //
+
+        if (a != null && a.isFunc()) {  // function exist check for overload.
+            FuncSTO exist = (FuncSTO) a;
+
+            if (exist.getOverloaded(key) != null) { // overload function doesnt exist add.
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error9_Decl, id));
+            } else { // function exist throw error
+                exist.addOverload(key, sto);
+            }
+        }
+        sto.addOverload(key, sto);
+
+        m_symtab.insert(sto);
+        m_symtab.openScope();
+
+    }
+    //----------------------------------------------------------------
+    //
+    //----------------------------------------------------------------
+    void DoStructdefDecl() {
+        StructdefSTO sto = m_symtab.getStruct();
+        sto.getType().setScope(m_symtab.getScope());           // set the struct type scope to current scope.
+        sto.getType().setStructSize();
+
+
+    }
+
+    void DoVarDeclwStruct(String id, Type typ, boolean stat, Vector<STO> array){
+
+        if (m_symtab.accessLocal(id) != null) {  // if global id exist
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            return;
+        }
+        // Type should have been done in Structtype_ID
+        if(typ.isError()){
+            m_nNumErrors++;
+            return;
+        }
+        StructdefSTO sto = new StructdefSTO(id, typ);
+        sto.setStatic(stat); // set static if static
+
+        if (array.size() > 0) {
+            StructdefSTO ret = new StructdefSTO(id, new ArrayType("", array.size()));
+            Type arrType = new ArrayType("", 0);
+            Type temp;
+            for (STO arr : array) {
+                if (arr.isError()) {
+                    m_nNumErrors++;
+                    return;
+                }
+                if (!(arr.getType().isInt())) {
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error10i_Array, getTypeName(arr)));
+                    return;
+                } else if (!arr.isConst()) {
+                    m_nNumErrors++;
+                    m_errors.print(ErrorMsg.error10c_Array);
+                    return;
+                } else if (arr.getIntValue() <= 0) {
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error10z_Array, arr.getIntValue()));
+                    return;
+                }
+            }
+
+            temp = DoArrayType(array, typ, arrType, 0);
+
+            ret.setType(temp);
+            ret.markModLVal();
+            m_symtab.insert(ret);
+            return;
+        }
+        m_symtab.insert(sto);
+    }
+
     void DoVarDeclwType(String id, Type typ, boolean stat, Vector<STO> array, STO init) {
         if (init != null && init.isError()) {
             m_nNumErrors++;
             return;    // might wanan change with !init.isError()
         }
         if (m_symtab.accessLocal(id) != null) {
+            if (m_symtab.getStruct() == null) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+                return;
+            }
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
             return;
         }
 
@@ -321,7 +426,6 @@ class MyParser extends parser {
             }
             m_symtab.insert(sto);
         }
-        //m_symtab.insert(sto);
     }
 
     //----------------------------------------------------------------
@@ -378,6 +482,7 @@ class MyParser extends parser {
         }
     }
 
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -406,31 +511,14 @@ class MyParser extends parser {
         return;
     }
 
-    //----------------------------------------------------------------
-    //
-    //----------------------------------------------------------------
-    void DoStructdefDecl(String id) {
 
 
-        if (m_symtab.accessLocal(id) != null) {
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-        }
 
-        StructdefSTO sto = new StructdefSTO(id);
-
-        StructType stype = new StructType("struct", 0);  // size is 0 for now
-        stype.setScope( m_symtab.getScope());           // set the struct type scope to current scope.
-
-
-        m_symtab.insert(sto);
-    }
 
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
     void DoFuncDecl_1(String id) {
-        boolean isThereOverloadedFunction = false;
         STO a = m_symtab.accessLocal(id);
 
         if (a != null && !(a.isFunc())) //if found STO is not function
@@ -544,8 +632,34 @@ class MyParser extends parser {
 
 
 
-    void DoStructBlock(){
+    void DoStructBlock(String id){
+
+        if (m_symtab.accessGlobal(id) != null) {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+        }
+
+        STO a = m_symtab.accessGlobal(id);
+
+        if (a != null && !a.isStructdef()) //if found STO is not function
+        {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+        }
+
+        StructdefSTO sto = new StructdefSTO(id);
+        StructType stype = new StructType(id, 0);  // size is 0 for now
+        //stype.setScope(m_symtab.getScope());           // set the struct type scope to current scope.
+        sto.setType(stype);
+        //stype.setSize();
+
         m_symtab.openScope();
+        m_symtab.setStruct(sto);
+        m_symtab.insert(sto); // should go in the global
+    }
+    void DoStructBlockClose(){
+        m_symtab.closeScope();
+        m_symtab.setStruct(null);  //close the current struct;
     }
 
     //----------------------------------------------------------------
@@ -806,12 +920,9 @@ class MyParser extends parser {
         STO sto;
         //check variable name in local scope
         if ((sto = m_symtab.accessLocal(strID)) == null) {
-            //if there is not variable name in local scope
-            //	then check the same name in global scope thus if u find
-            //	then return the global scope
-
             if ((sto = m_symtab.accessGlobal(strID)) == null) {
                 if ((sto = m_symtab.access(strID)) == null) {
+
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
                     sto = new ErrorSTO(strID);
@@ -964,13 +1075,11 @@ class MyParser extends parser {
         //type check pass by value
         if (!result.isRef()) {
             //if type is different but is assignable ex) int to float
+
             if (!exprType.isAssignableTo(resultType)) {
-                //error6a_Return_type =
                 //"Type.Type of return expression (%T), not assignment compatible with function's return type (%T).";
                 m_nNumErrors++;
-                m_errors.print(Formatter.toString(ErrorMsg.error6a_Return_type,
-                        getTypeName(a), getTypeName(resultType)));
-
+                m_errors.print(Formatter.toString(ErrorMsg.error6a_Return_type, getTypeName(a), getTypeName(resultType)));
                 return new ErrorSTO(a.getName());
             } else {
                 //m_symtab.setFunc(null);

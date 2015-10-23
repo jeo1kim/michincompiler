@@ -18,6 +18,18 @@ public abstract class CompositeType extends Type {
         setSize(size);
     }
 
+    public void setStructSize(){
+        return;
+    }
+
+    public void setScope(Scope scope){
+        m_structScope = scope;
+    }
+    public Scope getScope(){
+        return m_structScope;
+    }
+
+
     public void insert(STO var){
         m_structScope.InsertLocal(var);
     }
