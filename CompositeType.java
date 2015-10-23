@@ -1,5 +1,5 @@
 /**
- * Created by jinyongsuk on 10/8/15.
+ * Created on 10/8/15.
  */
 public abstract class CompositeType extends Type {
     // Name of the Type (e.g., int, bool, some structdef, etc.)
@@ -18,6 +18,18 @@ public abstract class CompositeType extends Type {
         setSize(size);
     }
 
+    public void setStructSize(){
+        return;
+    }
+
+    public void setScope(Scope scope){
+        m_structScope = scope;
+    }
+    public Scope getScope(){
+        return m_structScope;
+    }
+
+
     public void insert(STO var){
         m_structScope.InsertLocal(var);
     }
@@ -33,7 +45,7 @@ public abstract class CompositeType extends Type {
     }
     public void setSize() {
     }
-        //----------------------------------------------------------------
+    //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
     public String getName()

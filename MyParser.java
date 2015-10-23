@@ -171,15 +171,112 @@ class MyParser extends parser {
         m_symtab.insert(sto);
     }
 
+    void DoStructBlock(String id){
+
+        if (m_symtab.accessGlobal(id) != null) {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+        }
+
+        STO a = m_symtab.accessGlobal(id);
+
+        if (a != null && !a.isStructdef()) //if found STO is not function
+        {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+        }
+
+        StructdefSTO sto = new StructdefSTO(id);
+        StructType stype = new StructType(id, 0);  // size is 0 for now
+        //stype.setScope(m_symtab.getScope());           // set the struct type scope to current scope.
+        sto.setType(stype);
+        //stype.setSize();
+
+        m_symtab.insert(sto); // should go in the global
+
+        m_symtab.openScope();
+        m_symtab.setStruct(sto);
+    }
+    void DoStructBlockClose(){
+        m_symtab.closeScope();
+        m_symtab.setStruct(null);  //close the current struct;
+    }
+    void DoFuncDecl_1_Ctor(String id, Vector<STO> params){
+
+    }
+    //----------------------------------------------------------------
+    //
+    //----------------------------------------------------------------
+    void DoStructdefDecl() {
+        StructdefSTO sto = m_symtab.getStruct();
+        sto.getType().setScope(m_symtab.getScope());           // set the struct type scope to current scope.
+        sto.getType().setStructSize();
+
+
+    }
+
+    void DoVarDeclwStruct(String id, Type typ, boolean stat, Vector<STO> array){
+
+        if (m_symtab.accessLocal(id) != null) {  // if global id exist
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            return;
+        }
+        // Type should have been done in Structtype_ID
+        if(typ.isError()){
+            m_nNumErrors++;
+            return;
+        }
+        StructdefSTO sto = new StructdefSTO(id, typ);
+        sto.setStatic(stat); // set static if static
+
+        if (array.size() > 0) {
+            StructdefSTO ret = new StructdefSTO(id, new ArrayType("", array.size()));
+            Type arrType = new ArrayType("", 0);
+            Type temp;
+            for (STO arr : array) {
+                if (arr.isError()) {
+                    m_nNumErrors++;
+                    return;
+                }
+                if (!(arr.getType().isInt())) {
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error10i_Array, getTypeName(arr)));
+                    return;
+                } else if (!arr.isConst()) {
+                    m_nNumErrors++;
+                    m_errors.print(ErrorMsg.error10c_Array);
+                    return;
+                } else if (arr.getIntValue() <= 0) {
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error10z_Array, arr.getIntValue()));
+                    return;
+                }
+            }
+
+            temp = DoArrayType(array, typ, arrType, 0);
+
+            ret.setType(temp);
+            ret.markModLVal();
+            m_symtab.insert(ret);
+            return;
+        }
+        m_symtab.insert(sto);
+    }
+
+
     void DoVarDeclwType(String id, Type typ, boolean stat, Vector<STO> array, STO init) {
         if (init != null && init.isError()) {
             m_nNumErrors++;
             return;    // might wanan change with !init.isError()
         }
         if (m_symtab.accessLocal(id) != null) {
+            if (m_symtab.getStruct() == null) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            }
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-            return;
+            m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
         }
 
 
@@ -197,12 +294,12 @@ class MyParser extends parser {
             if (!initType.isAssignableTo(sto.getType())) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error8_Assign, getTypeName(init), getTypeName(typ)));
-                return;
-            } else { // exp is assignable to this varSto type. so
-                sto.setValue(init.getValue()); // set the value
-                m_symtab.insert(sto);
-                return;
             }
+            else { // exp is assignable to this varSto type. so
+                sto.setValue(init.getValue()); // set the value
+                //m_symtab.insert(sto);
+            }
+            m_symtab.insert(sto);
         }
         //case where var is an array
         else if (array.size() > 0) {
@@ -419,7 +516,7 @@ class MyParser extends parser {
 
         StructdefSTO sto = new StructdefSTO(id);
 
-        StructType stype = new StructType("struct", 0);  // size is 0 for now
+        StructType stype = new StructType(id, 0);  // size is 0 for now
         stype.setScope( m_symtab.getScope());           // set the struct type scope to current scope.
 
 
@@ -437,7 +534,6 @@ class MyParser extends parser {
         {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-            return;
             //error9_Decl
             // "Duplicate declaration of overloaded function %S.";
         }
@@ -457,8 +553,12 @@ class MyParser extends parser {
         STO a = m_symtab.accessLocal(id);
         if (a != null && !(a.isFunc())) //if found STO is not function
         {
+            if (m_symtab.getStruct() == null) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            }
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
         }
 
         String key = makeHKey(id, params);
@@ -489,8 +589,12 @@ class MyParser extends parser {
 
         if (a != null && !a.isFunc()) //if found STO is not function
         {
+            if (m_symtab.getStruct() == null) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            }
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
         }
 
         String key = makeHKey(id, params);

@@ -26,13 +26,19 @@ class StructdefSTO extends STO
 	public StructdefSTO(String strName)
 	{
 		super(strName);
+		init();
 	}
 
 	public StructdefSTO(String strName, Type typ)
 	{
 		super(strName, typ);
+		init();
 	}
 
+	public void init (){
+		setIsModifiable(true);
+		setIsAddressable(true);
+	}
 
 	public void setStatic(boolean stat){ m_static = stat;}
 	public boolean isStatic(){ return m_static; }

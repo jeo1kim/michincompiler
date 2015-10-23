@@ -268,7 +268,7 @@ VarDecl ::=         OptStatic:_1 DecoratedType:_2 T_ID:_3 OptArrayList:_4 OptIni
                     T_SEMI
     |               OptStatic:_1 StructType:_2 T_ID:_3 OptArrayList:_4 OptCtorCall:_5
                     {:
-                        ((MyParser) parser).DoVarDecl (_3);
+                        ((MyParser) parser).DoVarDeclwStruct (_3, _2, _1, _4);
                     :}
                     T_SEMI
     ;
@@ -299,7 +299,7 @@ OptStatic ::=       T_STATIC
 
 StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
                     {:
-                        ((MyParser) parser).DoStructBlock();
+                        ((MyParser) parser).DoStructBlock(_1);
                         // do struct decl.
                         //do struct open will insert struct into global
                         //grab scope from symbol table and insert into struct
@@ -316,8 +316,8 @@ StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
                     :}
                     OptFieldFuncsList
                     {:
-                        ((MyParser) parser).DoBlockClose();
-                        ((MyParser) parser).DoStructdefDecl (_1);
+                         ((MyParser) parser).DoStructdefDecl ();
+                         ((MyParser) parser).DoStructBlockClose();
                     :}
                     T_RBRACE T_SEMI
     ;
@@ -353,10 +353,10 @@ CtorDtorDecl ::=    CtorDef
 CtorDef ::=         T_ID_U:_3
                     {:
                         ((MyParser) parser).SaveLineNum ();               // if the constructors are made.
-                        ((MyParser) parser).DoFuncDecl_1(_3);
                     :}
                     T_LPAREN OptParamList:_4 T_RPAREN
                     {:
+                        ((MyParser) parser).DoFuncDecl_1_Ctor(_3, _4);
                         ((MyParser) parser).DoFormalParams(_4);
                     :}
                     T_LBRACE OptStmtList T_RBRACE
@@ -660,14 +660,12 @@ OptElse ::=         T_ELSE CodeBlock
 WhileStmt ::=       T_WHILE Expr:_1
                      {:
                         ((MyParser) parser).DoConditionCheck(_1);
-                        ((MyParser) parser).DoBlockOpen();
                         ((MyParser) parser).pushLoop("while");
 
                      :}
                      CodeBlock:_2
                      {:
 
-                        ((MyParser) parser).DoBlockClose();
                         ((MyParser) parser).popLoop();
 
                      :}
@@ -676,8 +674,8 @@ WhileStmt ::=       T_WHILE Expr:_1
 
 ForeachStmt ::=     T_FOREACH T_LPAREN Type:_1 OptRef:_2 T_ID:_3 T_COLON Expr:_4 T_RPAREN
                     {:
-                        ((MyParser) parser).DoBlockOpen();
                         ((MyParser) parser).pushLoop("for");
+                        ((MyParser) parser).DoBlockOpen();
                         ((MyParser) parser).DoVarDeclwType (_3, _1, false, new Vector(), null );
                         ((MyParser) parser).ForeachCheck(_1, _2, _3, _4);
 
@@ -685,7 +683,6 @@ ForeachStmt ::=     T_FOREACH T_LPAREN Type:_1 OptRef:_2 T_ID:_3 T_COLON Expr:_4
                     CodeBlock:_5
 
                     {:
-
                         ((MyParser) parser).DoBlockClose();
                         ((MyParser) parser).popLoop();
                     :}

@@ -12,7 +12,7 @@ import java.util.Vector;
 class FuncSTO extends STO
 {
 	private String m_strName;
-	private Type m_type;
+	private Type m_type = new VoidType("void", 1);
 	private boolean m_isAddressable;
 	private boolean m_isModifiable;
 	private boolean m_isRetByRef;
@@ -40,12 +40,10 @@ class FuncSTO extends STO
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}
-	public FuncSTO(String strName, Type retType)
-	{
+	public FuncSTO(String strName, Vector<STO> params)	{
 		super (strName);
-		setType(retType);
-		setReturnType(retType);
 		setName(strName);
+		setParamVec(params);
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
 	}

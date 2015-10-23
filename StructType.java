@@ -4,7 +4,7 @@
 public class StructType extends CompositeType {
     // Name of the Type (e.g., int, bool, some structdef, etc.)
     private String m_typeName;
-    private int m_size;
+    private int m_size = 0;
 
     private Scope m_structScope;
 
@@ -22,7 +22,7 @@ public class StructType extends CompositeType {
         m_structScope.InsertLocal(var);
     }
 
-    public void setSize(){
+    public void setStructSize(){
         for(STO var : m_structScope.getScopelist()){
             if(var.getType().isBasic()){
                 m_size += 4;
@@ -34,9 +34,8 @@ public class StructType extends CompositeType {
     }
 
 
-    public boolean isAssignableTo(Type t) { return false; }
-    public boolean isEquivalentTo(Type t) { return t.isStruct(); }
-
+    public boolean isAssignableTo(Type t) { return this.getName() == t.getName(); }
+    public boolean isEquivalentTo(Type t) { return this.getName() == t.getName(); }
 
 
     public void setScope(Scope scope){
