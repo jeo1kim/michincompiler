@@ -683,7 +683,11 @@ ForeachStmt ::=     T_FOREACH T_LPAREN Type:_1 OptRef:_2 T_ID:_3 T_COLON Expr:_4
                     CodeBlock:_5
 
                     {:
+<<<<<<< HEAD
                         ((MyParser) parser).DoBlockClose();
+=======
+
+>>>>>>> 96ce84b3945ecb14dd9f57dcf967e20136941c44
                         ((MyParser) parser).popLoop();
                     :}
     ;

@@ -40,6 +40,11 @@ class StructdefSTO extends STO
 		setIsAddressable(true);
 	}
 
+	public void init (){
+		setIsModifiable(true);
+		setIsAddressable(true);
+	}
+
 	public void setStatic(boolean stat){ m_static = stat;}
 	public boolean isStatic(){ return m_static; }
 	public void setRef(boolean ref){ m_ref = ref; }
