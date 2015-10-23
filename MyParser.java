@@ -172,18 +172,6 @@ class MyParser extends parser {
         m_symtab.insert(sto);
     }
 
-<<<<<<< HEAD
-    void DoStructBlock(String id){
-
-        if (m_symtab.accessGlobal(id) != null) {
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-        }
-
-        STO a = m_symtab.accessGlobal(id);
-
-        if (a != null && !a.isStructdef()) //if found STO is not function
-=======
     void DoFuncDecl_1_Ctor(String id, Vector<STO> params){
 
         if ( (m_symtab.getStruct())  == null){
@@ -194,30 +182,11 @@ class MyParser extends parser {
 
         STO a = m_symtab.accessLocal(id);
         if (a != null && !a.isFunc()) //if found STO is not function
->>>>>>> 96ce84b3945ecb14dd9f57dcf967e20136941c44
         {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
         }
-<<<<<<< HEAD
 
-        StructdefSTO sto = new StructdefSTO(id);
-        StructType stype = new StructType(id, 0);  // size is 0 for now
-        //stype.setScope(m_symtab.getScope());           // set the struct type scope to current scope.
-        sto.setType(stype);
-        //stype.setSize();
-
-        m_symtab.insert(sto); // should go in the global
-
-        m_symtab.openScope();
-        m_symtab.setStruct(sto);
-    }
-    void DoStructBlockClose(){
-        m_symtab.closeScope();
-        m_symtab.setStruct(null);  //close the current struct;
-    }
-    void DoFuncDecl_1_Ctor(String id, Vector<STO> params){
-=======
         if (id != m_symtab.getStruct().getName()){
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error13b_Ctor,id, m_symtab.getStruct().getName()));
@@ -241,8 +210,6 @@ class MyParser extends parser {
 
         m_symtab.insert(sto);
         m_symtab.openScope();
->>>>>>> 96ce84b3945ecb14dd9f57dcf967e20136941c44
-
     }
     //----------------------------------------------------------------
     //
@@ -304,10 +271,6 @@ class MyParser extends parser {
         m_symtab.insert(sto);
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 96ce84b3945ecb14dd9f57dcf967e20136941c44
     void DoVarDeclwType(String id, Type typ, boolean stat, Vector<STO> array, STO init) {
         if (init != null && init.isError()) {
             m_nNumErrors++;
@@ -317,19 +280,11 @@ class MyParser extends parser {
             if (m_symtab.getStruct() == null) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-<<<<<<< HEAD
             }
             else {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
             }
-=======
-                return;
-            }
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
-            return;
->>>>>>> 96ce84b3945ecb14dd9f57dcf967e20136941c44
         }
 
 
@@ -558,11 +513,6 @@ class MyParser extends parser {
 
 
 
-<<<<<<< HEAD
-        StructType stype = new StructType(id, 0);  // size is 0 for now
-        stype.setScope( m_symtab.getScope());           // set the struct type scope to current scope.
-=======
->>>>>>> 96ce84b3945ecb14dd9f57dcf967e20136941c44
 
 
     //----------------------------------------------------------------
