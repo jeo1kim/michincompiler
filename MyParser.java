@@ -275,8 +275,10 @@ class MyParser extends parser {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
             }
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
+            else {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
+            }
         }
 
 
