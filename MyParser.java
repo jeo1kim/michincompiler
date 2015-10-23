@@ -548,8 +548,10 @@ class MyParser extends parser {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
             }
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
+            else {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
+            }
         }
 
         String key = makeHKey(id, params);
@@ -584,8 +586,10 @@ class MyParser extends parser {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
             }
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
+            else {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
+            }
         }
 
         String key = makeHKey(id, params);
@@ -781,6 +785,12 @@ class MyParser extends parser {
             return sto;
         }
         // func holds expected param
+        if (!m_symtab.access(sto.getName()).isFunc()){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.not_function, sto.getName()));
+            return new ErrorSTO(sto.getName());
+        }
+
         FuncSTO func = (FuncSTO) m_symtab.access(sto.getName());
 
         String hKey = makeHKey(sto.getName(), argTyp); //u can use it for anyother func call
