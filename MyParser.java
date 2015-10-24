@@ -982,12 +982,12 @@ class MyParser extends parser {
             if(sto.getName() == "this"){
                 if((ret = m_symtab.getStruct().getType().getScope().access(strID)) == null ){
                     m_nNumErrors++;
-                    m_errors.print(Formatter.toString(ErrorMsg.error14c_StructExpThis,strID, sto.getName()));
+                    m_errors.print(Formatter.toString(ErrorMsg.error14c_StructExpThis, strID));
                 }
             }
             else if((ret = sType.getScope().access(strID)) == null ){
                 m_nNumErrors++;
-                m_errors.print(Formatter.toString(ErrorMsg.error14f_StructExp,strID, sto.getName()));
+                m_errors.print(Formatter.toString(ErrorMsg.error14f_StructExp,strID, sto.getType().getName()));
             }
 
         }
