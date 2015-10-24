@@ -319,6 +319,7 @@ StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
                         //if so create a function to pass in funcdecl
                         // Put logic here to create default ctor if needed
 
+                        //((MyParser) parser).DoFieldVar(_2);
                         ((MyParser) parser).DoStructdefDecl ();
 
                         ((MyParser) parser).DefaultCtorCheck(_1, new Vector());    // create default ctor and close scope
@@ -336,7 +337,15 @@ StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
 
 
 FieldVarsList ::=   FieldVarDecl:_1
+                    {:
+                        //RESULT = new Vector();
+                        //RESULT.addElement(_1);
+                    :}
     |               FieldVarsList:_1 FieldVarDecl:_2
+                    {:
+                        //RESULT = _1;
+                        //RESULT.addElement (_2);
+                    :}
     ;
 
 
@@ -648,8 +657,10 @@ NewStmt ::=     T_NEW Designator OptCtorCall T_SEMI
 
     ;
 
-DeleteStmt ::=  T_DELETE Designator T_SEMI
-
+DeleteStmt ::=  T_DELETE Designator:_1 T_SEMI
+                {:
+                    RESULT = _1;
+                :}
     ;
 
 

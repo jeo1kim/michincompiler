@@ -952,12 +952,11 @@ class MyParser extends parser {
     }
 
     STO DoStructThis(STO sto ){
-        Type sType = m_symtab.getStruct().getType();
-        sto.setType(sType);
+        STO ret = m_symtab.getStruct();
 
-        sto.markRVal();
+        ret.markRVal();
 
-        return sto;
+        return ret;
     }
 
     //----------------------------------------------------------------
@@ -981,8 +980,11 @@ class MyParser extends parser {
         STO ret = sto;
         if(sType.isStruct()){
 
-            if(sto.getName() == "this"){
-                if((ret = m_symtab.getStruct().getType().getScope().access(strID)) == null ){
+            if(sto == m_symtab.getStruct()){
+
+                // Change THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ACCESS OK? Or
+
+                if((ret = m_symtab.access(strID)) == null ){
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error14c_StructExpThis, strID));
                     return new ErrorSTO(sto.getName());
