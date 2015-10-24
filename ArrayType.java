@@ -89,7 +89,6 @@ public class ArrayType extends CompositeType {
         }
     }
     public void setBaseName(String base){
-        System.out.println(base);
         m_basetype = base;
     }
 

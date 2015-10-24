@@ -31,11 +31,11 @@ public abstract class ArithmeticOp extends BinaryOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
-        if( !(aType instanceof NumericType))
+        if( !(aType.isNumeric()))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, aType.getName(),opName));
         }
-        if(!(bType instanceof NumericType))
+        if(!(bType.isNumeric()))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1n_Expr, bType.getName(), opName));
         }
