@@ -352,6 +352,7 @@ FieldVarsList ::=   FieldVarDecl:_1
 FieldVarDecl ::=    DecoratedType:_1 T_ID:_2 OptArrayList:_3 T_SEMI   // use get struct to use variables here, variables inside the struct scope
                     {:
                         ((MyParser) parser).DoVarDeclwType(_2, _1, false, _3, null);  // this should make the var
+                        ((MyParser) parser).DoStructdefDecl ();
                     :}
     ;
 

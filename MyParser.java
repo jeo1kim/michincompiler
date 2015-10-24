@@ -288,7 +288,6 @@ class MyParser extends parser {
     }
 
 
-
     void DoVarDeclwStruct(String id, Type typ, boolean stat, Vector<STO> array, Vector<STO> optCtor) {
 
         if (m_symtab.access(id) != null) {  // if global id exist
@@ -303,7 +302,7 @@ class MyParser extends parser {
         }
         StructdefSTO sto = new StructdefSTO(id, typ);
         sto.setStatic(stat); // set static if static
-            // if ctor is default ctor.
+        // if ctor is default ctor.
         DoFuncCall(sto, optCtor);
 
 
@@ -951,55 +950,45 @@ class MyParser extends parser {
 
     }
 
-    STO DoStructThis(STO sto ){
+    STO DoStructThis(STO sto) {
         STO ret = m_symtab.getStruct();
-
         ret.markRVal();
-
         return ret;
     }
 
-    //----------------------------------------------------------------
-    //
-    //----------------------------------------------------------------
     STO DoDesignator2_Dot(STO sto, String strID) {
         // Good place to do the struct checks
 
-        if(sto.isError()){
+        if (sto.isError()) {
             m_nNumErrors++;
             return new ErrorSTO(sto.getName());
         }
 
         Type sType = sto.getType();
-        if(!sType.isStruct()){
+        if (!sType.isStruct()) {
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error14t_StructExp,getTypeName(sto)));
+            m_errors.print(Formatter.toString(ErrorMsg.error14t_StructExp, getTypeName(sto)));
             return new ErrorSTO(sto.getName());
 
         }
+
         STO ret = sto;
-        if(sType.isStruct()){
+        if (sto == m_symtab.getStruct()) {
 
-            if(sto == m_symtab.getStruct()){
+            // Change THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ACCESS OK? Or
 
-                // Change THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ACCESS OK? Or
-
-                if((ret = m_symtab.access(strID)) == null ){
-                    m_nNumErrors++;
-                    m_errors.print(Formatter.toString(ErrorMsg.error14c_StructExpThis, strID));
-                    return new ErrorSTO(sto.getName());
-
-                }
-            }
-            else if((ret = sType.getScope().access(strID)) == null ){
+            if ((ret = sto.getType().getScope().access(strID)) == null) {
                 m_nNumErrors++;
-                m_errors.print(Formatter.toString(ErrorMsg.error14f_StructExp,strID, sto.getType().getName()));
+                m_errors.print(Formatter.toString(ErrorMsg.error14c_StructExpThis, strID));
                 return new ErrorSTO(sto.getName());
 
             }
+        } else if ((ret = sType.getScope().access(strID)) == null) {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error14f_StructExp, strID, sto.getType().getName()));
+            return new ErrorSTO(sto.getName());
 
         }
-
 
 //        if ((sto = m_symtab.accessGlobal(strID)) == null) {
 //            m_nNumErrors++;
@@ -1058,16 +1047,25 @@ class MyParser extends parser {
     STO DoDesignator3_ID(String strID) {
         STO sto;
         //check variable name in local scope
-        if ((sto = m_symtab.accessLocal(strID)) == null) {
-            if ((sto = m_symtab.accessGlobal(strID)) == null) {
-                if ((sto = m_symtab.access(strID)) == null) {
+
+        if (m_symtab.getStruct() != null) {
+            if ((sto = m_symtab.accessLocal(strID)) == null) {
+                if ((sto = m_symtab.accessGlobal(strID)) == null) {
 
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
                     sto = new ErrorSTO(strID);
+
                 }
             }
+            return sto;
+        }
 
+        if ((sto = m_symtab.access(strID)) == null) {
+
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
+            sto = new ErrorSTO(strID);
         }
         return sto;
     }
