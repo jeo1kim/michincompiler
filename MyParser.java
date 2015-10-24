@@ -191,7 +191,7 @@ class MyParser extends parser {
         }
 
         String key = makeHKey(id, new Vector<>());
-        FuncSTO sto = new FuncSTO(id, new Vector<>()); //
+        FuncSTO sto = new FuncSTO(id, new Vector<STO>()); //
 
         if (a != null && a.isFunc()) {  // function exist check for overload.
             FuncSTO exist = (FuncSTO) a;
