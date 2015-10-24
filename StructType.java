@@ -34,8 +34,8 @@ public class StructType extends CompositeType {
     }
 
 
-    public boolean isAssignableTo(Type t) { return this.getName().equals(t.getName()); }
-    public boolean isEquivalentTo(Type t) { return this.getName().equals(t.getName()); }
+    public boolean isAssignableTo(Type t) { return this.getName().replace("~","").equals(t.getName().replace("~", "")); }
+    public boolean isEquivalentTo(Type t) { return this.getName().replace("~","").equals(t.getName().replace("~","")); }
 
 
     public void setScope(Scope scope){
