@@ -287,6 +287,8 @@ class MyParser extends parser {
 
     }
 
+
+
     void DoVarDeclwStruct(String id, Type typ, boolean stat, Vector<STO> array, Vector<STO> optCtor) {
 
         if (m_symtab.access(id) != null) {  // if global id exist
@@ -949,6 +951,15 @@ class MyParser extends parser {
 
     }
 
+    STO DoStructThis(STO sto ){
+        Type sType = m_symtab.getStruct().getType();
+        sto.setType(sType);
+
+        sto.markRVal();
+
+        return sto;
+    }
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -967,10 +978,18 @@ class MyParser extends parser {
         }
         STO ret = sto;
         if(sType.isStruct()){
-            if( (ret = sType.getScope().access(strID)) == null ){
+
+            if(sto.getName() == "this"){
+                if((ret = m_symtab.getStruct().getType().getScope().access(strID)) == null ){
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error14c_StructExpThis,strID, sto.getName()));
+                }
+            }
+            else if((ret = sType.getScope().access(strID)) == null ){
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error14f_StructExp,strID, sto.getName()));
             }
+
         }
 
 
@@ -980,8 +999,7 @@ class MyParser extends parser {
 //            sto = new ErrorSTO(strID);
 //        }
 
-
-        return sto;
+        return ret;
     }
 
     //----------------------------------------------------------------

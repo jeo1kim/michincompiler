@@ -1088,7 +1088,7 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_THIS
                     {:
-                        RESULT = new ExprSTO ("this");              // fix me!
+                        RESULT =  ((MyParser) parser).DoStructThis(new ExprSTO ("this"));              // fix me!
                     :}
     |               T_COLONCOLON T_ID:_1
                     {:
