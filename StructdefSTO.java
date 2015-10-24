@@ -19,7 +19,16 @@ class StructdefSTO extends STO
 	private boolean m_isModifiable;
 	private boolean m_ref  = false;
 
+	private boolean constructor = false;
+
 	private boolean m_static;
+
+	public boolean hasConstructor(){
+		return constructor;
+	}
+	public void setConstructor(boolean con){
+		constructor = con;
+	}
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------

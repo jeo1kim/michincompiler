@@ -172,6 +172,48 @@ class MyParser extends parser {
         m_symtab.insert(sto);
     }
 
+    void DoFuncDecl_1_Dtor(String id){
+        if ( (m_symtab.getStruct())  == null){
+            m_nNumErrors++;
+            m_errors.print("NOT IN STRUCT");
+            return;
+        }
+        // check constructor is a fxn
+        STO a = m_symtab.accessLocal(id);
+        if (a != null && !a.isFunc()) //if found STO is not function
+        {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            return;                                                              // do i need return? ctor dtor
+        }
+        // if constructor and struct name are different
+        if (id != m_symtab.getStruct().getName()){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error13b_Dtor, id, m_symtab.getStruct().getName()));
+            return;
+        }
+
+        String key = makeHKey(id, new Vector<>());
+        FuncSTO sto = new FuncSTO(id, new Vector<>()); //
+
+        if (a != null && a.isFunc()) {  // function exist check for overload.
+            FuncSTO exist = (FuncSTO) a;
+
+            if (exist.getOverloaded(key) != null) { // overload function doesnt exist add.
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error9_Decl, id));
+            } else { // function exist throw error
+                exist.addOverload(key, sto);
+            }
+        }
+
+        sto.addOverload(key, sto);
+
+        m_symtab.insert(sto);
+        m_symtab.openScope();
+
+    }
+
     void DoFuncDecl_1_Ctor(String id, Vector<STO> params){
 
         if ( (m_symtab.getStruct())  == null){
@@ -179,17 +221,18 @@ class MyParser extends parser {
             m_errors.print("NOT IN STRUCT");
             return;
         }
-
+        // check constructor is a fxn
         STO a = m_symtab.accessLocal(id);
         if (a != null && !a.isFunc()) //if found STO is not function
         {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            return;
         }
-
+        // if constructor and struct name are different
         if (id != m_symtab.getStruct().getName()){
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error13b_Ctor,id, m_symtab.getStruct().getName()));
+            m_errors.print(Formatter.toString(ErrorMsg.error13b_Ctor, id, m_symtab.getStruct().getName()));
             return;
         }
 
@@ -206,7 +249,9 @@ class MyParser extends parser {
                 exist.addOverload(key, sto);
             }
         }
+
         sto.addOverload(key, sto);
+        m_symtab.getStruct().setConstructor(true); // it has constructor
 
         m_symtab.insert(sto);
         m_symtab.openScope();

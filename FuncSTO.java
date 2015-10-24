@@ -25,60 +25,16 @@ class FuncSTO extends STO
 
 	public HashMap<String, FuncSTO> m_overLoadFuncName = new HashMap<>();
 
+	private boolean constructor = false;
 
-	//----------------------------------------------------------------
-	//
-	//----------------------------------------------------------------
 
-	public FuncSTO(String strName)
-	{
-		super (strName);
-		setType(new VoidType("void", 1));
-		setName(strName);
-		m_return_top_level = false;
 
-		// You may want to change the isModifiable and isAddressable
-		// fields as necessary
+	public boolean hasConstructor(){
+		return constructor;
 	}
-
-	public FuncSTO(String strName, Vector<STO> params)
-	{
-		super (strName);
-		setName(strName);
-		setParamVec(params);
-		// You may want to change the isModifiable and isAddressable
-		// fields as necessary
+	public void setConstructor(boolean con){
+		constructor = con;
 	}
-	public FuncSTO(String strName, Type retType, Vector<STO> params)
-	{
-		super (strName);
-		setName(strName);
-		setType(retType);
-		setParamVec(params);
-		// You may want to change the isModifiable and isAddressable
-		// fields as necessary
-	}
-
-
-	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
-	{
-		super (strName);
-		initSTO(strName,retType, params, ref);
-		setParamVec(params);
-		m_return_top_level = false;
-		// You may want to change the isModifiable and isAddressable
-		// fields as necessary
-	}
-
-
-	public void initSTO(String strName, Type retType, Vector<STO> params, boolean ref){
-		setReturnType(retType);
-		setType(retType);
-		setName(strName);
-		setRef(ref);
-		setParamCount(params.size());
-	}
-
 
 	public void addOverload(String overloadName, FuncSTO func){
 			m_overLoadFuncName.put(overloadName, func );
@@ -254,5 +210,58 @@ class FuncSTO extends STO
 	public Type getReturnType ()
 	{
 		return m_type;
+	}
+
+	//----------------------------------------------------------------
+	//
+	//----------------------------------------------------------------
+
+	public FuncSTO(String strName)
+	{
+		super (strName);
+		setType(new VoidType("void", 1));
+		setName(strName);
+		m_return_top_level = false;
+
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+
+	public FuncSTO(String strName, Vector<STO> params)
+	{
+		super (strName);
+		setName(strName);
+		setParamVec(params);
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+	public FuncSTO(String strName, Type retType, Vector<STO> params)
+	{
+		super (strName);
+		setName(strName);
+		setType(retType);
+		setParamVec(params);
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+
+
+	public FuncSTO(String strName, Type retType, Vector<STO> params, boolean ref)
+	{
+		super (strName);
+		initSTO(strName,retType, params, ref);
+		setParamVec(params);
+		m_return_top_level = false;
+		// You may want to change the isModifiable and isAddressable
+		// fields as necessary
+	}
+
+
+	public void initSTO(String strName, Type retType, Vector<STO> params, boolean ref){
+		setReturnType(retType);
+		setType(retType);
+		setName(strName);
+		setRef(ref);
+		setParamCount(params.size());
 	}
 }

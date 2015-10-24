@@ -311,8 +311,8 @@ StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
 
                         //call method to check constructor flag in my parser
                         //if so create a function to pass in funcdecl
-
                         // Put logic here to create default ctor if needed
+                        ((MyParser) parser).DoFuncDecl_1_Ctor(_1, new Vector());
                     :}
                     OptFieldFuncsList
                     {:
@@ -335,7 +335,7 @@ FieldVarDecl ::=    DecoratedType:_1 T_ID:_2 OptArrayList:_3 T_SEMI   // use get
     ;
 
 
-OptCtorDtorList ::= CtorDtorList
+OptCtorDtorList ::= CtorDtorList:_1
     |               /* empty */
     ;
 
@@ -345,8 +345,14 @@ CtorDtorList ::=    CtorDtorDecl
     ;
 
 
-CtorDtorDecl ::=    CtorDef
-    |               DtorDef
+CtorDtorDecl ::=    CtorDef:_1
+                    {:
+                        RESULT = _1;
+                    :}
+    |               DtorDef:_1
+                    {:
+                        RESULT = _1;
+                    :}
     ;
 
 
@@ -369,7 +375,7 @@ CtorDef ::=         T_ID_U:_3
 DtorDef ::=         T_TILDE T_ID_U:_3
                     {:
                         ((MyParser) parser).SaveLineNum ();
-                        ((MyParser) parser).DoFuncDecl_1("~" + _3);
+                        ((MyParser) parser).DoFuncDecl_1_Dtor("~" + _3);
                     :}
                     T_LPAREN T_RPAREN T_LBRACE OptStmtList T_RBRACE
                     {:
