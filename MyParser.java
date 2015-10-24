@@ -975,22 +975,25 @@ class MyParser extends parser {
         if(!sType.isStruct()){
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error14t_StructExp,getTypeName(sto)));
-        }
-           STO ret = sto;
-//        if(sType.isArray()){            // DO I EED TO CHECK ARRAY.DOT?
+            return new ErrorSTO(sto.getName());
 
-//        }
+        }
+        STO ret = sto;
         if(sType.isStruct()){
 
             if(sto.getName() == "this"){
                 if((ret = m_symtab.getStruct().getType().getScope().access(strID)) == null ){
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error14c_StructExpThis, strID));
+                    return new ErrorSTO(sto.getName());
+
                 }
             }
             else if((ret = sType.getScope().access(strID)) == null ){
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error14f_StructExp,strID, sto.getType().getName()));
+                return new ErrorSTO(sto.getName());
+
             }
 
         }
