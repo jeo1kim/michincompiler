@@ -190,7 +190,7 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error13b_Dtor, id, m_symtab.getStruct().getName()));
         }
 
-        String key = makeHKey(id, new Vector<>());
+        String key = makeHKey(id, new Vector<STO>());
         FuncSTO sto = new FuncSTO(id, new Vector<STO>()); //
 
         if (a != null && a.isFunc()) {  // function exist check for overload.
