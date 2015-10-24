@@ -272,6 +272,10 @@ VarDecl ::=         OptStatic:_1 DecoratedType:_2 T_ID:_3 OptArrayList:_4 OptIni
                     {:
                         ((MyParser) parser).DoVarDeclwStruct (_3, _2, _1, _4, _5);
                     :}
+                   /* OptCtorCall:_5
+                    {:
+                        ((MyParser) parser).CheckStructInstantiation(_3 , _5);
+                    :}*/
                     T_SEMI
     ;
 
@@ -307,18 +311,22 @@ StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
                         //grab scope from symbol table and insert into struct
 
                     :}
-                    FieldVarsList                       // insert the vars into the symbol table it doesnt matter..... really nick?
-                    OptCtorDtorList
+                    FieldVarsList:_2                       // insert the vars into the symbol table it doesnt matter..... really nick?
+                    OptCtorDtorList:_3
                     {:
 
                         //call method to check constructor flag in my parser
                         //if so create a function to pass in funcdecl
                         // Put logic here to create default ctor if needed
+
+                        ((MyParser) parser).DoStructdefDecl ();
+
                         ((MyParser) parser).DefaultCtorCheck(_1, new Vector());    // create default ctor and close scope
                         ((MyParser) parser).DoFuncDecl_2();                         // double check for scoping
 
+
                     :}
-                    OptFieldFuncsList
+                    OptFieldFuncsList:_4
                     {:
                          ((MyParser) parser).DoStructdefDecl ();
                          ((MyParser) parser).DoStructBlockClose();

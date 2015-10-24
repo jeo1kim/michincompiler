@@ -276,12 +276,20 @@ class MyParser extends parser {
         sto.getType().setScope(m_symtab.getScope());           // set the struct type scope to current scope.
         sto.getType().setStructSize();
 
+//        StructdefSTO sto = m_symtab.getStruct();
+//
+//        Scope scope = sto.getType().getScope();
+//        for(STO var : structList){
+//            scope.InsertLocal(var);
+//        }
+//        sto.getType().setScope(scope);           // set the struct type scope to current scope.
+//        sto.getType().setStructSize();
 
     }
 
     void DoVarDeclwStruct(String id, Type typ, boolean stat, Vector<STO> array, Vector<STO> optCtor) {
 
-        if (m_symtab.accessLocal(id) != null) {  // if global id exist
+        if (m_symtab.access(id) != null) {  // if global id exist
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
             return;
@@ -716,9 +724,9 @@ class MyParser extends parser {
         sto.setType(stype);
         //stype.setSize();
 
+        m_symtab.insert(sto); // should go in the global
         m_symtab.openScope();
         m_symtab.setStruct(sto);
-        m_symtab.insert(sto); // should go in the global
     }
 
     void DoStructBlockClose() {
@@ -947,6 +955,32 @@ class MyParser extends parser {
     STO DoDesignator2_Dot(STO sto, String strID) {
         // Good place to do the struct checks
 
+        if(sto.isError()){
+            m_nNumErrors++;
+            return new ErrorSTO(sto.getName());
+        }
+
+        Type sType = sto.getType();
+        if(!sType.isStruct()){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error14t_StructExp,getTypeName(sto)));
+        }
+        STO ret = sto;
+        if(sType.isStruct()){
+            if( (ret = sType.getScope().access(strID)) == null ){
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error14f_StructExp,strID, sto.getName()));
+            }
+        }
+
+
+//        if ((sto = m_symtab.accessGlobal(strID)) == null) {
+//            m_nNumErrors++;
+//            m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
+//            sto = new ErrorSTO(strID);
+//        }
+
+
         return sto;
     }
 
@@ -1018,7 +1052,7 @@ class MyParser extends parser {
     Type DoStructType_ID(String strID) {
         STO sto;
 
-        if ((sto = m_symtab.access(strID)) == null) {
+        if ((sto = m_symtab.accessGlobal(strID)) == null) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
             return new ErrorType();

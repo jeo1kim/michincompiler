@@ -39,6 +39,8 @@ public class StructType extends CompositeType {
 
 
     public void setScope(Scope scope){
+
+
         m_structScope = scope;
     }
     public Scope getScope(){
