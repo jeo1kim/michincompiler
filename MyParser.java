@@ -976,7 +976,10 @@ class MyParser extends parser {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error14t_StructExp,getTypeName(sto)));
         }
-        STO ret = sto;
+           STO ret = sto;
+//        if(sType.isArray()){            // DO I EED TO CHECK ARRAY.DOT?
+
+//        }
         if(sType.isStruct()){
 
             if(sto.getName() == "this"){
