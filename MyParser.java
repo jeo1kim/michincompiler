@@ -278,7 +278,7 @@ class MyParser extends parser {
 
     }
 
-    void DoVarDeclwStruct(String id, Type typ, boolean stat, Vector<STO> array){
+    void DoVarDeclwStruct(String id, Type typ, boolean stat, Vector<STO> array, STO optCtor){
 
         if (m_symtab.accessLocal(id) != null) {  // if global id exist
             m_nNumErrors++;

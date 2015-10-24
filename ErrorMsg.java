@@ -192,7 +192,7 @@ class ErrorMsg
 
     // Check 14 //
     public static final String error14t_StructExp =
-      "Type.Type of expression referenced by \".\" (%T) is not a struct.";
+      "Type of expression referenced by \".\" (%T) is not a struct.";
 
     // NOTE!  For printing a struct function call, only the name without
     //        parentheses should be provided to %S
