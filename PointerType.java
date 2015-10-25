@@ -1,10 +1,16 @@
 /**
  * Created by jinyongsuk on 10/8/15.
  */
-public abstract class PointerType extends CompositeType {
+public class PointerType extends CompositeType {
     // Name of the Type (e.g., int, bool, some structdef, etc.)
     private String m_typeName;
-    private int m_size;
+    private int m_size = 4;
+
+    private Type nextType;
+
+    public Type getNextType(){ return nextType; }
+    public void setNextType(Type type){ nextType = type; }
+
 
     //----------------------------------------------------------------
     //

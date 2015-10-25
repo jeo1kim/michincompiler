@@ -142,9 +142,9 @@ non terminal
     OptInit,
     //OptCtorCall,
     //CtorCall,
-    OptPointerList,
-    PointerList,
-    Pointer,
+    //OptPointerList,
+    //PointerList,
+    //Pointer,
     //OptArrayList,
     //ArrayList,
     Array,
@@ -191,6 +191,8 @@ non terminal STO
     ;
 
 non terminal Type
+    Pointer,
+
     TypecType,
     DecoratedBasicType,
     StructType,
@@ -200,6 +202,9 @@ non terminal Type
     ;
 
 non terminal Vector
+
+    OptPointerList,
+    PointerList,
     OptCtorCall,
     CtorCall,
     CodeBlock,
@@ -472,7 +477,8 @@ DecoratedType ::=   DecoratedBasicType:_1
 
 DecoratedBasicType ::= TypecType:_1 OptPointerList:_2
                     {:
-                        RESULT = _1;    // gotta do something here!
+                        RESULT = ((MyParser) parser).DecoratePointer(_1, _2 );
+                        // gotta do something here!
                     :}
     ;
 
@@ -510,16 +516,32 @@ ReturnType ::=      Type:_1
     ;
 
 
-OptPointerList ::=  PointerList
-    |               /* empty */
+OptPointerList ::=  PointerList:_1
+                    {:
+                        RESULT = _1;
+                    :}
+    |               {:
+                        RESULT = new Vector();
+                    :}
     ;
 
-PointerList ::=     Pointer
-    |               PointerList Pointer
+PointerList ::=     Pointer:_1
+                    {:
+                        RESULT = new Vector();
+                        RESULT.addElement(_1);
+                    :}
+    |               PointerList:_1 Pointer:_2
+                    {:
+                        RESULT = _1;
+                        RESULT.addElement(_2);
+                    :}
     ;
 
 
 Pointer ::=         T_STAR
+                    {:
+                        RESULT = new PointerType("*", 4 );
+                    :}
     ;
 
 

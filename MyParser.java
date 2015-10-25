@@ -470,6 +470,31 @@ class MyParser extends parser {
 
     }
 
+    Type DecoratePointer(Type basetype, Vector<Type> ptrs){
+        Type temp = new PointerType("",4);
+        if(ptrs.size()>0) {
+            Type ptrType = new PointerType("*", 4);
+            temp = DoPointerType(ptrs, basetype, ptrType, 0);
+        }
+        return temp;
+    }
+
+    Type DoPointerType(Vector<Type> ptrs, Type base, Type ptr, int n){
+        if (n == ptrs.size() - 1) {
+            //arrType.setBaseName(base.getName());
+            ptr.setNextType(base); // if base case my next type is the base type
+            ptr.setName(base.getName() +  ptrs.get(n).getName() );
+            ptr.setSize(base.getSize());
+            return ptr;
+        }
+        Type type = new PointerType("*", 4);
+        ptr.setSize(4);
+
+        ptr.setNextType(DoPointerType(ptrs, base, type, n + 1));
+        ptr.setName(base.getName() + ptrs.get(n).getName() + type.getName().replace(base.getName(), ""));
+        return ptr;
+    }
+
     void DoVarDeclwAuto(String id, STO expr, boolean stat) {
         if (expr.isError()) {
             return;
@@ -1063,6 +1088,8 @@ class MyParser extends parser {
         ret.setValue(expr.getValue());
         return ret;
     }
+
+
 
 
     //----------------------------------------------------------------
