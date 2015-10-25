@@ -1162,9 +1162,12 @@ class MyParser extends parser {
     STO CheckGlobalColonColon(String strID) {
         STO sto;
         if ((sto = m_symtab.accessGlobal(strID)) == null) {
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error0g_Scope, strID));
-            return new ErrorSTO(strID);
+            if ((sto = m_symtab.accessLocal(strID)) == null) {
+
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error0g_Scope, strID));
+                return new ErrorSTO(strID);
+            }
         }
         return sto;
     }
@@ -1288,7 +1291,7 @@ class MyParser extends parser {
                 if (a.isRef()) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
-                            getTypeName(a) + "*", getTypeName(result)));
+                            getTypeName(a), getTypeName(result)));
                 } else {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error6b_Return_equiv,
