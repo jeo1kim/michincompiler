@@ -953,7 +953,7 @@ class MyParser extends parser {
         Iterator<STO> it1;
         Iterator<STO> it2;
         Boolean flag = false;
-        for (it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext(); ) {  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
+        for (it1 =   argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext(); ) {  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
 
 
             STO arg = it1.next();
