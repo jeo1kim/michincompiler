@@ -230,7 +230,7 @@ class ErrorMsg
       "Operand to \"delete\" is not a modifiable L-value.";
 
     public static final String error16_Delete =
-      "Type.Type of delete's operand must be of pointer type, %T found.";
+      "Type of delete's operand must be of pointer type, %T found.";
 
     public static final String error16b_NonStructCtorCall =
       "Operand to \"new\" with constructor call is not of pointer to struct type, %T found.";
@@ -253,5 +253,5 @@ class ErrorMsg
 
     // Check 20 //
     public static final String error20_Cast = 
-      "Invalid type cast. Type.Type %T to type %T is not supported.";
+      "Invalid type cast. Type %T to type %T is not supported.";
 }

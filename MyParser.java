@@ -859,6 +859,7 @@ class MyParser extends parser {
                 m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getTypeName(expr), getTypeName(stoDes)));
                 return new ErrorSTO(ErrorMsg.error3a_Assign); // do we need this?
             }
+
         }
         else if (!expr.getType().isAssignableTo(stoDes.getType())) {
 

@@ -672,15 +672,17 @@ OptInit ::=         T_ASSIGN Expr:_1
 
 //============ TOP DOWN LANG. ADDED here
 
-NewStmt ::=     T_NEW Designator:_1 T_COLON OptCtorCall:_2 T_SEMI
-                {:
-                    ((MyParser) parser).CheckNew(_1,_2);
-                :}
-    ;
+
 
 DeleteStmt ::=  T_DELETE Designator:_1 T_SEMI
                 {:
                     ((MyParser) parser).CheckDelete(_1);
+                :}
+    ;
+
+NewStmt ::=     T_NEW Designator:_1 OptCtorCall:_2 T_SEMI
+                {:
+                    ((MyParser) parser).CheckNew(_1,_2);
                 :}
     ;
 
