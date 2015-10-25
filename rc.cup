@@ -1004,7 +1004,7 @@ UnarySign ::=       T_PLUS
 
 Designator ::=      T_STAR Designator:_1
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoPointer(_1);
                     :}
     |               T_AMPERSAND Designator:_1
                     {:
@@ -1050,9 +1050,9 @@ Designator2 ::=     Designator2:_1 T_DOT T_ID:_3
                     {:
                         RESULT = ((MyParser) parser).DoDesignator2_Array (_1, _2);
                     :}
-    |               Designator2:_1 T_ARROW T_ID
+    |               Designator2:_1 T_ARROW T_ID:_2
                     {:
-                        RESULT = _1;
+                        RESULT = ((MyParser) parser).DoArrow(_1,_2);
                     :}
     |               Designator2:_1 IncDecOp:_2
                     {:
@@ -1096,7 +1096,7 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_NULLPTR
                     {:
-                        RESULT = new ExprSTO ("nullptr", null);     // fix me!
+                        RESULT = new ExprSTO ("nullptr", new NullPointerType("null" , 4));     // fix me!
                     :}
     |               T_THIS
                     {:

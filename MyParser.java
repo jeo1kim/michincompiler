@@ -1024,12 +1024,13 @@ class MyParser extends parser {
     //----------------------------------------------------------------
     STO DoDesignator2_Array(STO sto, STO expr) {
         // Good place to do the array checks
-        if (expr.isError()) {
+        if (expr.isError() ||  (expr = nullcheck(expr)).isError()) {
             return expr;
         }
         if (sto.isError()) {
             return sto;
         }
+
 
         if (!sto.getType().isArray()) { // add pointer type
             m_nNumErrors++;
@@ -1280,6 +1281,44 @@ class MyParser extends parser {
         System.out.println("In DoExpReturn this should never reach");
         m_symtab.setFunc(null);
         return new ExprSTO(result.getName());
+    }
+
+
+
+    STO DoPointer (STO sto){
+        if (nullcheck(sto).isError() ){
+            return sto;
+        }
+        if(!sto.getType().isPointer()){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error15_Receiver,getTypeName(sto)));
+            return new ErrorSTO(sto.getName());
+        }
+
+        return sto;
+    }
+    STO DoArrow (STO sto, String strID){
+        if (nullcheck(sto).isError() ){
+            return sto;
+        }
+        if(!sto.getType().isPointer()){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error15_ReceiverArrow,getTypeName(sto)));
+            return new ErrorSTO(sto.getName());
+        }
+
+        return sto;
+    }
+
+
+
+    STO nullcheck(STO sto){
+        if(sto.getName() == "nullptr"){
+            m_nNumErrors++;
+            m_errors.print(ErrorMsg.error15_Nullptr);
+            sto = new ErrorSTO(sto.getName());
+        }
+        return sto;
     }
 
 
