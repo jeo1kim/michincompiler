@@ -334,10 +334,12 @@ class MyParser extends parser {
             temp = DoArrayType(array, typ, arrType, 0);
 
             ret.setType(temp);
-            ret.markModLVal();
+            ret.markModVal();
             m_symtab.insert(ret);
             return;
         }
+
+        sto.markModVal();
         m_symtab.insert(sto);
     }
 
@@ -688,6 +690,7 @@ class MyParser extends parser {
         }
 
         String key = makeHKey(id, params);
+
         FuncSTO sto = new FuncSTO(id, ret, params, ref); //
 
         if (a != null && a.isFunc()) {  // function exist check for overload.
@@ -849,19 +852,18 @@ class MyParser extends parser {
             return stoDes;
         }
         if (!stoDes.isModLValue()) {
-            if (expr instanceof ErrorSTO) {
-                return new ErrorSTO(ErrorMsg.error3a_Assign);
-            }
             m_nNumErrors++;
-            //      "Left-hand operand is not assignable (not a modifiable L-value).";
             m_errors.print(ErrorMsg.error3a_Assign);
-//			STO result = new ExprSTO(stoDes.getName()+expr.getName(), expr.getType());
-//			result.markRVal();
-//			return result;
-            // Good place to do the assign checks
             return new ErrorSTO(ErrorMsg.error3a_Assign);
         }
-        if (!expr.getType().isAssignableTo(stoDes.getType())) {
+        if (expr.getType().isPointer() || stoDes.getType().isPointer()){
+            if(!expr.getType().isEquivalentTo(stoDes.getType())){
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getTypeName(expr), getTypeName(stoDes)));
+                return new ErrorSTO(ErrorMsg.error3a_Assign); // do we need this?
+            }
+        }
+        else if (!expr.getType().isAssignableTo(stoDes.getType())) {
 
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getTypeName(expr), getTypeName(stoDes)));
@@ -915,6 +917,7 @@ class MyParser extends parser {
 
         String hKey = makeHKey(temp.getName(), argTyp); //u can use it for anyother func call
         Vector<STO> paramList;
+
         //if func is OverLoaded Function then check 9b
         if (func.m_overLoadFuncName.size() > 1) {
             if (func != null && func.getOverloaded(hKey) == null) {
@@ -960,6 +963,9 @@ class MyParser extends parser {
                 return arg;
             }
             if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())) {
+
+                //if array types check equivalencesTODO
+
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getTypeName(arg), param.getName(), getTypeName(param)));
                 flag = true;
@@ -972,6 +978,11 @@ class MyParser extends parser {
                     flag = true;
 
                 }//return new ErrorSTO(sto.getName());
+                //else if both array types, do nothing check. Because it passed the above equivalences check
+                else if ( arg.getType().isArray() && param.getType().isArray()){
+                    //
+                    //
+                }
                 else if (!arg.isModLValue()) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, param.getName(), getTypeName(param)));
@@ -1333,11 +1344,12 @@ class MyParser extends parser {
     }
 
     STO DoArrow(STO sto, String strID) {
+
         if (nullcheck(sto).isError()) {
             return sto;
         }
 
-        if (!(sto.isStructdef() && sto.getType().isPointer())) {
+        if (!(sto.getType().getBaseType().isStruct() && sto.getType().isPointer())) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error15_ReceiverArrow, getTypeName(sto)));
             return new ErrorSTO(sto.getName());
@@ -1347,7 +1359,7 @@ class MyParser extends parser {
 
 
     STO nullcheck(STO sto) {
-        if (sto.getName() == "nullptr") {
+        if (sto.getType().isNullPointer()) {
             m_nNumErrors++;
             m_errors.print(ErrorMsg.error15_Nullptr);
             sto = new ErrorSTO(sto.getName());
@@ -1483,12 +1495,12 @@ class MyParser extends parser {
             return new ErrorSTO(expr.getName());
         }
 
-        PointerType ptr = new PointerType("*", 4);
+        PointerType ptr = new PointerType(expr.getType().getName()+"*", 4);
         ptr.setNextType(expr.getType());
 
         ExprSTO ret = new ExprSTO(expr.getName(), ptr);
         ret.markRVal();
-        expr.setRef(true);
+        ret.setRef(true);
         return ret;
     }
 
