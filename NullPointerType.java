@@ -16,7 +16,7 @@ public class NullPointerType extends PointerType {
         setSize(size);
     }
 
-    public boolean isAssignableTo(Type t) { return false; }
+    public boolean isAssignableTo(Type t) { return t.isPointer(); }
     public boolean isEquivalentTo(Type t) { return t.isNullPointer(); }
 
     //----------------------------------------------------------------

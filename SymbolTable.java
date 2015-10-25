@@ -72,13 +72,11 @@ class SymbolTable {
             if ((stoReturn = scope.access(strName)) != null)
                 stk.push(stoReturn);  //add all elements to stack.
             //return stoReturn;
-
         }
 
-        while (!stk.empty())  // while stack has elements, pop the top LIFO
+        while (!stk.empty()) {  // while stack has elements, pop the top LIFO
             return (STO) stk.pop();
-
-
+        }
         return null;
     }
 
