@@ -29,7 +29,11 @@ abstract class Type
 		setSize(size);
 	}
 	public Type getBaseType(){
-		if(!this.getNextType().isPointer()){
+		if(this.getNextType() == null){
+			return this;
+		}
+		else if(!this.getNextType().isPointer()){
+
 			return this.getNextType();
 		}
 		return this;

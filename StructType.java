@@ -6,7 +6,8 @@ public class StructType extends CompositeType {
     private String m_typeName;
     private int m_size = 0;
 
-    private Scope m_structScope;
+    private Scope m_structScope = new Scope();
+    private Type nextType;
 
     private boolean m_ptr = false;
 
@@ -20,6 +21,12 @@ public class StructType extends CompositeType {
         setSize(size);
     }
 
+    public Type getBaseType(){
+        if(!this.getNextType().isPointer()){
+            return this.getNextType();
+        }
+        return this;
+    }
 
     public void setPtr(boolean ptr){
         m_ptr= true;

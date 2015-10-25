@@ -23,6 +23,7 @@ class ExprSTO extends STO
         // You may want to change the isModifiable and isAddressable
         // fields as necessary
 		m_strName = strName;
+		init();
 	}
 
 	public ExprSTO(String strName, Type typ)
@@ -30,8 +31,13 @@ class ExprSTO extends STO
 		super(strName, typ);
 		m_strName = strName;
 		m_type = typ;
+		init();
         // You may want to change the isModifiable and isAddressable
         // fields as necessary
+	}
+	public void init(){
+		setIsAddressable(true);
+		setIsModifiable(true);
 	}
 
 	//----------------------------------------------------------------
@@ -108,7 +114,7 @@ class ExprSTO extends STO
 	//----------------------------------------------------------------
 	public boolean isModLValue()
 	{
-		return !getIsModifiable() && getIsAddressable();
+		return getIsModifiable() && getIsAddressable();
 	}
 
 	// return true only if both are false

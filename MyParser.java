@@ -303,6 +303,7 @@ class MyParser extends parser {
         }
         StructdefSTO sto = new StructdefSTO(id, typ);
         sto.setStatic(stat); // set static if static
+
         // if ctor is default ctor.
         DoFuncCall(sto, optCtor);
 
@@ -897,6 +898,7 @@ class MyParser extends parser {
         //
         else if (sto.isitStructFuck()) {
 
+            m_symtab.getStruct().getType();
             Scope scope = m_symtab.getStruct().getType().getScope();
 
             if (!(temp = scope.accessLocal(sto.getName())).isFunc()) {
@@ -1032,7 +1034,7 @@ class MyParser extends parser {
 
         }
 
-        STO ret = sto;
+        STO ret;
         if (sto == m_symtab.getStruct()) {
 
             // Change THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ACCESS OK? Or
@@ -1043,19 +1045,19 @@ class MyParser extends parser {
                 return new ErrorSTO(sto.getName());
 
             }
-        } else if ((ret = sType.getScope().access(strID)) == null) {
+
+        }
+        else if ((ret = sType.getScope().access(strID)) == null) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error14f_StructExp, strID, sto.getType().getName()));
             return new ErrorSTO(sto.getName());
 
         }
 
-//        if ((sto = m_symtab.accessGlobal(strID)) == null) {
-//            m_nNumErrors++;
-//            m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
-//            sto = new ErrorSTO(strID);
-//        }
-        ret.setStructFunc(true);
+        if(ret.isFunc()) {
+            ret.setStructFunc(true);
+        }
+
         return ret;
     }
 

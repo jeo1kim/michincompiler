@@ -51,6 +51,7 @@ class StructdefSTO extends STO
 
 
 
+
 	public void setStatic(boolean stat){ m_static = stat;}
 	public boolean isStatic(){ return m_static; }
 	public void setRef(boolean ref){ m_ref = ref; }
