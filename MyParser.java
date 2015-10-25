@@ -853,15 +853,14 @@ class MyParser extends parser {
             m_errors.print(ErrorMsg.error3a_Assign);
             return new ErrorSTO(ErrorMsg.error3a_Assign);
         }
-        if (expr.getType().isPointer() || stoDes.getType().isPointer()){
-            if(!expr.getType().isEquivalentTo(stoDes.getType())){
+        if (expr.getType().isPointer() || stoDes.getType().isPointer()) {
+            if (!expr.getType().isEquivalentTo(stoDes.getType())) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getTypeName(expr), getTypeName(stoDes)));
                 return new ErrorSTO(ErrorMsg.error3a_Assign); // do we need this?
             }
 
-        }
-        else if (!expr.getType().isAssignableTo(stoDes.getType())) {
+        } else if (!expr.getType().isAssignableTo(stoDes.getType())) {
 
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error3b_Assign, getTypeName(expr), getTypeName(stoDes)));
@@ -952,7 +951,7 @@ class MyParser extends parser {
         Iterator<STO> it1;
         Iterator<STO> it2;
         Boolean flag = false;
-        for (it1 =   argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext(); ) {  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
+        for (it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext(); ) {  //VarSTO params : paramTyp && (VarSTO argTyp : ((FuncSTO) func).setParamVec();)){
 
 
             STO arg = it1.next();
@@ -978,11 +977,10 @@ class MyParser extends parser {
 
                 }//return new ErrorSTO(sto.getName());
                 //else if both array types, do nothing check. Because it passed the above equivalences check
-                else if ( arg.getType().isArray() && param.getType().isArray()){
+                else if (arg.getType().isArray() && param.getType().isArray()) {
                     //
                     //
-                }
-                else if (!arg.isModLValue()) {
+                } else if (!arg.isModLValue()) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, param.getName(), getTypeName(param)));
                     flag = true;
@@ -1042,8 +1040,7 @@ class MyParser extends parser {
 
             }
 
-        }
-        else if ((ret = sType.getScope().access(strID)) == null) {
+        } else if ((ret = sType.getScope().access(strID)) == null) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error14f_StructExp, strID, sto.getType().getName()));
             return new ErrorSTO(sto.getName());
@@ -1118,9 +1115,7 @@ class MyParser extends parser {
 
                 }
             }
-        }
-
-        else if ((sto = m_symtab.access(strID)) == null) {
+        } else if ((sto = m_symtab.access(strID)) == null) {
 
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
@@ -1365,6 +1360,7 @@ class MyParser extends parser {
 
     void CheckNew(STO sto, Vector<STO> ctor) {
 
+        STO ret;
         if (sto.isError()) {
             return;
         }
@@ -1372,28 +1368,30 @@ class MyParser extends parser {
             m_nNumErrors++;
             m_errors.print(ErrorMsg.error16_New_var);
             return;
-        }
-        if (!sto.getType().isPointer()) {
+        } else if (!sto.getType().isPointer()) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error16_New, getTypeName(sto)));
             return;
         }
 
-        STO ret;
-        if (!sto.getType().isPointer() || !sto.getType().getBaseType().isStruct()) {
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error16b_NonStructCtorCall, getTypeName(sto)));
+        if (ctor.size() == 0) {
+            if (sto.getType().getBaseType().isStruct()) {
+                StructdefSTO str = new StructdefSTO(sto.getType().getbaseName(), sto.getType().getBaseType());
+                DoFuncCall(str, ctor);
+                return;
+
+            }
+        } else if (ctor.size() > 0) {
+            if (!sto.getType().getBaseType().isStruct()) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error16b_NonStructCtorCall, getTypeName(sto)));
+                return;
+            } else {
+                StructdefSTO str = new StructdefSTO(sto.getType().getbaseName(), sto.getType().getBaseType());
+                DoFuncCall(str, ctor);
+            }
             return;
         }
-        else {
-            if(ctor.size() == 0){
-                ret = (FuncSTO) DoFuncCall(sto, new Vector());
-            }
-            else{
-                ret = (FuncSTO) DoFuncCall(sto, ctor);
-            }
-        }
-        return;
     }
 
     void CheckDelete(STO sto) {
@@ -1491,7 +1489,7 @@ class MyParser extends parser {
             return new ErrorSTO(expr.getName());
         }
 
-        PointerType ptr = new PointerType(expr.getType().getName()+"*", 4);
+        PointerType ptr = new PointerType(expr.getType().getName() + "*", 4);
         ptr.setNextType(expr.getType());
 
         ExprSTO ret = new ExprSTO(expr.getName(), ptr);

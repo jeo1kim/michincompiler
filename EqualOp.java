@@ -22,16 +22,16 @@ public class EqualOp extends ComparisonOp {
         Type bType = b.getType();
 
 
-        if(!(aType instanceof NumericType) && !(aType instanceof BoolType))
+        if(!(aType.isNumeric()) && !(aType.isNumeric()))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName(), m_OpName, bType.getName()));
         }
-        if(!(bType instanceof NumericType) && !(bType instanceof BoolType))
+        if(!(bType.isNumeric()) && !(bType.isNumeric()))
         {
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName(), m_OpName, bType.getName()));
         }
 
-        else if (((aType instanceof NumericType) && (bType instanceof NumericType))
+        else if (((aType.isNumeric()) && (bType.isNumeric()))
                         ||( aType instanceof BoolType && bType instanceof BoolType)) {
             //errro
             if (a.isConst() && b.isConst())
