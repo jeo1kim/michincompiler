@@ -470,20 +470,22 @@ class MyParser extends parser {
 
     }
 
-    Type DecoratePointer(Type basetype, Vector<Type> ptrs){
-        Type temp = new PointerType("",4);
-        if(ptrs.size()>0) {
+    Type DecoratePointer(Type basetype, Vector<Type> ptrs) {
+        Type temp;
+        if (ptrs.size() == 0) {
+            temp = basetype;
+        } else {
             Type ptrType = new PointerType("*", 4);
             temp = DoPointerType(ptrs, basetype, ptrType, 0);
         }
         return temp;
     }
 
-    Type DoPointerType(Vector<Type> ptrs, Type base, Type ptr, int n){
+    Type DoPointerType(Vector<Type> ptrs, Type base, Type ptr, int n) {
         if (n == ptrs.size() - 1) {
             //arrType.setBaseName(base.getName());
             ptr.setNextType(base); // if base case my next type is the base type
-            ptr.setName(base.getName() +  ptrs.get(n).getName() );
+            ptr.setName(base.getName() + ptrs.get(n).getName());
             ptr.setSize(base.getSize());
             return ptr;
         }
@@ -657,10 +659,11 @@ class MyParser extends parser {
         }
         sto.addOverload(key, sto);
 
-        if (m_symtab.getStruct() != null){
+        if (m_symtab.getStruct() != null) {
             m_symtab.getStruct().getType().getScope().InsertLocal(sto);
+        } else {
+            m_symtab.insert(sto);
         }
-        else{m_symtab.insert(sto);}
         //m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
         m_symtab.openScope();
         m_symtab.setFunc(sto);
@@ -698,10 +701,11 @@ class MyParser extends parser {
         }
 
         sto.addOverload(key, sto);
-        if (m_symtab.getStruct() != null){
+        if (m_symtab.getStruct() != null) {
             m_symtab.getStruct().getType().getScope().InsertLocal(sto);
+        } else {
+            m_symtab.insert(sto);
         }
-        else{m_symtab.insert(sto);}
         m_symtab.openScope();
         m_symtab.setFunc(sto);
     }
@@ -888,7 +892,7 @@ class MyParser extends parser {
             }
         }
         //
-        else if(sto.isitStructFuck()){
+        else if (sto.isitStructFuck()) {
 
             Scope scope = m_symtab.getStruct().getType().getScope();
 
@@ -904,7 +908,6 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.not_function, sto.getName()));
             return new ErrorSTO(sto.getName());
         }
-
 
 
         FuncSTO func = (FuncSTO) temp;
@@ -1049,7 +1052,7 @@ class MyParser extends parser {
     //----------------------------------------------------------------
     STO DoDesignator2_Array(STO sto, STO expr) {
         // Good place to do the array checks
-        if (expr.isError() ||  (expr = nullcheck(expr)).isError()) {
+        if (expr.isError() || (expr = nullcheck(expr)).isError()) {
             return expr;
         }
         if (sto.isError()) {
@@ -1058,7 +1061,7 @@ class MyParser extends parser {
 
 
         if (!sto.getType().isArray()) { // add pointer type
-            if( !sto.getType().isPointer()) {
+            if (!sto.getType().isPointer()) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error11t_ArrExp, getTypeName(sto)));
                 return new ErrorSTO(sto.getName());
@@ -1069,8 +1072,7 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error11i_ArrExp, expr.getType().getName()));
             return new ErrorSTO(sto.getName());
         }
-        if (expr.getType().isPointer())
-        {
+        if (expr.getType().isPointer()) {
             //get basetype and set the Var with next
         }
         if (expr.isConst()) {
@@ -1088,8 +1090,6 @@ class MyParser extends parser {
         ret.setValue(expr.getValue());
         return ret;
     }
-
-
 
 
     //----------------------------------------------------------------
@@ -1314,39 +1314,39 @@ class MyParser extends parser {
     }
 
 
-
-    STO DoPointer (STO sto){
-        if (nullcheck(sto).isError() ){
-            return sto;
-        }
-        if(!sto.getType().isPointer()){
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error15_Receiver,getTypeName(sto)));
-            return new ErrorSTO(sto.getName());
-        }
-        return sto;
-    }
-
-    STO DoArrow (STO sto, String strID){
-        if (nullcheck(sto).isError() ){
+    STO DoPointer(STO sto) {
+        if (nullcheck(sto).isError()) {
             return sto;
         }
 
-        if( !(sto.isStructdef() && sto.getType().isPointer() )){
+        if (!sto.getType().isPointer()) {
             m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error15_ReceiverArrow,getTypeName(sto)));
+            m_errors.print(Formatter.toString(ErrorMsg.error15_Receiver, getTypeName(sto)));
             return new ErrorSTO(sto.getName());
         }
 
+        ExprSTO ret = new ExprSTO(sto.getName(), sto.getType().getNextType());
+        ret.markModVal();
 
-        return DoDesignator2_Dot(sto, strID);
+        return ret;
+    }
 
+    STO DoArrow(STO sto, String strID) {
+        if (nullcheck(sto).isError()) {
+            return sto;
+        }
+
+        if (!(sto.isStructdef() && sto.getType().isPointer())) {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error15_ReceiverArrow, getTypeName(sto)));
+            return new ErrorSTO(sto.getName());
+        }
+        return DoDesignator2_Dot(DoPointer(sto), strID);
     }
 
 
-
-    STO nullcheck(STO sto){
-        if(sto.getName() == "nullptr"){
+    STO nullcheck(STO sto) {
+        if (sto.getName() == "nullptr") {
             m_nNumErrors++;
             m_errors.print(ErrorMsg.error15_Nullptr);
             sto = new ErrorSTO(sto.getName());
@@ -1354,6 +1354,55 @@ class MyParser extends parser {
         return sto;
     }
 
+    void CheckNew(STO sto, Vector<STO> ctor) {
+
+        if (sto.isError()) {
+            return;
+        }
+        if (!sto.isModLValue()) {
+            m_nNumErrors++;
+            m_errors.print(ErrorMsg.error16_New_var);
+            return;
+        }
+        if (!sto.getType().isPointer()) {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error16_New, getTypeName(sto)));
+            return;
+        }
+
+        STO ret;
+        if (!sto.getType().isPointer() || !sto.getType().getBaseType().isStruct()) {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error16b_NonStructCtorCall, getTypeName(sto)));
+            return;
+        }
+        else {
+            if(ctor.size() == 0){
+                ret = (FuncSTO) DoFuncCall(sto, new Vector());
+            }
+            else{
+                ret = (FuncSTO) DoFuncCall(sto, ctor);
+            }
+        }
+        return;
+    }
+
+    void CheckDelete(STO sto) {
+        if (sto.isError()) {
+            return;
+        }
+        if (!sto.isModLValue()) {
+            m_nNumErrors++;
+            m_errors.print(ErrorMsg.error16_Delete_var);
+            return;
+        }
+        if (!sto.getType().isPointer()) {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error16_Delete, getTypeName(sto)));
+            return;
+        }
+
+    }
 
     void DoNoReturn(Vector<String> stmts) {
 
@@ -1423,12 +1472,23 @@ class MyParser extends parser {
     }
 
     STO markAmpersand(STO expr) {
-        if (expr.isError()) {
+        if (nullcheck(expr).isError() || expr.isError()) {
             return expr;
         }
 
+        if (!expr.getIsAddressable()) {
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error18_AddressOf, getTypeName(expr)));
+            return new ErrorSTO(expr.getName());
+        }
+
+        PointerType ptr = new PointerType("*", 4);
+        ptr.setNextType(expr.getType());
+
+        ExprSTO ret = new ExprSTO(expr.getName(), ptr);
+        ret.markRVal();
         expr.setRef(true);
-        return expr;
+        return ret;
     }
 
 

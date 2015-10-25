@@ -11,6 +11,12 @@ public class PointerType extends CompositeType {
     public Type getNextType(){ return nextType; }
     public void setNextType(Type type){ nextType = type; }
 
+    public Type getBaseType(){
+        if(!this.getNextType().isPointer()){
+            return this.getNextType();
+        }
+        return this;
+    }
 
     //----------------------------------------------------------------
     //
@@ -21,8 +27,25 @@ public class PointerType extends CompositeType {
         setName(strName);
         setSize(size);
     }
-    public boolean isAssignableTo(Type t) { return t.isPointer(); }
-    public boolean isEquivalentTo(Type t) { return t.isPointer(); }
+    public boolean isEquivalentTo(Type t) {
+        if(t.isNullPointer()){
+            return true;
+        }
+        else if (t.isPointer()){
+            return this.getNextType().isEquivalentTo(t.getNextType());
+        }
+        return false;
+    }
+
+
+    public boolean isAssignableTo(Type t) {
+        if(t.isPointer()){
+            return this.isEquivalentTo(t);
+        }
+        else{
+            return false;
+        }
+    }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

@@ -470,7 +470,7 @@ DecoratedType ::=   DecoratedBasicType:_1
                     :}
     |               StructType:_1 PointerList:_2
                     {:
-                        RESULT = _1;    // gotta do something here!
+                        RESULT = ((MyParser) parser).DecoratePointer(_1, _2 );
                     :}
     ;
 
@@ -478,7 +478,6 @@ DecoratedType ::=   DecoratedBasicType:_1
 DecoratedBasicType ::= TypecType:_1 OptPointerList:_2
                     {:
                         RESULT = ((MyParser) parser).DecoratePointer(_1, _2 );
-                        // gotta do something here!
                     :}
     ;
 
@@ -673,13 +672,15 @@ OptInit ::=         T_ASSIGN Expr:_1
 
 //============ TOP DOWN LANG. ADDED here
 
-NewStmt ::=     T_NEW Designator OptCtorCall T_SEMI
-
+NewStmt ::=     T_NEW Designator:_1 T_COLON OptCtorCall:_2 T_SEMI
+                {:
+                    ((MyParser) parser).CheckNew(_1,_2);
+                :}
     ;
 
 DeleteStmt ::=  T_DELETE Designator:_1 T_SEMI
                 {:
-                    RESULT = _1;
+                    ((MyParser) parser).CheckDelete(_1);
                 :}
     ;
 

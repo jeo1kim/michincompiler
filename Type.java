@@ -28,6 +28,12 @@ abstract class Type
 		setName(strName);
 		setSize(size);
 	}
+	public Type getBaseType(){
+		if(!this.getNextType().isPointer()){
+			return this.getNextType();
+		}
+		return this;
+	}
 
 	private boolean m_ptr = false;
 

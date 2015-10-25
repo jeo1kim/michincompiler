@@ -223,7 +223,7 @@ class ErrorMsg
       "Operand to \"new\" is not a modifiable L-value.";
 
     public static final String error16_New =
-      "Type.Type of new's operand must be of pointer type, %T found.";
+      "Type of new's operand must be of pointer type, %T found.";
 
     // NOTE!  You don't need to use the formatter with this message
     public static final String error16_Delete_var =
