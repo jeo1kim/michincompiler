@@ -1033,14 +1033,20 @@ class MyParser extends parser {
 
 
         if (!sto.getType().isArray()) { // add pointer type
-            m_nNumErrors++;
-            m_errors.print(Formatter.toString(ErrorMsg.error11t_ArrExp, getTypeName(sto)));
-            return new ErrorSTO(sto.getName());
+            if( !sto.getType().isPointer()) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error11t_ArrExp, getTypeName(sto)));
+                return new ErrorSTO(sto.getName());
+            }
         }
-        if (!expr.getType().isInt()) {
+        if (!(expr.getType().isInt() || expr.getType().isPointer())) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error11i_ArrExp, expr.getType().getName()));
             return new ErrorSTO(sto.getName());
+        }
+        if (expr.getType().isPointer())
+        {
+            //get basetype and set the Var with next
         }
         if (expr.isConst()) {
             int ex = expr.getIntValue();
@@ -1050,12 +1056,9 @@ class MyParser extends parser {
                 m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
                 return new ErrorSTO(sto.getName());
             }
-//            if (ex < 0) {
-//                m_nNumErrors++;
-//                m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
-//                return new ErrorSTO(sto.getName());
-//            }
         }
+
+
         VarSTO ret = new VarSTO(sto.getName(), sto.getType().getNextType());
         ret.setValue(expr.getValue());
         return ret;
@@ -1294,20 +1297,23 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error15_Receiver,getTypeName(sto)));
             return new ErrorSTO(sto.getName());
         }
-
         return sto;
     }
+
     STO DoArrow (STO sto, String strID){
         if (nullcheck(sto).isError() ){
             return sto;
         }
-        if(!sto.getType().isPointer()){
+
+        if( !(sto.isStructdef() && sto.getType().isPointer() )){
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error15_ReceiverArrow,getTypeName(sto)));
             return new ErrorSTO(sto.getName());
         }
 
-        return sto;
+
+        return DoDesignator2_Dot(sto, strID);
+
     }
 
 

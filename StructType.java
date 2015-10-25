@@ -8,6 +8,8 @@ public class StructType extends CompositeType {
 
     private Scope m_structScope;
 
+    private boolean m_ptr = false;
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -16,6 +18,14 @@ public class StructType extends CompositeType {
         super(strName, size);
         setName(strName);
         setSize(size);
+    }
+
+
+    public void setPtr(boolean ptr){
+        m_ptr= true;
+    }
+    public boolean isPtr(){
+        return m_ptr;
     }
 
     public void insert(STO var){

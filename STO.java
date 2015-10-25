@@ -23,6 +23,8 @@ abstract class STO
 
 	private STO m_array;
 
+
+
 	private boolean structFuck = false;
 
 	public void setStructFunc(boolean func){

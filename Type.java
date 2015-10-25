@@ -29,6 +29,15 @@ abstract class Type
 		setSize(size);
 	}
 
+	private boolean m_ptr = false;
+
+	public void setPtr(boolean ptr){
+		m_ptr= true;
+	}
+	public boolean isPtr(){
+		return m_ptr;
+	}
+
 	public void setStructSize(){
 		return;
 	}
