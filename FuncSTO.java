@@ -23,10 +23,20 @@ class FuncSTO extends STO
 	private boolean m_return_top_level = false;
 	private boolean m_isOverloaded = false;
 
+
 	public HashMap<String, FuncSTO> m_overLoadFuncName = new HashMap<>();
 
 	private boolean constructor = false;
 	private boolean structFuck = false;
+
+	private StructdefSTO m_stru;
+
+	private Scope s_scope;
+
+	public void setMyStruct(Scope stru){ s_scope = stru;}
+	public Scope getMyStruct(){
+		return s_scope;
+	}
 
 	public void setStructFunc(boolean func){
 		structFuck = func;

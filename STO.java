@@ -52,6 +52,13 @@ abstract class STO
 		setIsModifiable(false);
 	}
 
+	private Scope s_scope;
+
+	public void setMyStruct(Scope stru){ s_scope = stru;}
+	public Scope getMyStruct(){
+		return s_scope;
+	}
+
 
 
 

@@ -444,10 +444,6 @@ class MyParser extends parser {
             }
 
             temp = DoArrayType(array, typ, arrType, 0);
-//            if(array.size() ==1){
-//                temp.setName(typ.getName()+temp.getName());
-//            }
-            //temp.setName(typ.getName() + temp.getName());
             ret.setRef(ref);
             ret.setType(temp);
             ret.markModLVal();
@@ -898,8 +894,8 @@ class MyParser extends parser {
         //
         else if (sto.isitStructFuck()) {
 
-            m_symtab.getStruct().getType();
-            Scope scope = m_symtab.getStruct().getType().getScope();
+
+            Scope scope = sto.getMyStruct();
 
             if (!(temp = scope.accessLocal(sto.getName())).isFunc()) {
                 m_nNumErrors++;
@@ -1031,7 +1027,6 @@ class MyParser extends parser {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.error14t_StructExp, getTypeName(sto)));
             return new ErrorSTO(sto.getName());
-
         }
 
         STO ret;
@@ -1054,9 +1049,8 @@ class MyParser extends parser {
 
         }
 
-        if(ret.isFunc()) {
-            ret.setStructFunc(true);
-        }
+        ret.setStructFunc(true);
+        ret.setMyStruct(sto.getType().getScope());
 
         return ret;
     }
@@ -1123,10 +1117,9 @@ class MyParser extends parser {
 
                 }
             }
-            return sto;
         }
 
-        if ((sto = m_symtab.access(strID)) == null) {
+        else if ((sto = m_symtab.access(strID)) == null) {
 
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
