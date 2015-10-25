@@ -1162,12 +1162,10 @@ class MyParser extends parser {
     STO CheckGlobalColonColon(String strID) {
         STO sto;
         if ((sto = m_symtab.accessGlobal(strID)) == null) {
-            if ((sto = m_symtab.accessLocal(strID)) == null) {
 
-                m_nNumErrors++;
-                m_errors.print(Formatter.toString(ErrorMsg.error0g_Scope, strID));
-                return new ErrorSTO(strID);
-            }
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error0g_Scope, strID));
+            return new ErrorSTO(strID);
         }
         return sto;
     }
