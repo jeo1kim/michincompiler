@@ -1118,7 +1118,8 @@ Designator3 ::=     T_LPAREN Expr:_2 T_RPAREN
                     :}
     |               T_NULLPTR
                     {:
-                        RESULT = new ExprSTO ("nullptr", new NullPointerType("null" , 4));     // fix me!
+                        RESULT = new ExprSTO ("nullptr", new NullPointerType("nullptr" , 4));     // fix me!
+                        RESULT.markRVal();
                     :}
     |               T_THIS
                     {:

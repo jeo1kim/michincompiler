@@ -10,8 +10,7 @@ public class EqualOp extends ComparisonOp {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    public EqualOp(String strName )
-    {
+    public EqualOp(String strName) {
         super(strName);
         setName(strName);
         //setSize(size);
@@ -22,35 +21,33 @@ public class EqualOp extends ComparisonOp {
         Type bType = b.getType();
 
 
-        if(!(aType.isNumeric()) && !(aType.isNumeric()))
-        {
-            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName(), m_OpName, bType.getName()));
-        }
-        if(!(bType.isNumeric()) && !(bType.isNumeric()))
-        {
-            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName(), m_OpName, bType.getName()));
-        }
-
-        else if (aType.isPointer() || bType.isPointer()) {
+        if (aType.isPointer() || bType.isPointer()) {
             if (!aType.isEquivalentTo(bType)) {
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName(), m_OpName, bType.getName()));
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr, getName(), aType.getName(), bType.getName()));
+            }
+            else if (!bType.isEquivalentTo(aType)) {
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr, getName(), aType.getName(), bType.getName()));
             }
             return new ExprSTO(a.getName() + getName() + b.getName(), new BoolType());
-
         }
-
-        else if (((aType.isNumeric()) && (bType.isNumeric()))
-                        ||( aType.isBool() && bType.isBool())) {
-            if (a.isConst() && b.isConst())
-            {
-                int val = a.getValue().compareTo(b.getValue());
-                return new ConstSTO( a.getName()+ getName() + b.getName() , new BoolType(), val);
+        else if (aType.isNullPointer() || bType.isNullPointer()) {
+            if (aType.isEquivalentTo(bType)) {
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr, getName(), aType.getName(), bType.getName()));
             }
-            return new ExprSTO(a.getName() + getName()+ b.getName(), new BoolType());
+            else if (bType.isEquivalentTo(aType)) {
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr, getName(), aType.getName(), bType.getName()));
+            }
+            return new ExprSTO(a.getName() + getName() + b.getName(), new BoolType());
         }
-        else {
+        else if (((aType.isNumeric()) && (bType.isNumeric())) || (aType.isBool() && bType.isBool())) {
+            if (a.isConst() && b.isConst()) {
+                int val = a.getValue().compareTo(b.getValue());
+                return new ConstSTO(a.getName() + getName() + b.getName(), new BoolType(), val);
+            }
+            return new ExprSTO(a.getName() + getName() + b.getName(), new BoolType());
+        } else {
             //if it's not both integer then return error STO
-            STO err = (!(aType.isBool()) && !(aType.isNumeric()) && !(aType.isPointer())) ? b : a;
+            STO err = (!(aType.isBool()) && !(aType.isNumeric())) ? b : a;
             // should increment m_nNumErrors++; in MyParser
             return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, err.getType().getName(), m_OpName, bType.getName()));
         }
@@ -59,16 +56,14 @@ public class EqualOp extends ComparisonOp {
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    public String getName()
-    {
+    public String getName() {
         return m_OpName;
     }
 
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
-    private void setName(String str)
-    {
+    private void setName(String str) {
         m_OpName = str;
     }
 }

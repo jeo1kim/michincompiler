@@ -19,19 +19,23 @@ public class NotEqualOp extends ComparisonOp {
         Type aType = a.getType();
         Type bType = b.getType();
 
-        if (!(aType.isNumeric()) && !(aType.isNumeric())) {
-            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName(), m_OpName, bType.getName()));
-        }
-        if (!(bType.isNumeric()) && !(bType.isNumeric())) {
-            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName(), m_OpName, bType.getName()));
-        }
-
-        else if (aType.isPointer() || bType.isPointer()) {
+        if (aType.isPointer() || bType.isPointer()) {
             if (!aType.isEquivalentTo(bType)) {
-                return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, aType.getName(), m_OpName, bType.getName()));
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr, getName(), aType.getName(), bType.getName()));
+            }
+            else if (!bType.isEquivalentTo(aType)) {
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr, getName(), aType.getName(), bType.getName()));
             }
             return new ExprSTO(a.getName() + getName() + b.getName(), new BoolType());
-
+        }
+        else if (aType.isNullPointer() || bType.isNullPointer()) {
+            if (aType.isEquivalentTo(bType)) {
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr, getName(), aType.getName(), bType.getName()));
+            }
+            else if (bType.isEquivalentTo(aType)) {
+                return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr, getName(), aType.getName(), bType.getName()));
+            }
+            return new ExprSTO(a.getName() + getName() + b.getName(), new BoolType());
         }
         else if (((aType.isNumeric()) && (bType.isNumeric()))
                 || (aType.isBool() && bType.isBool())) {
@@ -40,8 +44,7 @@ public class NotEqualOp extends ComparisonOp {
                 return new ConstSTO(a.getName() + getName() + b.getName(), new BoolType(), val);
             }
             return new ExprSTO(a.getName() + getName() + b.getName(), new BoolType());
-        }
-        else {
+        } else {
             //if it's not both integer then return error STO
             STO err = (!(aType instanceof BoolType) && !(aType instanceof NumericType)) ? b : a;
             // should increment m_nNumErrors++; in MyParser
