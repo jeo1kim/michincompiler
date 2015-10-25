@@ -26,9 +26,14 @@ class FuncSTO extends STO
 	public HashMap<String, FuncSTO> m_overLoadFuncName = new HashMap<>();
 
 	private boolean constructor = false;
+	private boolean structFuck = false;
 
-
-
+	public void setStructFunc(boolean func){
+		structFuck = func;
+	}
+	public boolean isitStructFuck(){
+		return structFuck;
+	}
 	public boolean hasConstructor(){
 		return constructor;
 	}

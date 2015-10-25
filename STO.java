@@ -20,8 +20,17 @@ abstract class STO
 	private Vector<STO> paramSTO;
 	private boolean m_return_top_level = false;
 
+
 	private STO m_array;
 
+	private boolean structFuck = false;
+
+	public void setStructFunc(boolean func){
+		structFuck = func;
+	}
+	public boolean isitStructFuck(){
+		return structFuck;
+	}
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------

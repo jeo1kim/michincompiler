@@ -320,7 +320,7 @@ StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
                         // Put logic here to create default ctor if needed
 
                         //((MyParser) parser).DoFieldVar(_2);
-                        ((MyParser) parser).DoStructdefDecl ();
+                        //((MyParser) parser).DoStructdefDecl ();
 
                         ((MyParser) parser).DefaultCtorCheck(_1, new Vector());    // create default ctor and close scope
                         ((MyParser) parser).DoFuncDecl_2();                         // double check for scoping

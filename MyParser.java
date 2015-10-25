@@ -631,7 +631,11 @@ class MyParser extends parser {
             }
         }
         sto.addOverload(key, sto);
-        m_symtab.insert(sto);
+
+        if (m_symtab.getStruct() != null){
+            m_symtab.getStruct().getType().getScope().InsertLocal(sto);
+        }
+        else{m_symtab.insert(sto);}
         //m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
         m_symtab.openScope();
         m_symtab.setFunc(sto);
@@ -667,9 +671,12 @@ class MyParser extends parser {
                 exist.addOverload(key, sto);
             }
         }
-        sto.addOverload(key, sto);
 
-        m_symtab.insert(sto);
+        sto.addOverload(key, sto);
+        if (m_symtab.getStruct() != null){
+            m_symtab.getStruct().getType().getScope().InsertLocal(sto);
+        }
+        else{m_symtab.insert(sto);}
         m_symtab.openScope();
         m_symtab.setFunc(sto);
     }
@@ -846,6 +853,7 @@ class MyParser extends parser {
             return sto;
         }
         STO temp = sto;
+        // constructor
         if (temp.isStructdef()) {
             temp = sto.getType().getScope().access(sto.getType().getName());
             if (temp == null || !temp.isFunc()) {
@@ -854,12 +862,25 @@ class MyParser extends parser {
                 return new ErrorSTO(sto.getName());
             }
         }
-        // func holds expected param
-        else if (!(temp = m_symtab.access(sto.getName())).isFunc()) {
+        //
+        else if(sto.isitStructFuck()){
+
+            Scope scope = m_symtab.getStruct().getType().getScope();
+
+            if (!(temp = scope.accessLocal(sto.getName())).isFunc()) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.not_function, sto.getName()));
+                return new ErrorSTO(sto.getName());
+            }
+        }
+        // func holds   expected param
+        else if (!(temp = m_symtab.accessGlobal(sto.getName())).isFunc()) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.not_function, sto.getName()));
             return new ErrorSTO(sto.getName());
         }
+
+
 
         FuncSTO func = (FuncSTO) temp;
 
@@ -911,7 +932,6 @@ class MyParser extends parser {
             }
             if (!param.isRef() && !arg.getType().isAssignableTo(param.getType())) {
                 m_nNumErrors++;
-
                 m_errors.print(Formatter.toString(ErrorMsg.error5a_Call, getTypeName(arg), param.getName(), getTypeName(param)));
                 flag = true;
 
@@ -946,7 +966,7 @@ class MyParser extends parser {
             return ret;
         }
         System.out.println("here");
-        return sto;
+        return temp;
 
     }
 
@@ -995,7 +1015,7 @@ class MyParser extends parser {
 //            m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
 //            sto = new ErrorSTO(strID);
 //        }
-
+        ret.setStructFunc(true);
         return ret;
     }
 
