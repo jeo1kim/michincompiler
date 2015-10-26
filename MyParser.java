@@ -153,19 +153,7 @@ class MyParser extends parser {
         m_symtab.closeScope();
     }
 
-    //----------------------------------------------------------------
-    //
-    //----------------------------------------------------------------
-    void DoVarDecl(String id) {
-        if (m_symtab.accessLocal(id) != null)
-            if (m_symtab.accessLocal(id) != null) {
-                m_nNumErrors++;
-                m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
-            }
 
-        VarSTO sto = new VarSTO(id);
-        m_symtab.insert(sto);
-    }
 
     void DoFuncDecl_1_Dtor(String id) {
         if ((m_symtab.getStruct()) == null) {
@@ -279,7 +267,7 @@ class MyParser extends parser {
 
     void DoVarDeclwStruct(String id, Type typ, boolean stat, Vector<STO> array, Vector<STO> optCtor) {
 
-        if (m_symtab.access(id) != null) {  // if global id exist
+        if (m_symtab.accessLocal(id) != null) {  // if global id exist
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
             return;
@@ -746,9 +734,7 @@ class MyParser extends parser {
 
         StructdefSTO sto = new StructdefSTO(id);
         StructType stype = new StructType(id, 0);  // size is 0 for now
-        //stype.setScope(m_symtab.getScope());           // set the struct type scope to current scope.
         sto.setType(stype);
-        //stype.setSize();
 
         m_symtab.insert(sto); // should go in the global
         m_symtab.openScope();

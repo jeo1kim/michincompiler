@@ -1033,7 +1033,6 @@ Designator ::=      T_STAR Designator:_1
                     :}
     |               UnarySign:_1 Designator:_2
                     {:
-
                         RESULT = ((MyParser) parser).MarkUnary(_1,_2);
                     :}
     |               T_NOT Designator:_1
