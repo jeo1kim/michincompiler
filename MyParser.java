@@ -1171,10 +1171,14 @@ class MyParser extends parser {
         if (expr.getType().isPointer()) {
             //get basetype and set the Var with next
         }
-        if (expr.isConst()) {
+
+        else if (expr.isConst()) {
             int ex = expr.getIntValue();
             int des = sto.getType().getSize() - 1;
-            if (ex > des || ex < 0) {
+            if (sto.getType().isPointer()){
+                return new ExprSTO(sto.getName(), sto.getType().getNextType());
+            }
+            else if (ex > des || ex < 0) {
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error11b_ArrExp, expr.getIntValue(), sto.getType().getSize()));
                 return new ErrorSTO(sto.getName());
@@ -1204,12 +1208,14 @@ class MyParser extends parser {
 
                 }
             }
-        } else if ((sto = m_symtab.access(strID)) == null) {
+        }
+        else if ((sto = m_symtab.access(strID)) == null) {
 
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
             sto = new ErrorSTO(strID);
         }
+        //System.err.println(sto.getType().getName() + sto.getName());
         return sto;
     }
 
