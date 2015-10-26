@@ -7,13 +7,8 @@
 
 import java_cup.runtime.*;
 
-import javax.swing.text.Style;
 import java.math.BigDecimal;
-import java.text.Normalizer;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.Stack;
 import java.util.Vector;
 import java.lang.*;
 
@@ -1048,6 +1043,59 @@ class MyParser extends parser {
 
         ret = new ConstSTO(sto.getName(), new intType("int", 4), size);
         ret.markRVal();
+        return ret;
+    }
+
+    STO DoTypeCast(Type cast, STO sto){
+
+        Type stoType = sto.getType();
+
+        if(cast.isError() || cast.isNullPointer()){
+            return new ErrorSTO(cast.getName());
+        }
+        if(sto.isError() || sto.getType().isNullPointer()){
+            return sto;
+        }
+
+        if(!stoType.isBasic() && !stoType.isPointer()){
+
+            if(!cast.isBasic() || !cast.isPointer()) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error20_Cast, getTypeName(stoType), getTypeName(cast)));
+                return new ErrorSTO(cast.getName());
+            }
+
+        }
+        ExprSTO ret = new ExprSTO(sto.getName(), cast);   // if sto is pointer return new expr with cast pointer type
+        ret.markRVal();
+        if (sto.isConst()){  // if sto is basic type return constantSTO
+            ConstSTO con;
+            if (cast.isInt()){
+                con = new ConstSTO( Integer.toString(sto.getIntValue()) , cast, sto.getIntValue());
+                con.markRVal();
+                return con;
+            }
+            else if (cast.isFloat()){
+                con = new ConstSTO( Double.toString(sto.getIntValue()) , cast, sto.getFloatValue());
+                con.markRVal();
+                return con;
+            }
+            else{ // case for bool
+                int val = sto.getIntValue();
+
+                if(sto.getType().isFloat()){
+                    if (sto.getValue().equals(BigDecimal.ZERO)){
+                        val = 0;
+                    }
+                    else{
+                        val = 1;
+                    }
+                }
+                con = new ConstSTO( Boolean.toString(sto.getBoolValue()) , cast, val);
+                con.markRVal();
+                return con;
+            }
+        }
         return ret;
     }
 
