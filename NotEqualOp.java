@@ -29,10 +29,13 @@ public class NotEqualOp extends ComparisonOp {
             return new ExprSTO(a.getName() + getName() + b.getName(), new BoolType());
         }
         else if (aType.isNullPointer() || bType.isNullPointer()) {
-            if (aType.isEquivalentTo(bType)) {
+            if (aType.isNullPointer() && bType.isNullPointer()){
+                return new ExprSTO(a.getName() + getName() + b.getName(), new BoolType());
+            }
+            else if (!aType.isEquivalentTo(bType)) {
                 return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr, getName(), aType.getName(), bType.getName()));
             }
-            else if (bType.isEquivalentTo(aType)) {
+            else if (!bType.isEquivalentTo(aType)) {
                 return new ErrorSTO(Formatter.toString(ErrorMsg.error17_Expr, getName(), aType.getName(), bType.getName()));
             }
             return new ExprSTO(a.getName() + getName() + b.getName(), new BoolType());

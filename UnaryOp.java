@@ -25,7 +25,7 @@ abstract class UnaryOp extends Operator {
         Type aType = a.getType();
         //System.out.println(a);System.out.println(aType);
 
-        if( !(aType.isNumeric() || aType.isPointer()))
+        if( !(aType.isNumeric() || aType.isPointer() || aType.isNullPointer()))
         {
             // "Incompatible type %T to operator %O, equivalent to int, float, or pointer expected.";
             return new ErrorSTO(Formatter.toString(ErrorMsg.error2_Type, aType.getName(),opName));
