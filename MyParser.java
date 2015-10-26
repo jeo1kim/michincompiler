@@ -523,6 +523,7 @@ class MyParser extends parser {
         if (m_symtab.accessLocal(id) != null) {
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+
         }
 
         ConstSTO sto = new ConstSTO(id, typ);   // fix me
