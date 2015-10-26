@@ -44,12 +44,13 @@ public class StructType extends CompositeType {
     }
 
     public void setStructSize(){
+        m_size = 0;
         for(STO var : m_structScope.getScopelist()){
             if(var.getType().isBasic()){
                 m_size += 4;
             }
             else if(var.getType().isComposite()){
-                m_size += var.getType().getSize();
+                m_size += var.getType().getBaseType().getSize() *var.getType().getTot();
             }
         }
     }

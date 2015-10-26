@@ -180,7 +180,7 @@ class ConstSTO extends STO
 		super(strName);
 		m_value = null; // fix this
 		m_strName = strName;
-		m_isAddressable = true;				// double value are constands non mod. L value
+		m_isAddressable = false;				// double value are constands non mod. L value
 		m_isModifiable = false;
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
@@ -192,7 +192,7 @@ class ConstSTO extends STO
 		m_strName = strName;
 		m_type = typ;
 		m_value = null; // fix this
-		m_isAddressable = true;				// double value are constands non mod. L value
+		m_isAddressable = false;				// double value are constands non mod. L value
 		m_isModifiable = false;
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
@@ -204,7 +204,7 @@ class ConstSTO extends STO
 		m_strName = strName;
 		m_type = typ;
 		m_value = new BigDecimal(val);
-		m_isAddressable = true;				// double value are constands non mod. L value
+		m_isAddressable = false;				// double value are constands non mod. L value
 		m_isModifiable = false;
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary
@@ -216,7 +216,7 @@ class ConstSTO extends STO
 		m_strName = strName;
 		m_type = typ;
 		m_value = new BigDecimal(val);
-		m_isAddressable = true;				// double value are constands non mod. L value
+		m_isAddressable = false;				// double value are constands non mod. L value
 		m_isModifiable = false;
 		// You may want to change the isModifiable and isAddressable
 		// fields as necessary

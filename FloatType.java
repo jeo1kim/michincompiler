@@ -19,7 +19,7 @@ public class FloatType extends NumericType {
     {
         super(strName, size);
         setName(strName);
-        setSize(size);
+        setSize(4);
     }
 
     public boolean isAssignableTo(Type t) { return t.isFloat(); }

@@ -18,12 +18,14 @@ public class PointerType extends CompositeType {
         return this;
     }
 
+
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
     public PointerType(String strName, int size)
     {
-        super(strName, size);
+        super(strName, 4);
         setName(strName);
         setSize(size);
     }

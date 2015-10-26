@@ -25,6 +25,7 @@ abstract class STO
 
 
 
+
 	private boolean structFuck = false;
 
 	public void setStructFunc(boolean func){

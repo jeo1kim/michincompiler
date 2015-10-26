@@ -38,6 +38,18 @@ abstract class Type
 		}
 		return this;
 	}
+	public int getTot(){
+		if (this.getNextType() == null){
+			return getSize();
+		}
+		else if(this.getNextType().isArray()){
+			return getSize()* this.getNextType().getTot();
+		}
+		else if(this.getNextType().isPointer()){
+			return this.getNextType().getSize();
+		}
+		return getSize();
+	}
 
 	private boolean m_ptr = false;
 

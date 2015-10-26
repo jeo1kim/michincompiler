@@ -275,19 +275,12 @@ class MyParser extends parser {
     void DoStructdefDecl() {
         StructdefSTO sto = m_symtab.getStruct();
         sto.getType().setScope(m_symtab.getScope());           // set the struct type scope to current scope.
-        sto.getType().setStructSize();
-
-//        StructdefSTO sto = m_symtab.getStruct();
-//
-//        Scope scope = sto.getType().getScope();
-//        for(STO var : structList){
-//            scope.InsertLocal(var);
-//        }
-//        sto.getType().setScope(scope);           // set the struct type scope to current scope.
-//        sto.getType().setStructSize();
-
     }
 
+    void SetStructSize(){
+        StructdefSTO sto = m_symtab.getStruct();
+        sto.getType().setStructSize();
+    }
 
     void DoVarDeclwStruct(String id, Type typ, boolean stat, Vector<STO> array, Vector<STO> optCtor) {
 
@@ -1007,6 +1000,57 @@ class MyParser extends parser {
 
     }
 
+    STO DoSizeOf(Type type, Vector<STO> array ){ // array hold constant lit sto
+        ConstSTO ret;
+        int size = type.getSize();
+
+        if( type.isError()){
+            return new ErrorSTO(type.getName());
+        }
+
+        if(!(type instanceof Type)){
+            m_nNumErrors++;
+            m_errors.print(ErrorMsg.error19_Sizeof);
+            return new ErrorSTO(type.getName());
+        }
+
+        if(array.size()>0){
+            for(STO a : array) {
+                size = type.getSize() * a.getIntValue();
+            }
+        }
+
+        ret = new ConstSTO(type.getName(), new intType("int", 4), size);
+        ret.markRVal();
+        return ret;
+    }
+
+    STO DoSizeOf(STO sto){ // array hold constant lit sto
+        ConstSTO ret;
+        int size = sto.getType().getSize();
+        int base;
+        int tot;
+
+        if( sto.isError()){
+            return sto;
+        }
+        if(!sto.getIsAddressable()){
+            m_nNumErrors++;
+            m_errors.print(ErrorMsg.error19_Sizeof);
+            return new ErrorSTO(sto.getName());
+        }
+        if(sto.getType().isArray()){
+            base = sto.getType().getBaseType().getSize();
+            tot = sto.getType().getTot();
+            size =  base*tot;
+
+        }
+
+        ret = new ConstSTO(sto.getName(), new intType("int", 4), size);
+        ret.markRVal();
+        return ret;
+    }
+
     STO DoStructThis(STO sto) {
         STO ret = m_symtab.getStruct();
         ret.markRVal();
@@ -1065,7 +1109,6 @@ class MyParser extends parser {
             return sto;
         }
 
-
         if (!sto.getType().isArray()) { // add pointer type
             if (!sto.getType().isPointer()) {
                 m_nNumErrors++;
@@ -1090,7 +1133,6 @@ class MyParser extends parser {
                 return new ErrorSTO(sto.getName());
             }
         }
-
 
         VarSTO ret = new VarSTO(sto.getName(), sto.getType().getNextType());
         ret.setValue(expr.getValue());

@@ -321,8 +321,7 @@ StructdefDecl ::=   T_STRUCTDEF T_ID_U:_1 T_LBRACE
                         //if so create a function to pass in funcdecl
                         // Put logic here to create default ctor if needed
 
-                        //((MyParser) parser).DoFieldVar(_2);
-                        //((MyParser) parser).DoStructdefDecl ();
+                        ((MyParser) parser).SetStructSize();
 
                         ((MyParser) parser).DefaultCtorCheck(_1, new Vector());    // create default ctor and close scope
                         ((MyParser) parser).DoFuncDecl_2();                         // double check for scoping
@@ -1043,11 +1042,11 @@ Designator ::=      T_STAR Designator:_1
                     :}
     |               T_SIZEOF T_LPAREN Designator:_2 T_RPAREN
                     {:
-                        RESULT = new ConstSTO("sizeof variable - fix me", null, 0);
+                        RESULT = ((MyParser) parser).DoSizeOf( _2);                     //new ConstSTO("sizeof variable - fix me", null, 0);
                     :}
-    |               T_SIZEOF T_LPAREN Type:_2 OptArrayList T_RPAREN
+    |               T_SIZEOF T_LPAREN Type:_2 OptArrayList:_3 T_RPAREN
                     {:
-                        RESULT = new ConstSTO("sizeof type - fix me", null, 0);
+                        RESULT = ((MyParser) parser).DoSizeOf( _2, _3);                     //new ConstSTO("sizeof type - fix me", null, 0);
                     :}
     |               T_LPAREN DecoratedType T_RPAREN Designator:_2
                     {:

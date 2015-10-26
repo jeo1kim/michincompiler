@@ -49,7 +49,7 @@ public class EqualOp extends ComparisonOp {
             //if it's not both integer then return error STO
             STO err = (!(aType.isBool()) && !(aType.isNumeric())) ? b : a;
             // should increment m_nNumErrors++; in MyParser
-            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, err.getType().getName(), m_OpName, bType.getName()));
+            return new ErrorSTO(Formatter.toString(ErrorMsg.error1b_Expr, err.getType().getName(), getName(), bType.getName()));
         }
     }
 

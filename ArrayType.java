@@ -8,6 +8,9 @@ public class ArrayType extends CompositeType {
     private String m_typeName;
     private int m_size;
     private Type nextType;
+    private Type basetype;
+
+    int totalsize;
 
     private Vector<Integer> dimensions = new Vector<>();
 
@@ -92,6 +95,35 @@ public class ArrayType extends CompositeType {
         m_basetype = base;
     }
 
+
+    public Type getBaseType(){
+        if(this.getNextType() == null){
+            return this;
+        }
+        else if(this.getNextType().isPointer()){
+
+            return this;
+        }
+        else if(this.getNextType().isArray()){
+            return this.getNextType().getBaseType();
+        }
+        else{
+            return getNextType();
+        }
+    }
+
+    public int getTot(){
+        if (this.getNextType() == null){
+            return getSize();
+        }
+        else if(this.getNextType().isArray()){
+            return getSize()* this.getNextType().getTot();
+        }
+        else if(this.getNextType().isPointer()){
+            return this.getNextType().getSize();
+        }
+        return getSize();
+    }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
