@@ -1592,7 +1592,7 @@ class MyParser extends parser {
             return new ErrorSTO(expr.getName());
         }
 
-        PointerType ptr = new PointerType(expr.getType().getName() + "*", 4);
+        PointerType ptr = new PointerType(expr.getType().getName() , 4);
         ptr.setNextType(expr.getType());
 
         ExprSTO ret = new ExprSTO(expr.getName(), ptr);
@@ -1600,6 +1600,4 @@ class MyParser extends parser {
         ret.setRef(true);
         return ret;
     }
-
-
 }
