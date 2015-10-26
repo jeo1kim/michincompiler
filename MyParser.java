@@ -772,8 +772,6 @@ class MyParser extends parser {
             return;
         } else if (!ref && !expr.getType().getNextType().isAssignableTo(type)) {
             m_nNumErrors++;
-            //      "Foreach array element of type %T not assignable to value iteration variable %S, of type %T.";
-
             m_errors.print(Formatter.toString(ErrorMsg.error12v_Foreach, getTypeName(expr.getType().getNextType()), id, getTypeName(type)));
             return;
         } else if (ref && !expr.getType().getNextType().isEquivalentTo(type)) {
@@ -857,6 +855,7 @@ class MyParser extends parser {
         }
         STO temp = sto;
         // constructor
+        boolean strucCal = false;
         if (temp.isStructdef()) {
             temp = sto.getType().getScope().access(sto.getType().getName());
             if (temp == null || !temp.isFunc()) {
@@ -864,8 +863,9 @@ class MyParser extends parser {
                 m_errors.print(Formatter.toString(ErrorMsg.not_function, sto.getName()));
                 return new ErrorSTO(sto.getName());
             }
+            strucCal = true;
+
         }
-        //
         else if (sto.isitStructFuck()) {
 
 
@@ -876,6 +876,7 @@ class MyParser extends parser {
                 m_errors.print(Formatter.toString(ErrorMsg.not_function, sto.getName()));
                 return new ErrorSTO(sto.getName());
             }
+            strucCal = true;
         }
         // func holds   expected param
         else if (!(temp = m_symtab.accessGlobal(sto.getName())).isFunc()) {
@@ -944,6 +945,12 @@ class MyParser extends parser {
 
             }
             else if (param.isRef()) {
+
+                if(strucCal){
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error9_Illegal, func.getName()));
+                    return new ErrorSTO(sto.getName());
+                }
                 if (!arg.getType().isEquivalentTo(param.getType())) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getTypeName(arg), param.getName(), getTypeName(param)));
@@ -1151,12 +1158,10 @@ class MyParser extends parser {
             return sto;
         }
 
-        if (!sto.getType().isArray()) { // add pointer type
-            if (!sto.getType().isPointer()) {
+        if (!(sto.getType().isArray() || sto.getType().isPointer())) { // add pointer type
                 m_nNumErrors++;
                 m_errors.print(Formatter.toString(ErrorMsg.error11t_ArrExp, getTypeName(sto)));
                 return new ErrorSTO(sto.getName());
-            }
         }
         if (!(expr.getType().isInt() || expr.getType().isPointer())) {
             m_nNumErrors++;
