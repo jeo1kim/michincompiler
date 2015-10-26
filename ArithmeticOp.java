@@ -43,7 +43,7 @@ public abstract class ArithmeticOp extends BinaryOp {
         if (a.isConst() && b.isConst()) {
             // need to check float <=> int
             if(opName == "/") {
-                if ((b.getType().isInt() && b.getValue().equals(BigDecimal.ZERO)) || (b.getType().isFloat() && b.getValue().equals(BigDecimal.ZERO)) {
+                if ((b.getType().isInt() && b.getValue().equals(BigDecimal.ZERO)) || (b.getType().isFloat() && b.getValue().equals(BigDecimal.ZERO))) {
                     return new ErrorSTO(ErrorMsg.error8_Arithmetic);
                 }
             }
