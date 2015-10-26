@@ -1067,7 +1067,6 @@ class MyParser extends parser {
 
         }
         ExprSTO ret = new ExprSTO(sto.getName(), cast);   // if sto is pointer return new expr with cast pointer type
-        ret.markRVal();
         if (sto.isConst()){  // if sto is basic type return constantSTO
             ConstSTO con;
             if (cast.isInt()){
@@ -1096,7 +1095,10 @@ class MyParser extends parser {
                 return con;
             }
         }
-        return ret;
+        else {
+            ret.markRVal();
+            return ret;
+        }
     }
 
     STO DoStructThis(STO sto) {
