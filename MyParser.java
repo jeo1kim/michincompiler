@@ -1288,17 +1288,15 @@ class MyParser extends parser {
     }
 
     STO MarkUnary(String unary, STO a) {
-
+        ConstSTO con;
         if (a.getType().isNumeric() || a.isConst() || a.isExpr() || a.isVar()) {
             if (unary == "-") {
-                a.setName(a.getName());
-                a.setType(a.getType());
-                a.setValue(a.getValue().negate());
-                return a;
+                con = new ConstSTO(a.getName(), a.getType());
+                con.setValue(a.getValue().negate());
+                return con;
             } else {
-                a.setName(a.getName());
-                a.setType(a.getType());
-                return a;
+                con = new ConstSTO(a.getName(), a.getType());
+                return con;
             }
 
         }
