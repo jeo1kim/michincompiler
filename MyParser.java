@@ -1045,6 +1045,8 @@ class MyParser extends parser {
         return ret;
     }
 
+
+
     STO DoTypeCast(Type cast, STO sto){
 
         Type stoType = sto.getType();
@@ -1063,7 +1065,6 @@ class MyParser extends parser {
                 m_errors.print(Formatter.toString(ErrorMsg.error20_Cast, getTypeName(stoType), getTypeName(cast)));
                 return new ErrorSTO(cast.getName());
             }
-
         }
         ExprSTO ret = new ExprSTO(sto.getName(), cast);   // if sto is pointer return new expr with cast pointer type
         if (sto.isConst()){  // if sto is basic type return constantSTO
@@ -1303,7 +1304,9 @@ class MyParser extends parser {
         if (a.getType().isNumeric() || a.isConst() || a.isExpr() || a.isVar()) {
             if (unary == "-") {
                 con = new ConstSTO(a.getName(), a.getType());
-                con.setValue(a.getValue().negate());
+                if (a.getValue() != null) {
+                    con.setValue(a.getValue().negate());
+                }
                 return con;
             } else {
                 con = new ConstSTO(a.getName(), a.getType());
