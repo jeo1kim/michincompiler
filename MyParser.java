@@ -1154,7 +1154,7 @@ class MyParser extends parser {
         if (expr.isError() || (expr = nullcheck(expr)).isError()) {
             return expr;
         }
-        if (sto.isError()) {
+        if (sto.isError() || nullcheck(sto).isError()) {
             return sto;
         }
 
