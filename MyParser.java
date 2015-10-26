@@ -958,13 +958,18 @@ class MyParser extends parser {
 
             }
             else if (param.isRef()) {
-                if (!arg.getType().isAssignableTo(param.getType())) {
+                if (!arg.getType().isEquivalentTo(param.getType())) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getTypeName(arg), param.getName(), getTypeName(param)));
                     flag = true;
 
-                }//return new ErrorSTO(sto.getName());
-                //else if both array types, do nothing check. Because it passed the above equivalences check
+                }
+                else if (!arg.getType().isAssignableTo(param.getType())) {
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getTypeName(arg), param.getName(), getTypeName(param)));
+                    flag = true;
+
+                }
                 else if (arg.getType().isArray() && param.getType().isArray()) {
                     //
                     //
@@ -984,7 +989,7 @@ class MyParser extends parser {
         ExprSTO ret = new ExprSTO(sto.getName(), func.getType());
         // check if func sto was called by ref and assign R val or mod l val
         if (func.isRef()) {
-            ret.markModLVal();
+            ret.markModVal();
             ret.setRef(true);
             return ret;
         } else if (!func.isRef()) {
