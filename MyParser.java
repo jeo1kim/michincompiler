@@ -1050,12 +1050,18 @@ class MyParser extends parser {
     STO DoTypeCast(Type cast, STO sto){
 
         Type stoType = sto.getType();
+        ExprSTO ret = new ExprSTO(sto.getName(), cast);   // if sto is pointer return new expr with cast pointer type
 
         if(cast.isError() || cast.isNullPointer()){
             return new ErrorSTO(cast.getName());
         }
-        if(sto.isError() || sto.getType().isNullPointer()){
+        if(sto.isError()){
             return sto;
+        }
+        if( stoType.isNullPointer()){
+            m_nNumErrors++;
+            m_errors.print(Formatter.toString(ErrorMsg.error20_Cast, getTypeName(stoType), getTypeName(cast)));
+            return new ErrorSTO(cast.getName());
         }
 
         if(!stoType.isBasic() && !stoType.isPointer()){
@@ -1066,22 +1072,18 @@ class MyParser extends parser {
                 return new ErrorSTO(cast.getName());
             }
         }
-        ExprSTO ret = new ExprSTO(sto.getName(), cast);   // if sto is pointer return new expr with cast pointer type
         if (sto.isConst()){  // if sto is basic type return constantSTO
             ConstSTO con;
             if (cast.isInt()){
                 con = new ConstSTO( Integer.toString(sto.getIntValue()) , cast, sto.getIntValue());
                 con.markRVal();
-                return con;
             }
             else if (cast.isFloat()){
                 con = new ConstSTO( Double.toString(sto.getIntValue()) , cast, sto.getFloatValue());
                 con.markRVal();
-                return con;
             }
             else{ // case for bool
                 int val = sto.getIntValue();
-
                 if(sto.getType().isFloat()){
                     if (sto.getValue().equals(BigDecimal.ZERO)){
                         val = 0;
@@ -1092,8 +1094,11 @@ class MyParser extends parser {
                 }
                 con = new ConstSTO( Boolean.toString(sto.getBoolValue()) , cast, val);
                 con.markRVal();
+            }
+            if(!cast.isPointer()){
                 return con;
             }
+            return ret;
         }
         else {
             ret.markRVal();
