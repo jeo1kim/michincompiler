@@ -957,8 +957,8 @@ class MyParser extends parser {
                 flag = true;
 
             }
-            if (param.isRef()) {
-                if (!arg.getType().isEquivalentTo(param.getType())) {
+            else if (param.isRef()) {
+                if (!arg.getType().isAssignableTo(param.getType())) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error5r_Call, getTypeName(arg), param.getName(), getTypeName(param)));
                     flag = true;
@@ -968,7 +968,8 @@ class MyParser extends parser {
                 else if (arg.getType().isArray() && param.getType().isArray()) {
                     //
                     //
-                } else if (!arg.isModLValue()) {
+                }
+                else if (!arg.isModLValue()) {
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.error5c_Call, param.getName(), getTypeName(param)));
                     flag = true;
