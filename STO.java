@@ -17,15 +17,19 @@ abstract class STO
 	private boolean m_ref  = false;
 	private BigDecimal m_value;
 	private int m_paramCount;
+
 	private Vector<STO> paramSTO;
 	private boolean m_return_top_level = false;
 	private boolean m_isGlobal = false;
+	private boolean m_static;
+
 
 
 	private STO m_array;
 
 
-
+	public void setStatic(boolean stat){ m_static = stat;}
+	public boolean isStatic(){ return m_static; }
 
 	private boolean structFuck = false;
 
