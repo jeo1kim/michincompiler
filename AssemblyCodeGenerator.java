@@ -1,6 +1,7 @@
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -58,13 +59,21 @@ public class AssemblyCodeGenerator {
     private static final String MOV_OP = "mov";
 
     //section
-    private static final String SECTION = ".section \".%S\"\n";
-    private static final String TEXT = ".text";
-    private static final String DATA = ".data";
-    private static final String BSS = ".bss";
-    private static final String GLOBAL = ".global %S\n";
-    private static final String ALIGN = ".align %d\n";
+    private static final String SECTION = ".section \"%s\"\n";
+    private static final String TEXT_SEC = ".text";
+    private static final String DATA_SEC = ".data";
+    private static final String BSS_SEC = ".bss";
+    private static final String GLOBAL = ".global %s\n";
+    private static final String ALIGN = ".align %s\n";
+    private static final String WORD = ".word %s\n";
+    private static final String SKIP = ".skip %s\n";
+
+    private static final String VARCOLON = "%s:"+SEPARATOR;
     //private static final String ASCIZ = ".asciz";
+
+    private static final String SAVE_FUNC = "SAVE.%s.%s";
+    private static final String FINI_FUNC = "%s.%s.fini";
+
 
 
     public AssemblyCodeGenerator(String fileToWrite) {
@@ -80,33 +89,75 @@ public class AssemblyCodeGenerator {
         }
     }
 
-    public void writeVariables(STO sto, STO init, STO func){
+    public void writeVariable(STO sto, STO init){
 
-        if(sto.isGlobal() || sto.isStatic()){
-            globalnstatic(sto, init, func);
+        if(sto.isStatic() || sto.isGlobal()){
+            this.writeGlobalStaticVariable(sto, init);
+        }
+
+    }
+
+    public void writeGlobalStaticVariable(STO sto, STO init){
+        String sectioncheck;
+        //Type sType = sto.getType();
+
+        Type stotype = sto.getType();
+        int size = stotype.getSize();
+        String val = "";
+
+
+        if((init == null)){
+            sectioncheck = BSS_SEC;
         }
         else{
-            localVariables(sto, init, func);
+            sectioncheck = DATA_SEC;
+            if(init.getType().isInt()) {
+                int constval = init.getIntValue();
+                val = iString(constval);
+            }
+            if(init.getType().isFloat()){
+                float constval = init.getFloatValue();
+                val = Float.toString(constval);
+            }
+            if(init.getType().isBool()){
+                if(init.getValue().equals(BigDecimal.ZERO)){
+                    val = "0";
+                }else {
+                    val = "1";
+                }
+            }
+            if(!init.isConst()){
+                size = 0;
+                val = iString(size);
+            }
+        }
+
+        //indent
+        increaseIndent();
+        writeAssembly(SECTION, sectioncheck);
+        writeAssembly(ALIGN, iString(stotype.getSize()));
+
+        String name = sto.getName();
+        if (!sto.isStatic()) { // global
+            writeAssembly(GLOBAL, name);
+            decreaseIndent();
+            writeAssembly(VARCOLON, name);
+            writeAssembly(WORD, val);
+        } else {
+            decreaseIndent();
+            writeAssembly(VARCOLON, name);
+            if (init != null) {
+                writeAssembly(WORD, val);
+            } else {
+                writeAssembly(SKIP, val);
+            }
         }
     }
 
-    public void localVariables(STO sto, STO init, STO func){
-
-
-
+    public String iString(int val){
+        return Integer.toString(val);
     }
 
-    public void globalnstatic(STO sto, STO init, STO func){
-
-        Type stype = sto.getType();
-
-
-    }
-
-
-    /*public void writeGlobalVariable(STO sto){
-
-    }*/
     // 8
     public void decreaseIndent() {
         indent_level--;
@@ -141,6 +192,7 @@ public class AssemblyCodeGenerator {
         asStmt.append(String.format(template, (Object[])params));
 
         try {
+
             fileWriter.write(asStmt.toString());
         } catch (IOException e) {
             System.err.println(ERROR_IO_WRITE);
@@ -149,7 +201,7 @@ public class AssemblyCodeGenerator {
     }
 
     // 12
-    public static void main(String args[]) {
+   /* public static void main(String args[]) {
         AssemblyCodeGenerator myAsWriter = new AssemblyCodeGenerator("rc.s");
 
         myAsWriter.increaseIndent();
@@ -162,5 +214,5 @@ public class AssemblyCodeGenerator {
 
         myAsWriter.decreaseIndent();
         myAsWriter.dispose();
-    }
+    }*/
 }

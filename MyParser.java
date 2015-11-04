@@ -24,6 +24,8 @@ class MyParser extends parser {
 
     private SymbolTable m_symtab;
 
+    private AssemblyCodeGenerator ag;
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -33,6 +35,7 @@ class MyParser extends parser {
         m_errors = errors;
         m_debugMode = debugMode;
         m_nNumErrors = 0;
+        ag = new AssemblyCodeGenerator("rc.s");
     }
 
     //----------------------------------------------------------------
@@ -152,6 +155,7 @@ class MyParser extends parser {
     //
     //----------------------------------------------------------------
     void DoProgramEnd() {
+        ag.dispose();
         m_symtab.closeScope();
     }
 
@@ -356,6 +360,7 @@ class MyParser extends parser {
                 //m_symtab.insert(sto);
             }
             m_symtab.insert(sto);
+            ag.writeVariable(sto, init);
         }
         //case where var is an array
         else if (array.size() > 0) {
@@ -392,6 +397,7 @@ class MyParser extends parser {
 //                System.err.println(ret.getName()+ret.isGlobal());
 //            }
             m_symtab.insert(ret);
+            ag.writeVariable(sto, init);
             return;
         } else {
 //            if(m_symtab.isGlobalScope()){
@@ -399,6 +405,7 @@ class MyParser extends parser {
 //                System.err.println(sto.getName()+sto.isGlobal());
 //            }
             m_symtab.insert(sto);
+            ag.writeVariable(sto, init);
             return;
         }
     }

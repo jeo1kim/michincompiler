@@ -12,7 +12,7 @@ public class ArrayType extends CompositeType {
 
     int totalsize;
 
-    private Vector<Integer> dimensions = new Vector<>();
+    private Vector<Integer> dimensions = new Vector<Integer>();
 
 
     //----------------------------------------------------------------
