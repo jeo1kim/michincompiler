@@ -146,6 +146,8 @@ class MyParser extends parser {
         m_symtab.openScope();
     }
 
+
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -385,9 +387,17 @@ class MyParser extends parser {
             ret.setType(temp);
             ret.markModLVal();
             ret.setStatic(stat);
+//            if(m_symtab.isGlobalScope()){
+//                ret.setGlobal();
+//                System.err.println(ret.getName()+ret.isGlobal());
+//            }
             m_symtab.insert(ret);
             return;
         } else {
+//            if(m_symtab.isGlobalScope()){
+//                sto.setGlobal();
+//                System.err.println(sto.getName()+sto.isGlobal());
+//            }
             m_symtab.insert(sto);
             return;
         }
