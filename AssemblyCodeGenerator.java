@@ -5,6 +5,7 @@ import java.util.Date;
 
 
 public class AssemblyCodeGenerator {
+
     // 1
     private int indent_level = 0;
 
@@ -29,8 +30,42 @@ public class AssemblyCodeGenerator {
     private static final String SEPARATOR = "\t";
 
     // 6
-    private static final String SET_OP = "set";
+    //parameters
+    private static final String ONE_PARAM = "%s" + SEPARATOR + "%s\n";
     private static final String TWO_PARAM = "%s" + SEPARATOR + "%s, %s\n";
+    private static final String THREE_PARAM = "%s" + SEPARATOR + "%s, %s, %s\n";
+
+
+
+    public static final String OFFSET = " = -(92 + %d) & -8";
+    public static final String SP_REG = "%sp";
+    public static final String FP_REG = "%fp";
+
+    //synthetic instructions
+    private static final String SET_OP = "set";
+    private static final String SAVE_OP = "save";
+    private static final String RET_OP = "ret";
+    private static final String RESTORE_OP = "restore";
+
+    private static final String CMP_OP = "cmp";
+    private static final String JMP_OP = "jmp";
+    private static final String CALL_OP = "call";
+    private static final String TST_OP = "tst";
+    private static final String NOT_OP = "not";
+    private static final String NEG_OP = "neg";
+    private static final String INC_OP = "inc";
+    private static final String DEC_OP = "dec";
+    private static final String MOV_OP = "mov";
+
+    //section
+    private static final String SECTION = ".section \".%S\"\n";
+    private static final String TEXT = ".text";
+    private static final String DATA = ".data";
+    private static final String BSS = ".bss";
+    private static final String GLOBAL = ".global %S\n";
+    private static final String ALIGN = ".align %d\n";
+    //private static final String ASCIZ = ".asciz";
+
 
     public AssemblyCodeGenerator(String fileToWrite) {
         try {
@@ -45,7 +80,9 @@ public class AssemblyCodeGenerator {
         }
     }
 
+    /*public void writeGlobalVariable(STO sto){
 
+    }*/
     // 8
     public void decreaseIndent() {
         indent_level--;
