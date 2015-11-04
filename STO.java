@@ -19,6 +19,7 @@ abstract class STO
 	private int m_paramCount;
 	private Vector<STO> paramSTO;
 	private boolean m_return_top_level = false;
+	private boolean m_isGlobal = false;
 
 
 	private STO m_array;
@@ -27,6 +28,13 @@ abstract class STO
 
 
 	private boolean structFuck = false;
+
+	public boolean isGlobal(){
+		return m_isGlobal;
+	}
+	public void setGlobal(){
+		m_isGlobal = true;
+	}
 
 	public void setStructFunc(boolean func){
 		structFuck = func;

@@ -37,10 +37,23 @@ class SymbolTable {
             m_scopeGlobal.InsertLocal(sto);
         } else {
             Scope scope = m_stkScopes.peek();
+            if(scope == m_scopeGlobal)
+            {
+                sto.setGlobal();
+                System.err.println(sto.getName()+sto.isGlobal());
+
+            }
+
             scope.InsertLocal(sto);
         }
     }
-
+    public boolean isGlobalScope(){
+        if(m_stkScopes.peek() == m_scopeGlobal)
+        {
+            return true;
+        }
+        return false;
+    }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

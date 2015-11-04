@@ -149,6 +149,8 @@ class MyParser extends parser {
         m_symtab.openScope();
     }
 
+
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -388,9 +390,17 @@ class MyParser extends parser {
             ret.setType(temp);
             ret.markModLVal();
             ret.setStatic(stat);
+//            if(m_symtab.isGlobalScope()){
+//                ret.setGlobal();
+//                System.err.println(ret.getName()+ret.isGlobal());
+//            }
             m_symtab.insert(ret);
             return;
         } else {
+//            if(m_symtab.isGlobalScope()){
+//                sto.setGlobal();
+//                System.err.println(sto.getName()+sto.isGlobal());
+//            }
             m_symtab.insert(sto);
             return;
         }
@@ -1595,7 +1605,7 @@ class MyParser extends parser {
             return new ErrorSTO(expr.getName());
         }
 
-        PointerType ptr = new PointerType(expr.getType().getName() , 4);
+        PointerType ptr = new PointerType(expr.getType().getName() + "*", 4);
         ptr.setNextType(expr.getType());
 
         ExprSTO ret = new ExprSTO(expr.getName(), ptr);
@@ -1603,4 +1613,6 @@ class MyParser extends parser {
         ret.setRef(true);
         return ret;
     }
+
+
 }
