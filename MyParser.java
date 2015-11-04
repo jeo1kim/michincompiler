@@ -24,6 +24,8 @@ class MyParser extends parser {
 
     private SymbolTable m_symtab;
 
+    private AssemblyCodeGenerator ag;
+
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------
@@ -33,6 +35,7 @@ class MyParser extends parser {
         m_errors = errors;
         m_debugMode = debugMode;
         m_nNumErrors = 0;
+        ag = new AssemblyCodeGenerator("rc.s");
     }
 
     //----------------------------------------------------------------
