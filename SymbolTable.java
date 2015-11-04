@@ -14,7 +14,7 @@ class SymbolTable {
     private FuncSTO m_func = null;
     private StructdefSTO m_struct = null;
 
-    private Stack<String> m_stkLooop = new Stack<>();
+    private Stack<String> m_stkLooop = new Stack<String>();
 
     private String m_scopeName = null;
 
