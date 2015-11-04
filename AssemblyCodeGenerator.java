@@ -80,6 +80,30 @@ public class AssemblyCodeGenerator {
         }
     }
 
+    public void writeVariables(STO sto, STO init, STO func){
+
+        if(sto.isGlobal() || sto.isStatic()){
+            globalnstatic(sto, init, func);
+        }
+        else{
+            localVariables(sto, init, func);
+        }
+    }
+
+    public void localVariables(STO sto, STO init, STO func){
+
+
+
+    }
+
+    public void globalnstatic(STO sto, STO init, STO func){
+
+        Type stype = sto.getType();
+
+
+    }
+
+
     /*public void writeGlobalVariable(STO sto){
 
     }*/
