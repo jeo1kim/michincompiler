@@ -40,7 +40,7 @@ class SymbolTable {
             if(scope == m_scopeGlobal)
             {
                 sto.setGlobal();
-                System.err.println(sto.getName()+sto.isGlobal());
+//                System.err.println(sto.getName()+sto.isGlobal());
 
             }
 
