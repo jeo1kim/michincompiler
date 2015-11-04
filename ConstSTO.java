@@ -27,7 +27,7 @@ class ConstSTO extends STO
 	private boolean m_isModifiable;
 	private boolean m_static;
 
-	private Vector<STO> m_arrayElms = new Vector<>();
+	private Vector<STO> m_arrayElms = new Vector<STO>();
 	private ConstSTO m_innerArray;
 
 	public STO getArrayIndex(int index){

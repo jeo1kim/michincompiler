@@ -3,11 +3,9 @@
 // Copyright (C) 2008-2015 Garo Bournoutian and Rick Ord
 // University of California, San Diego
 //---------------------------------------------------------------------
-import java.beans.VetoableChangeListener;
 import java.util.HashMap;
 import java.util.Vector;
 
-import java.util.Vector;
 
 class FuncSTO extends STO
 {
@@ -18,13 +16,13 @@ class FuncSTO extends STO
 	private boolean m_isRetByRef;
 	private boolean m_ref;
 	private int m_paramCount;
-	private Vector<STO> paramSTO = new Vector<>();
+	private Vector<STO> paramSTO = new Vector<STO>();
 	private int m_level;
 	private boolean m_return_top_level = false;
 	private boolean m_isOverloaded = false;
 
 
-	public HashMap<String, FuncSTO> m_overLoadFuncName = new HashMap<>();
+	public HashMap<String, FuncSTO> m_overLoadFuncName = new HashMap<String, FuncSTO>();
 
 	private boolean constructor = false;
 	private boolean structFuck = false;
