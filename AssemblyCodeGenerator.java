@@ -286,10 +286,10 @@ public class AssemblyCodeGenerator {
         }
         else {
             if(init !=null && init.getType().isFloat()){
-                writeAssembly(FLOAT,val);
+                writeAssembly(FLOAT,stoValue(init));
             }
             else if (init !=null) {
-                writeAssembly(WORD, val);
+                writeAssembly(WORD, stoValue(init));
             }
         }
 
