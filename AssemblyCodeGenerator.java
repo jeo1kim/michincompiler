@@ -31,7 +31,7 @@ public class AssemblyCodeGenerator {
     private static final String SEPARATOR = "\t";
 
     private int offset = 0; //to check what offset of that value is
-    private String infunc = ""; //used as a flag to check if it is inside function or not i belive there will be a better way tho 
+    private String infunc = null; //used as a flag to check if it is inside function or not i belive there will be a better way tho
     // 6
     //parameters
     private static final String ONE_PARAM = "%s" + SEPARATOR + "%s\n";
@@ -154,21 +154,11 @@ public class AssemblyCodeGenerator {
 
         increaseIndent();
         if((init != null)){     //check if init is not null store the value
-            if(init.getType().isInt()) {
-                int constval = init.getIntValue();
-                val = iString(constval);
-            }
-            if(init.getType().isFloat()){
-                float constval = init.getFloatValue();
-                val = Float.toString(constval);
-            }
-            if(init.getType().isBool()){
-                if(init.getValue().equals(BigDecimal.ZERO)){
-                    val = "0";
-                }else {
-                    val = "1";
-                }
-            }
+
+
+            val = stoValue(init); // stoVal gets teh value of sto.
+
+
             decreaseOffset();
             //create space
             writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
@@ -201,23 +191,7 @@ public class AssemblyCodeGenerator {
         else{
             sectioncheck = DATA_SEC;
 
-            val = stoValue(init);
-            /*
-            if(init.getType().isInt()) {
-                int constval = init.getIntValue();
-                val = iString(constval);
-            }
-            if(init.getType().isFloat()){
-                float constval = init.getFloatValue();
-                val = Float.toString(constval);
-            }
-            if(init.getType().isBool()){
-                if(init.getValue().equals(BigDecimal.ZERO)){
-                    val = "0";
-                }else {
-                    val = "1";
-                }
-            }*/
+            val = stoValue(init);   // stoValue gets the value of the sto
 
             //any global variable not initialized when declared is set to value 0
             if(!init.isConst() && sto.isGlobal()){
@@ -246,6 +220,7 @@ public class AssemblyCodeGenerator {
                 val = iString(stotype.getSize());
             }
         }
+
         decreaseIndent();
         writeAssembly(VARCOLON, name);
         if((sectioncheck == BSS_SEC) && sto.isGlobal()){

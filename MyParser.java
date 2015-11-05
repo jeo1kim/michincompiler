@@ -661,7 +661,7 @@ class MyParser extends parser {
         //m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
         m_symtab.openScope();
         m_symtab.setFunc(sto);
-
+        ag.writeFunctionDecl_1(sto);  // funciont def
     }
 
     // funcdef
@@ -700,10 +700,10 @@ class MyParser extends parser {
             m_symtab.getStruct().getType().getScope().InsertLocal(sto);
         } else {
             m_symtab.insert(sto);
-            ag.writeFunctionDecl_1(sto);
         }
         m_symtab.openScope();
         m_symtab.setFunc(sto);
+        ag.writeFunctionDecl_1(sto);     // function decl
     }
 
     //----------------------------------------------------------------
