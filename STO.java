@@ -23,10 +23,15 @@ abstract class STO
 	private boolean m_isGlobal = false;
 	private boolean m_static;
 
-
-
+	private int sparcOffset=0;
 	private STO m_array;
 
+	public void setSparcOffset(int offset){
+		sparcOffset = offset;
+	}
+	public int getSparcOffset(){
+		return sparcOffset;
+	}
 
 	public void setStatic(boolean stat){ m_static = stat;}
 	public boolean isStatic(){ return m_static; }
