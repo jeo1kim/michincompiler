@@ -208,7 +208,7 @@ public class AssemblyCodeGenerator {
                 writeAssembly(TWO_PARAM, SET_OP, ".$$.float."+iString(floatcounter), L7  );
 
                 writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", f0);
-                writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
+                writeAssembly(TWO_PARAM, ST_OP, f0, "["+O1+"]");
                 decreaseIndent();
                 writeAssembly(NL);
 
