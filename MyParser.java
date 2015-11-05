@@ -700,6 +700,7 @@ class MyParser extends parser {
             m_symtab.getStruct().getType().getScope().InsertLocal(sto);
         } else {
             m_symtab.insert(sto);
+            ag.writeFunctionDecl_1(sto);
         }
         m_symtab.openScope();
         m_symtab.setFunc(sto);
@@ -1375,10 +1376,7 @@ class MyParser extends parser {
             return a;
         }
         FuncSTO result = m_symtab.getFunc();
-//        if (a == result) {
-//
-//            return a;
-//        }
+
 
         Type resultType = result.getType();
         Type exprType = a.getType();
@@ -1394,7 +1392,7 @@ class MyParser extends parser {
                 return new ErrorSTO(a.getName());
             } else {
                 //m_symtab.setFunc(null);
-                return new ExprSTO(result.getName());
+                return new ExprSTO(a.getName());
             }
 
 
