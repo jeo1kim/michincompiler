@@ -76,7 +76,7 @@ public class AssemblyCodeGenerator {
     private static final String ALIGN = ".align\t\t%s\n";
     private static final String WORD = ".word\t\t%s\n";
     private static final String SKIP = ".skip\t\t%s\n";
-    private static final String FLOAT = ".single\t0r%s\n";
+    private static final String FLOAT = ".single \t0r%s\n";
 
     private static final String VARCOLON = "%s:\n"+SEPARATOR;
     //private static final String ASCIZ = ".asciz";
