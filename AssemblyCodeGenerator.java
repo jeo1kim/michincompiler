@@ -150,6 +150,8 @@ public class AssemblyCodeGenerator {
             decreaseIndent();
             writeAssembly(NL);
         }
+        decreaseIndent();
+        decreaseIndent();
     }
 
     public void writeAssignExprVariable(STO stoDes, STO expr){
@@ -174,12 +176,12 @@ public class AssemblyCodeGenerator {
     }
     //TODO: take care of when init not there too
     public void writeLocalVariable(STO sto, STO init){
+        increaseIndent();
         String sectioncheck;
         String val = ""; //later used for init if init is null to handle null pointer
         int floatcounter=0;
         int templvl=0;
 
-        increaseIndent();
         if((init != null)){     //check if init is not null store the value
 
             val = stoValue(init); // stoVal gets teh value of sto.
@@ -203,7 +205,7 @@ public class AssemblyCodeGenerator {
 
                 writeAssembly(SECTION, TEXT_SEC);
                 writeAssembly(ALIGN, iString(init.getType().getSize()));
-                writeAssembly(TWO_PARAM, SET_OP, ".$$.float."+stoValue(init), L7  );
+                writeAssembly(TWO_PARAM, SET_OP, ".$$.float."+iString(floatcounter), L7  );
 
                 writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", f0);
                 writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
@@ -277,18 +279,20 @@ public class AssemblyCodeGenerator {
 
         decreaseIndent();
         writeAssembly(VARCOLON, name);
-        if((sectioncheck == BSS_SEC) && sto.isGlobal()){
+        increaseIndent();
+
+        if((sectioncheck == BSS_SEC)){
             writeAssembly(SKIP, iString(size));
-        } else {
+        }
+        else {
             if(init !=null && init.getType().isFloat()){
                 writeAssembly(FLOAT,val);
             }
-            else {
+            else if (init !=null) {
                 writeAssembly(WORD, val);
             }
         }
 
-        increaseIndent();
         writeAssembly(NL);
         writeAssembly(SECTION, TEXT_SEC);
         writeAssembly(ALIGN, iString(stotype.getSize()));
