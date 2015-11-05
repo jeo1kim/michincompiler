@@ -165,7 +165,7 @@ public class AssemblyCodeGenerator {
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             //set value
             writeAssembly(TWO_PARAM, SET_OP, val, O0);
-            writeAssembly(TWO_PARAM, ST_OP, O1, "["+O1+"]");
+            writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
             decreaseIndent();
             writeAssembly(NL);
         }
