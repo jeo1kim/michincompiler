@@ -45,7 +45,7 @@ public class AssemblyCodeGenerator {
     public static final String FP = "%fp";
 
     //synthetic instructions
-    private static final String SET_OP = "set";
+    private static final String SET_OP = "set    \t";
     private static final String SAVE_OP = "save";
     private static final String RET_OP = "ret\n";
     private static final String RESTORE_OP = "restore\n";
@@ -61,10 +61,10 @@ public class AssemblyCodeGenerator {
     private static final String DEC_OP = "dec";
     private static final String MOV_OP = "mov";
 
-    private static final String ST_OP = "st";
-    private static final String LD_OP = "ld";
+    private static final String ST_OP = "st   \t";
+    private static final String LD_OP = "ld   \t";
 
-    private static final String ADD_OP = "add";
+    private static final String ADD_OP = "add  \t";
 
 
     //section
@@ -77,9 +77,12 @@ public class AssemblyCodeGenerator {
     private static final String WORD = ".word   \t%s\n";
     private static final String SKIP = ".skip   \t%s\n";
     private static final String FLOAT = ".single \t0r%s\n";
+    private static final String RODATA_SEC = ".rodata";
 
     private static final String VARCOLON = "%s:\n"+SEPARATOR;
     //private static final String ASCIZ = ".asciz";
+
+    private static final String FLOAT_COUNTER = ".$$.float.%s:\n";
 
     private static final String SAVE_MAIN = "SAVE.main";
     private static final String SAVE_FUNC = "SAVE.%s";
@@ -88,6 +91,10 @@ public class AssemblyCodeGenerator {
     private static final String NL = "\n";
     private static final String O0 = "%o0";
     private static final String O1 = "%o1";
+
+    // for float
+    private static final String f0 = "%f0";
+    private static final String L7 = "%l7";
 
 
 
@@ -151,6 +158,8 @@ public class AssemblyCodeGenerator {
     public void writeLocalVariable(STO sto, STO init){
         String sectioncheck;
         String val = ""; //later used for init if init is null to handle null pointer
+        int floatcounter=0;
+        int templvl=0;
 
         increaseIndent();
         if((init != null)){     //check if init is not null store the value
@@ -163,15 +172,40 @@ public class AssemblyCodeGenerator {
             //create space
             writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+            if(init.getType().isFloat()){
+                writeAssembly(NL);
+                writeAssembly(SECTION,RODATA_SEC);
+                writeAssembly(ALIGN, iString(init.getType().getSize()));
+                //decreaseIndent();
+                templvl = indent_level;
+                indent_level = 1;
+                writeAssembly(FLOAT_COUNTER, iString(++floatcounter));
+                increaseIndent();
+                indent_level = templvl;
+                writeAssembly(FLOAT, stoValue(init));
+                writeAssembly(NL);
+
+                writeAssembly(SECTION, TEXT_SEC);
+                writeAssembly(ALIGN, iString(init.getType().getSize()));
+                writeAssembly(TWO_PARAM, SET_OP, ".$$.float."+stoValue(init), L7  );
+
+                writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", f0);
+                writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
+                decreaseIndent();
+                writeAssembly(NL);
+
+
+            }
+            else{
             //set value
-            writeAssembly(TWO_PARAM, SET_OP, val, O0);
-            writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
-            decreaseIndent();
-            writeAssembly(NL);
+                writeAssembly(TWO_PARAM, SET_OP, val, O0);
+                writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
+                decreaseIndent();
+                writeAssembly(NL);
+            }
         }
         else{
-            //here nothing done yet
-            sectioncheck = TEXT_SEC;
+            decreaseOffset();
         }
     }
     //writes assembly for variables that is glocal or static
@@ -226,7 +260,7 @@ public class AssemblyCodeGenerator {
         if((sectioncheck == BSS_SEC) && sto.isGlobal()){
             writeAssembly(SKIP, iString(size));
         } else {
-            if(init.getType().isFloat()){
+            if(init !=null && init.getType().isFloat()){
                 writeAssembly(FLOAT,val);
             }
             else {
