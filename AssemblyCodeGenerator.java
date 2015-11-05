@@ -76,8 +76,9 @@ public class AssemblyCodeGenerator {
     private static final String ALIGN = ".align %s\n";
     private static final String WORD = ".word %s\n";
     private static final String SKIP = ".skip %s\n";
+    private static final String FLOAT = ".single"+SEPARATOR+"0r%s\n";
 
-    private static final String VARCOLON = "%s:"+SEPARATOR;
+    private static final String VARCOLON = "%s:\n"+SEPARATOR;
     //private static final String ASCIZ = ".asciz";
 
     private static final String SAVE_MAIN = "SAVE.main";
@@ -199,6 +200,9 @@ public class AssemblyCodeGenerator {
         }
         else{
             sectioncheck = DATA_SEC;
+
+            val = stoValue(init);
+            /*
             if(init.getType().isInt()) {
                 int constval = init.getIntValue();
                 val = iString(constval);
@@ -213,7 +217,7 @@ public class AssemblyCodeGenerator {
                 }else {
                     val = "1";
                 }
-            }
+            }*/
 
             //any global variable not initialized when declared is set to value 0
             if(!init.isConst() && sto.isGlobal()){
@@ -247,10 +251,21 @@ public class AssemblyCodeGenerator {
         if((sectioncheck == BSS_SEC) && sto.isGlobal()){
             writeAssembly(SKIP, iString(size));
         } else {
-            writeAssembly(WORD, val);
+            if(init.getType().isFloat()){
+                writeAssembly(FLOAT,val);
+            }
+            else {
+                writeAssembly(WORD, val);
+            }
         }
 
+        increaseIndent();
         writeAssembly(NL);
+        writeAssembly(SECTION, TEXT_SEC);
+        writeAssembly(ALIGN, iString(stotype.getSize()));
+        writeAssembly(NL);
+        decreaseIndent();
+
     }
 
 
@@ -303,6 +318,31 @@ public class AssemblyCodeGenerator {
             e.printStackTrace();
         }
     }
+
+    public String stoValue(STO sto){
+
+        String ret = "";
+        if(sto.isConst()) {
+            Type stype = sto.getType();
+            if (stype.isInt()) {
+                ret =  Integer.toString(sto.getIntValue());
+            }
+
+            if (stype.isFloat()) {
+                ret =  Float.toString(sto.getFloatValue());
+            }
+
+            if (stype.isBool()) {
+                ret = Integer.toString((sto.getBoolValue()) ? 1 : 0);
+            }
+            return ret;
+        }
+        else{
+            return "0";
+        }
+    }
+
+
 
     // 12
    /* public static void main(String args[]) {

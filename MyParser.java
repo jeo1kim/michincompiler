@@ -35,7 +35,7 @@ class MyParser extends parser {
         m_errors = errors;
         m_debugMode = debugMode;
         m_nNumErrors = 0;
-        ag = new AssemblyCodeGenerator("rc.s");
+        ag = new AssemblyCodeGenerator("rc1.s");
     }
 
     //----------------------------------------------------------------
