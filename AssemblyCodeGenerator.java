@@ -68,15 +68,15 @@ public class AssemblyCodeGenerator {
 
 
     //section
-    private static final String SECTION = ".section " + SEPARATOR+"\"%s\"\n";
+    private static final String SECTION = ".section" + SEPARATOR+"\"%s\"\n";
     private static final String TEXT_SEC = ".text";
     private static final String DATA_SEC = ".data";
     private static final String BSS_SEC = ".bss";
-    private static final String GLOBAL = ".global \t%s\n";
-    private static final String ALIGN = ".align \t\t%s\n";
-    private static final String WORD = ".word \t\t%s\n";
-    private static final String SKIP = ".skip \t\t%s\n";
-    private static final String FLOAT = ".single \t0r%s\n";
+    private static final String GLOBAL = ".global\t%s\n";
+    private static final String ALIGN = ".align\t\t%s\n";
+    private static final String WORD = ".word\t\t%s\n";
+    private static final String SKIP = ".skip\t\t%s\n";
+    private static final String FLOAT = ".single\t0r%s\n";
 
     private static final String VARCOLON = "%s:\n"+SEPARATOR;
     //private static final String ASCIZ = ".asciz";
