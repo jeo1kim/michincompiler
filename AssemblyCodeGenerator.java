@@ -31,7 +31,7 @@ public class AssemblyCodeGenerator {
     private static final String SEPARATOR = "\t";
 
     private int offset = 0; //to check what offset of that value is
-    private String infunc = ""; //used as a flag to check if it is inside function or not i belive there will be a better way tho 
+    private String infunc = null; //used as a flag to check if it is inside function or not i belive there will be a better way tho
     // 6
     //parameters
     private static final String ONE_PARAM = "%s" + SEPARATOR + "%s\n";
@@ -40,7 +40,7 @@ public class AssemblyCodeGenerator {
 
 
 
-    public static final String OFFSET = " = -(92 + %d) & -8";
+    public static final String OFFSET_TOTAL = " = -(92 + %d) & -8";
     public static final String SP = "%sp";
     public static final String FP = "%fp";
 
@@ -68,16 +68,17 @@ public class AssemblyCodeGenerator {
 
 
     //section
-    private static final String SECTION = ".section \"%s\"\n";
+    private static final String SECTION = ".section" + SEPARATOR+"\"%s\"\n";
     private static final String TEXT_SEC = ".text";
     private static final String DATA_SEC = ".data";
     private static final String BSS_SEC = ".bss";
-    private static final String GLOBAL = ".global %s\n";
-    private static final String ALIGN = ".align %s\n";
-    private static final String WORD = ".word %s\n";
-    private static final String SKIP = ".skip %s\n";
+    private static final String GLOBAL = ".global\t\t%s\n";
+    private static final String ALIGN = ".align\t\t%s\n";
+    private static final String WORD = ".word\t\t%s\n";
+    private static final String SKIP = ".skip\t\t%s\n";
+    private static final String FLOAT = ".single \t0r%s\n";
 
-    private static final String VARCOLON = "%s:"+SEPARATOR;
+    private static final String VARCOLON = "%s:\n";
     //private static final String ASCIZ = ".asciz";
 
     private static final String SAVE_MAIN = "SAVE.main";
@@ -135,7 +136,6 @@ public class AssemblyCodeGenerator {
         writeAssembly(GLOBAL, name);
         decreaseIndent();
         writeAssembly(VARCOLON, name);
-        writeAssembly(NL);
 
         if(name.equals("main")){
             increaseIndent();
@@ -146,6 +146,26 @@ public class AssemblyCodeGenerator {
         }
     }
 
+    public void writeAssignExprVariable(STO stoDes, STO expr){
+        int desoffset;
+        String val = "";
+        increaseIndent();
+        if((desoffset = stoDes.getSparcOffset()) != 0){
+            
+
+            val = stoValue(expr); // stoVal gets teh value of sto.
+            //create space
+            writeAssembly(TWO_PARAM, SET_OP, iString(desoffset), O1);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+            //set value
+            writeAssembly(TWO_PARAM, SET_OP, val, O0);
+            writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
+            decreaseIndent();
+            writeAssembly(NL);
+            
+        }
+        decreaseIndent();
+    }
     //TODO: take care of when init not there too
     public void writeLocalVariable(STO sto, STO init){
         String sectioncheck;
@@ -153,35 +173,24 @@ public class AssemblyCodeGenerator {
 
         increaseIndent();
         if((init != null)){     //check if init is not null store the value
-            if(init.getType().isInt()) {
-                int constval = init.getIntValue();
-                val = iString(constval);
-            }
-            if(init.getType().isFloat()){
-                float constval = init.getFloatValue();
-                val = Float.toString(constval);
-            }
-            if(init.getType().isBool()){
-                if(init.getValue().equals(BigDecimal.ZERO)){
-                    val = "0";
-                }else {
-                    val = "1";
-                }
-            }
+            val = stoValue(init); // stoVal gets teh value of sto.
+
             decreaseOffset();
             //create space
             writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             //set value
             writeAssembly(TWO_PARAM, SET_OP, val, O0);
-            writeAssembly(TWO_PARAM, ST_OP, O1, "["+O1+"]");
-            decreaseIndent();
+            writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
+            
             writeAssembly(NL);
         }
         else{
+            decreaseOffset();
             //here nothing done yet
-            sectioncheck = TEXT_SEC;
+            sto.setSparcOffset(getOffset());
         }
+        decreaseIndent();
     }
     //writes assembly for variables that is glocal or static
     public void writeGlobalStaticVariable(STO sto, STO init){
@@ -199,21 +208,8 @@ public class AssemblyCodeGenerator {
         }
         else{
             sectioncheck = DATA_SEC;
-            if(init.getType().isInt()) {
-                int constval = init.getIntValue();
-                val = iString(constval);
-            }
-            if(init.getType().isFloat()){
-                float constval = init.getFloatValue();
-                val = Float.toString(constval);
-            }
-            if(init.getType().isBool()){
-                if(init.getValue().equals(BigDecimal.ZERO)){
-                    val = "0";
-                }else {
-                    val = "1";
-                }
-            }
+
+            val = stoValue(init);   // stoValue gets the value of the sto
 
             //any global variable not initialized when declared is set to value 0
             if(!init.isConst() && sto.isGlobal()){
@@ -222,7 +218,6 @@ public class AssemblyCodeGenerator {
             }
 
         }
-
 
         writeAssembly(SECTION, sectioncheck);
         writeAssembly(ALIGN, iString(stotype.getSize()));
@@ -242,21 +237,31 @@ public class AssemblyCodeGenerator {
                 val = iString(stotype.getSize());
             }
         }
+
         decreaseIndent();
         writeAssembly(VARCOLON, name);
         if((sectioncheck == BSS_SEC) && sto.isGlobal()){
             writeAssembly(SKIP, iString(size));
         } else {
-            writeAssembly(WORD, val);
+            if(init.getType().isFloat()){
+                writeAssembly(FLOAT,val);
+            }
+            else {
+                writeAssembly(WORD, val);
+            }
         }
 
+        increaseIndent();
         writeAssembly(NL);
+        writeAssembly(SECTION, TEXT_SEC);
+        writeAssembly(ALIGN, iString(stotype.getSize()));
+        writeAssembly(NL);
+        decreaseIndent();
+
     }
 
 
-
-
-
+    //get int value and form it as a string
     public String iString(int val){
         return Integer.toString(val);
     }
@@ -303,6 +308,32 @@ public class AssemblyCodeGenerator {
             e.printStackTrace();
         }
     }
+
+    //get the value of the sto when sto is constant
+    public String stoValue(STO sto){
+
+        String ret = "";
+        if(sto.isConst()) {
+            Type stype = sto.getType();
+            if (stype.isInt()) {
+                ret =  Integer.toString(sto.getIntValue());
+            }
+
+            if (stype.isFloat()) {
+                ret =  Float.toString(sto.getFloatValue());
+            }
+
+            if (stype.isBool()) {
+                ret = Integer.toString((sto.getBoolValue()) ? 1 : 0);
+            }
+            return ret;
+        }
+        else{
+            return "0";
+        }
+    }
+
+
 
     // 12
    /* public static void main(String args[]) {
