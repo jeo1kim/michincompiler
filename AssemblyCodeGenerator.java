@@ -198,10 +198,12 @@ public class AssemblyCodeGenerator {
         String val = "";
         increaseIndent();
         if((desoffset = stoDes.getSparcOffset()) != 0){
-            
+            String sName = stoDes.getName();
+            String iName = expr.getName();
 
             val = stoValue(expr); // stoVal gets teh value of sto.
             //create space
+            writeAssembly(String.format(var_comment, sName,iName));
             writeAssembly(TWO_PARAM, SET_OP, iString(desoffset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             //set value

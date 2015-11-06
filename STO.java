@@ -25,7 +25,15 @@ abstract class STO
 	private boolean m_auto = false;
 
 	private int sparcOffset=0;
+	private String sparcBase= "";
 	private STO m_array;
+
+	public void setSparcBase(String base){
+		sparcBase = base;
+	}
+	public String getSparcBase(){
+		return sparcBase;
+	}
 
 	public void setAuto(){
 		m_auto = true;
