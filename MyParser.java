@@ -504,6 +504,7 @@ class MyParser extends parser {
             if (stat) {
                 sto.setStatic(stat); // set variable static
             }
+            sto.setAuto();
             m_symtab.insert(sto);
             ag.writeVariable(sto, expr);
 
@@ -512,6 +513,8 @@ class MyParser extends parser {
             if (stat) {
                 sto.setStatic(stat); // set variable static
             }
+
+            sto.setAuto();
             m_symtab.insert(sto);
             ag.writeVariable(sto, expr);
         }

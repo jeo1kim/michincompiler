@@ -22,9 +22,17 @@ abstract class STO
 	private boolean m_return_top_level = false;
 	private boolean m_isGlobal = false;
 	private boolean m_static;
+	private boolean m_auto = false;
 
 	private int sparcOffset=0;
 	private STO m_array;
+
+	public void setAuto(){
+		m_auto = true;
+	}
+	public boolean getAuto(){
+		return m_auto;
+	}
 
 	public void setSparcOffset(int offset){
 		sparcOffset = offset;

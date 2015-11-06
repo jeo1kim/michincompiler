@@ -38,6 +38,7 @@ public class AssemblyCodeGenerator {
     private static final String TWO_PARAM = "%s" + SEPARATOR + "%s, %s\n";
     private static final String THREE_PARAM = "%s" + SEPARATOR + "%s, %s, %s\n";
 
+    private static final String NOPARAM_3 = "%s\n%s\n%s\n";
 
 
     public static final String OFFSET_TOTAL = " = -(92 + %s) & -8";
@@ -69,6 +70,8 @@ public class AssemblyCodeGenerator {
 
     //section
     private static final String SECTION = ".section" + SEPARATOR+"\"%s\"\n";
+
+    private static final String INIT_SEC = ".init";
     private static final String TEXT_SEC = ".text";
     private static final String DATA_SEC = ".data";
     private static final String BSS_SEC = ".bss";
@@ -81,8 +84,11 @@ public class AssemblyCodeGenerator {
     private static final String VARCOLON = "%s:\n";
 
     //private static final String ASCIZ = ".asciz";
-
     private static final String FLOAT_COUNTER = ".$$.float.%s:\n";
+
+    //global auto
+    private static final String GL_AUTO_INIT = ".$.init.%s:\n";
+    private static final String GL_AUTO_FINI = ".$.init.%s.fini:";
 
     //private static final String SAVE_MAIN = "SAVE.%s.void";
     private static final String SAVE_FUNC = "SAVE.%s.void";
@@ -92,9 +98,19 @@ public class AssemblyCodeGenerator {
     private static final String O0 = "%o0";
     private static final String O1 = "%o1";
 
+    //global register
+    private static final String G0 = "%g0";
+    private static final String G1 = "%g1";
+    private static final String G2 = "%g2";
+    private static final String G3 = "%g3";
+
+
+
     // for float
     private static final String f0 = "%f0";
     private static final String L7 = "%l7";
+
+    private static final String var_comment = "! %s = %s\n";
 
 
 
@@ -174,7 +190,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
         
         decreaseIndent();
-        decreaseIndent();
+        //decreaseIndent();
     }
 
     public void writeAssignExprVariable(STO stoDes, STO expr){
@@ -201,20 +217,41 @@ public class AssemblyCodeGenerator {
     public void writeLocalVariable(STO sto, STO init){
         increaseIndent();
         String sectioncheck;
+        String register = "";
         String val = ""; //later used for init if init is null to handle null pointer
+
+
         int floatcounter=0;
         int templvl=0;
 
         decreaseOffset();
+
+
         if((init != null)){     //check if init is not null store the value
 
-            //increaseIndent();
+            increaseIndent();
             val = stoValue(init); // stoVal gets teh value of sto.
-            
+            String sName = sto.getName();
+            String iName = init.getName();
             //create space
+            writeAssembly(String.format(var_comment, sName,iName));
             writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-            if(init.getType().isFloat()){
+
+            if(sto.getAuto()){ // if its auto
+
+                writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
+                writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+                register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
+                writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", register);
+                writeAssembly(TWO_PARAM, ST_OP, register, "["+O1+"]");
+
+                writeAssembly(NL);
+                decreaseIndent();
+
+
+            }
+            else if(init.getType().isFloat() && !sto.getAuto()){  // if its not auto and float
                 writeAssembly(NL);
                 writeAssembly(SECTION,RODATA_SEC);
                 writeAssembly(ALIGN, iString(init.getType().getSize()));
@@ -246,9 +283,10 @@ public class AssemblyCodeGenerator {
                 decreaseIndent();
                 writeAssembly(NL);
             }
+            decreaseIndent();
         }
         else{
-            
+
             //here nothing done yet
             sto.setSparcOffset(getOffset());
         }
@@ -262,13 +300,15 @@ public class AssemblyCodeGenerator {
         Type stotype = sto.getType();
         int size = stotype.getSize();
         String val = "";
+        boolean auto = false;
 
 
-        if((init == null)){
+        if((init == null) || (auto = sto.getAuto())){
             sectioncheck = BSS_SEC;
         }
         else{
-            sectioncheck = DATA_SEC;
+
+            sectioncheck = sto.getAuto() ? BSS_SEC : DATA_SEC;
 
             val = stoValue(init);   // stoValue gets the value of the sto
 
@@ -283,10 +323,13 @@ public class AssemblyCodeGenerator {
         writeAssembly(SECTION, sectioncheck);
         writeAssembly(ALIGN, iString(stotype.getSize()));
 
+
+
         String name = sto.getName();
+
+
         if (!sto.isStatic()) { // global
             writeAssembly(GLOBAL, name);
-
         }
         //take care of the name change if static is inside function
         if(sto.isStatic()){
@@ -315,15 +358,87 @@ public class AssemblyCodeGenerator {
             }
         }
 
+        if(auto){       // if its auto do auto and return
+
+            sectionAlign(TEXT_SEC,iString(stotype.getSize()) );
+            writeGlobalAuto(sto, init);
+        }
         writeAssembly(NL);
-        writeAssembly(SECTION, TEXT_SEC);
-        writeAssembly(ALIGN, iString(stotype.getSize()));
-        //writeAssembly(NL);
+
+        sectionAlign(TEXT_SEC,iString(stotype.getSize()) ); // SECTION and ALIGN
+        //writeAssembly(SECTION, TEXT_SEC);
+        //writeAssembly(ALIGN, iString(stotype.getSize()));
+
+        writeAssembly(NL);
         decreaseIndent();
 
     }
 
+    private static final String endFunc_cmt = "! End of function .$.init.%s\n";
+    public void writeGlobalAuto(STO sto, STO init){
+        String sName = sto.getName();
+        String iName = init.getName();
+        String save = "SAVE..$.init."+sName;
+        String register = "";
 
+        decreaseIndent();
+        writeAssembly(GL_AUTO_INIT, sName);
+        increaseIndent();
+        writeAssembly(TWO_PARAM, SET_OP, save , G0);
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, G1, SP);
+
+        writeAssembly(NL);
+        increaseIndent();
+        writeAssembly(String.format(var_comment, sName,iName));
+        writeAssembly(TWO_PARAM, SET_OP, sName, O1);
+        writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
+        writeAssembly(TWO_PARAM, SET_OP, iName, L7);
+        writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+        register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
+        writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", register);
+        writeAssembly(TWO_PARAM, ST_OP, register, "["+O1+"]");
+
+        decreaseIndent();
+        writeAssembly(NL);
+        writeAssembly(String.format(endFunc_cmt, sName));
+        call(sName);
+        //writeAssembly(ONE_PARAM, CALL_OP, String.format(GL_AUTO_FINI,sName) );
+        retRest();
+        writeAssembly(save+String.format(OFFSET_TOTAL,"0"));
+        writeAssembly(NL);
+        writeAssembly(NL);
+
+        decreaseIndent();
+        writeAssembly(GL_AUTO_FINI, sName);
+        newline();
+        increaseIndent();
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP); // might need to change offset
+        retRest();
+        writeAssembly(NL);
+
+        sectionAlign(INIT_SEC, iString(sto.getType().getSize()));
+        call(sName);
+    }
+
+    public void call(String name){
+        writeAssembly(ONE_PARAM, CALL_OP, String.format(GL_AUTO_FINI, name));
+        writeAssembly(NOP_OP);
+    }
+    public void sectionAlign(String section, String align){
+        writeAssembly(NL);
+        writeAssembly(SECTION, section );
+        writeAssembly(ALIGN, align);
+    }
+
+    public void newline(){
+        writeAssembly(NL);
+    }
+
+
+    public void retRest(){
+        writeAssembly(RET_OP);
+        writeAssembly(RESTORE_OP);
+    }
 
     //get int value and form it as a string
     public String iString(int val){
