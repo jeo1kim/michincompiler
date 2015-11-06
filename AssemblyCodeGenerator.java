@@ -129,7 +129,6 @@ public class AssemblyCodeGenerator {
         else {
             writeLocalVariable(sto, init);
         }
-
     }
 
     //simple function decl
@@ -300,6 +299,7 @@ public class AssemblyCodeGenerator {
         decreaseIndent();
 
     }
+
 
 
     //get int value and form it as a string
