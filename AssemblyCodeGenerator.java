@@ -87,7 +87,7 @@ public class AssemblyCodeGenerator {
     private static final String FLOAT_COUNTER = ".$$.float.%s:\n";
 
     //global auto
-    private static final String GL_AUTO_INIT = ".$.init.%s:\n";
+    private static final String GL_AUTO_INIT = ".$.init.%s:";
     private static final String GL_AUTO_FINI = ".$.init.%s.fini:";
 
     //private static final String SAVE_MAIN = "SAVE.%s.void";
@@ -329,6 +329,7 @@ public class AssemblyCodeGenerator {
 
         }
 
+        writeAssembly(NL);
         writeAssembly(SECTION, sectioncheck);
         writeAssembly(ALIGN, iString(stotype.getSize()));
 
@@ -372,13 +373,12 @@ public class AssemblyCodeGenerator {
             sectionAlign(TEXT_SEC,iString(stotype.getSize()) );
             writeGlobalAuto(sto, init);
         }
-        writeAssembly(NL);
 
         sectionAlign(TEXT_SEC,iString(stotype.getSize()) ); // SECTION and ALIGN
         //writeAssembly(SECTION, TEXT_SEC);
         //writeAssembly(ALIGN, iString(stotype.getSize()));
 
-        writeAssembly(NL);
+        //writeAssembly(NL);
         decreaseIndent();
 
     }
@@ -392,8 +392,9 @@ public class AssemblyCodeGenerator {
 
         decreaseIndent();
         writeAssembly(GL_AUTO_INIT, sName);
+        newline();
         increaseIndent();
-        writeAssembly(TWO_PARAM, SET_OP, save , G0);
+        writeAssembly(TWO_PARAM, SET_OP, save , G1);
         writeAssembly(THREE_PARAM, SAVE_OP, SP, G1, SP);
 
         writeAssembly(NL);
@@ -412,7 +413,7 @@ public class AssemblyCodeGenerator {
         decreaseIndent();
         writeAssembly(NL);
         writeAssembly(String.format(endFunc_cmt, sName));
-        call(sName);
+        call(sName+".fini");
         //writeAssembly(ONE_PARAM, CALL_OP, String.format(GL_AUTO_FINI,sName) );
         retRest();
         writeAssembly(save+String.format(OFFSET_TOTAL,"0"));
@@ -425,14 +426,13 @@ public class AssemblyCodeGenerator {
         increaseIndent();
         writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP); // might need to change offset
         retRest();
-        writeAssembly(NL);
 
         sectionAlign(INIT_SEC, iString(sto.getType().getSize()));
         call(sName);
     }
 
     public void call(String name){
-        writeAssembly(ONE_PARAM, CALL_OP, String.format(GL_AUTO_FINI, name));
+        writeAssembly(ONE_PARAM, CALL_OP, String.format(GL_AUTO_INIT, name));
         writeAssembly(NOP_OP);
     }
     public void sectionAlign(String section, String align){
