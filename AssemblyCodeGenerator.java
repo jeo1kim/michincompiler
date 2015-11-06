@@ -298,8 +298,6 @@ public class AssemblyCodeGenerator {
     //writes assembly for variables that is glocal or static
     public void writeGlobalStaticVariable(STO sto, STO init){
         increaseIndent();
-        increaseIndent();
-        increaseIndent();
         String sectioncheck;
         //Type sType = sto.getType();
 
@@ -376,8 +374,6 @@ public class AssemblyCodeGenerator {
         //writeAssembly(ALIGN, iString(stotype.getSize()));
 
         writeAssembly(NL);
-        decreaseIndent();
-        decreaseIndent();
         decreaseIndent();
 
     }
