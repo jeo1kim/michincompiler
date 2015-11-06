@@ -241,10 +241,16 @@ public class AssemblyCodeGenerator {
 
             if(sto.getAuto()){ // if its auto
 
-                writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
-                writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
                 register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
-                writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", register);
+                if(sto.isConst()){
+                    writeAssembly(TWO_PARAM, SET_OP, stoValue(init), O0);
+
+                }
+                else {
+                    writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
+                    writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+                    writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+                }
                 writeAssembly(TWO_PARAM, ST_OP, register, "["+O1+"]");
                 decreaseIndent();
                 writeAssembly(NL);
@@ -395,8 +401,10 @@ public class AssemblyCodeGenerator {
         writeAssembly(String.format(var_comment, sName,iName));
         writeAssembly(TWO_PARAM, SET_OP, sName, O1);
         writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
+
         writeAssembly(TWO_PARAM, SET_OP, iName, L7);
         writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+
         register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
         writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", register);
         writeAssembly(TWO_PARAM, ST_OP, register, "["+O1+"]");
