@@ -216,6 +216,7 @@ public class AssemblyCodeGenerator {
     //TODO: take care of when init not there too
     public void writeLocalVariable(STO sto, STO init){
         increaseIndent();
+        increaseIndent();
         String sectioncheck;
         String register = "";
         String val = ""; //later used for init if init is null to handle null pointer
@@ -259,7 +260,7 @@ public class AssemblyCodeGenerator {
                 templvl = indent_level;
                 indent_level = 1;
                 writeAssembly(FLOAT_COUNTER, iString(++floatcounter));
-                increaseIndent();
+                //increaseIndent();
                 indent_level = templvl;
                 writeAssembly(FLOAT, stoValue(init));
                 writeAssembly(NL);
@@ -270,6 +271,7 @@ public class AssemblyCodeGenerator {
 
                 writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", f0);
                 writeAssembly(TWO_PARAM, ST_OP, f0, "["+O1+"]");
+
                 decreaseIndent();
                 writeAssembly(NL);
 
@@ -289,10 +291,14 @@ public class AssemblyCodeGenerator {
 
             //here nothing done yet
             sto.setSparcOffset(getOffset());
+            decreaseIndent();
         }
+        decreaseIndent();
     }
     //writes assembly for variables that is glocal or static
     public void writeGlobalStaticVariable(STO sto, STO init){
+        increaseIndent();
+        increaseIndent();
         increaseIndent();
         String sectioncheck;
         //Type sType = sto.getType();
@@ -370,6 +376,8 @@ public class AssemblyCodeGenerator {
         //writeAssembly(ALIGN, iString(stotype.getSize()));
 
         writeAssembly(NL);
+        decreaseIndent();
+        decreaseIndent();
         decreaseIndent();
 
     }
