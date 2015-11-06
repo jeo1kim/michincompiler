@@ -174,7 +174,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
         
         decreaseIndent();
-        //decreaseIndent();
+        decreaseIndent();
     }
 
     public void writeAssignExprVariable(STO stoDes, STO expr){
@@ -208,7 +208,7 @@ public class AssemblyCodeGenerator {
         decreaseOffset();
         if((init != null)){     //check if init is not null store the value
 
-            increaseIndent();
+            //increaseIndent();
             val = stoValue(init); // stoVal gets teh value of sto.
             
             //create space
