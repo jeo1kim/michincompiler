@@ -40,20 +40,20 @@ public class AssemblyCodeGenerator {
 
 
 
-    public static final String OFFSET_TOTAL = " = -(92 + %d) & -8";
+    public static final String OFFSET_TOTAL = " = -(92 + %s) & -8";
     public static final String SP = "%sp";
     public static final String FP = "%fp";
 
     //synthetic instructions
     private static final String SET_OP = "set    \t";
-    private static final String SAVE_OP = "save";
+    private static final String SAVE_OP = "save\t";
     private static final String RET_OP = "ret\n";
     private static final String RESTORE_OP = "restore\n";
     private static final String NOP_OP = "nop\n";
 
     private static final String CMP_OP = "cmp";
     private static final String JMP_OP = "jmp";
-    private static final String CALL_OP = "call";
+    private static final String CALL_OP = "call"+SEPARATOR;
     private static final String TST_OP = "tst";
     private static final String NOT_OP = "not";
     private static final String NEG_OP = "neg";
@@ -79,12 +79,13 @@ public class AssemblyCodeGenerator {
     private static final String FLOAT = ".single \t0r%s\n";
     private static final String RODATA_SEC = ".rodata";
     private static final String VARCOLON = "%s:\n";
+
     //private static final String ASCIZ = ".asciz";
 
     private static final String FLOAT_COUNTER = ".$$.float.%s:\n";
 
-    private static final String SAVE_MAIN = "SAVE.main";
-    private static final String SAVE_FUNC = "SAVE.%s";
+    //private static final String SAVE_MAIN = "SAVE.%s.void";
+    private static final String SAVE_FUNC = "SAVE.%s.void";
     private static final String FINI_FUNC = "%s.%s.fini";
 
     private static final String NL = "\n";
@@ -131,26 +132,49 @@ public class AssemblyCodeGenerator {
         }
     }
 
+
+    public void writeCloseFunc(STO sto){
+        increaseIndent();
+        writeAssembly(ONE_PARAM, CALL_OP, String.format(FINI_FUNC, sto.getName(), "void"));
+        writeAssembly(NOP_OP);
+        writeAssembly(RET_OP);
+        writeAssembly(RESTORE_OP);
+
+        int posoffset = Math.abs(getOffset());
+        writeAssembly("%s %s\n", String.format(SAVE_FUNC, sto.getName()), String.format(OFFSET_TOTAL, iString(posoffset)));
+        
+        decreaseIndent();
+
+        writeAssembly(NL);
+        writeAssembly(FINI_FUNC, sto.getName(), "void");
+        writeAssembly(":\n");
+        increaseIndent();
+        int add = -92 + getOffset();
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, iString(add), SP);
+        writeAssembly(RET_OP);
+        writeAssembly(RESTORE_OP);
+    }
     //simple function decl
     //TODO: does not take care of parameters yet
     public void writeFunctionDecl_1(STO sto){
         infunc = sto.getName();
         String name = sto.getName();
         increaseIndent();
-        writeAssembly(SECTION, TEXT_SEC);
+        //writeAssembly(SECTION, TEXT_SEC);
         writeAssembly(GLOBAL, name);
         decreaseIndent();
         writeAssembly(VARCOLON, name);
-
-        if(name.equals("main")){
-            increaseIndent();
-            writeAssembly(TWO_PARAM, SET_OP, SAVE_MAIN, "%g1");
-            writeAssembly(THREE_PARAM, SAVE_OP, SP, "%g1", SP);
-            decreaseIndent();
-            writeAssembly(NL);
-        }
+        String funcvoid = name + ".void";
+        writeAssembly(VARCOLON, funcvoid);
+        
+        increaseIndent();
+        writeAssembly(TWO_PARAM, SET_OP, String.format(SAVE_FUNC, name), "%g1");
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, "%g1", SP);
         decreaseIndent();
+        writeAssembly(NL);
+        
         decreaseIndent();
+        //decreaseIndent();
     }
 
     public void writeAssignExprVariable(STO stoDes, STO expr){
@@ -181,11 +205,12 @@ public class AssemblyCodeGenerator {
         int floatcounter=0;
         int templvl=0;
 
+        decreaseOffset();
         if((init != null)){     //check if init is not null store the value
 
+            increaseIndent();
             val = stoValue(init); // stoVal gets teh value of sto.
-
-            decreaseOffset();
+            
             //create space
             writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
@@ -215,8 +240,7 @@ public class AssemblyCodeGenerator {
             }
             else{
             //set value
-                decreaseOffset();
-
+                
                 writeAssembly(TWO_PARAM, SET_OP, val, O0);
                 writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
                 decreaseIndent();
@@ -224,8 +248,7 @@ public class AssemblyCodeGenerator {
             }
         }
         else{
-            decreaseOffset();
-
+            
             //here nothing done yet
             sto.setSparcOffset(getOffset());
         }
@@ -268,7 +291,7 @@ public class AssemblyCodeGenerator {
         //take care of the name change if static is inside function
         if(sto.isStatic()){
             if(infunc != null){
-                name = infunc + "." + sto.getName();
+                name = infunc + ".void." + sto.getName();
             }
             //if sto is static and is not global get the size of the type and write as word even tho it is bss
             if(!sto.isGlobal()){
@@ -295,7 +318,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
         writeAssembly(SECTION, TEXT_SEC);
         writeAssembly(ALIGN, iString(stotype.getSize()));
-        writeAssembly(NL);
+        //writeAssembly(NL);
         decreaseIndent();
 
     }

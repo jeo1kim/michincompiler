@@ -505,6 +505,7 @@ class MyParser extends parser {
                 sto.setStatic(stat); // set variable static
             }
             m_symtab.insert(sto);
+            ag.writeVariable(sto, expr);
 
         } else {
             ConstSTO sto = new ConstSTO(id, expr.getType());
@@ -512,7 +513,9 @@ class MyParser extends parser {
                 sto.setStatic(stat); // set variable static
             }
             m_symtab.insert(sto);
+            ag.writeVariable(sto, expr);
         }
+
     }
 
     //----------------------------------------------------------------
@@ -710,7 +713,8 @@ class MyParser extends parser {
     //
     //----------------------------------------------------------------
     void DoFuncDecl_2() {
-
+        STO sto = m_symtab.getFunc();
+        ag.writeCloseFunc(sto);
         m_symtab.closeScope();
         m_symtab.setFunc(null);
     }
@@ -858,7 +862,8 @@ class MyParser extends parser {
             return new ErrorSTO(ErrorMsg.error3a_Assign); // do we need this?
         }
         //error3b_Assign ="Value of type %T not assignable to variable of type %T.";
-
+        ////////
+        ag.writeAssignExprVariable(stoDes, expr);
         return stoDes;
     }
 
@@ -1241,6 +1246,7 @@ class MyParser extends parser {
             sto = new ErrorSTO(strID);
         }
         //System.err.println(sto.getType().getName() + sto.getName());
+
         return sto;
     }
 
