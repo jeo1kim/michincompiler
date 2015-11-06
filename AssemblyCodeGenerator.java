@@ -222,7 +222,7 @@ public class AssemblyCodeGenerator {
         String sectioncheck;
         String register = "";
         String val = ""; //later used for init if init is null to handle null pointer
-
+        sto.setSparcBase("%fp");
 
         int floatcounter=0;
         int templvl=0;
@@ -246,7 +246,6 @@ public class AssemblyCodeGenerator {
                 register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
                 if(sto.isConst()){
                     writeAssembly(TWO_PARAM, SET_OP, stoValue(init), O0);
-
                 }
                 else {
                     writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
@@ -312,6 +311,8 @@ public class AssemblyCodeGenerator {
         int size = stotype.getSize();
         String val = "";
         boolean auto = false;
+
+        sto.setSparcBase("%g0");
 
 
         if((init == null) || (auto = sto.getAuto())){
