@@ -62,10 +62,10 @@ public class AssemblyCodeGenerator {
     private static final String DEC_OP = "dec";
     private static final String MOV_OP = "mov";
 
-    private static final String ST_OP = "st   \t";
-    private static final String LD_OP = "ld   \t";
+    private static final String ST_OP = "st     \t";
+    private static final String LD_OP = "ld     \t";
 
-    private static final String ADD_OP = "add  \t";
+    private static final String ADD_OP = "add    \t";
 
 
     //section
@@ -246,9 +246,8 @@ public class AssemblyCodeGenerator {
                 register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
                 writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", register);
                 writeAssembly(TWO_PARAM, ST_OP, register, "["+O1+"]");
-
-                writeAssembly(NL);
                 decreaseIndent();
+                writeAssembly(NL);
 
 
             }
