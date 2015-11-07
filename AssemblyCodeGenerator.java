@@ -111,6 +111,9 @@ public class AssemblyCodeGenerator {
     private static final String L7 = "%l7";
 
     private static final String I0 = "%i0";
+    private static final String FITOS = "fitos  \t";
+
+
 
     private static final String var_comment = "! %s = %s\n";
 
@@ -216,14 +219,14 @@ public class AssemblyCodeGenerator {
             val = stoValue(expr); // stoVal gets teh value of sto.
             writeAssembly(TWO_PARAM, SET_OP, iString(desoffset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-            writeInit(expr);
+            writeInit(stoDes, expr);
 
         }
         decreaseIndent();
     }
 
     //used when initializing values e.g x = 2
-    public void writeInit(STO init){
+    public void writeInit(STO sto, STO init ){
         String val = stoValue(init); // stoVal gets teh value of sto.
         String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
@@ -235,13 +238,36 @@ public class AssemblyCodeGenerator {
         else {
 
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
-            writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+            writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+            if(sto.getType().isFloat() && init.getType().isInt()){
+                convertToFloat(init);
+                decreaseIndent();
+                writeAssembly(NL);
+                return;
+            }
         }
         writeAssembly(TWO_PARAM, ST_OP, register, "["+O1+"]");
         decreaseIndent();
         writeAssembly(NL);
     }
+
+
+    public void convertToFloat(STO init){
+        String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
+        String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
+        String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
+
+        writeAssembly(TWO_PARAM, SET_OP, iString(offset-4), L7);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+        writeAssembly(TWO_PARAM, ST_OP, O0, "["+f0+"]");
+        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
+        writeAssembly(TWO_PARAM, FITOS, f0, f0);
+        writeAssembly(TWO_PARAM, ST_OP, f0, "["+O1+"]");
+        decreaseOffset();
+
+    }
+
     public void writeConstFloat(STO init){
 
         writeAssembly(NL);
@@ -304,7 +330,7 @@ public class AssemblyCodeGenerator {
 
         if((init != null)){     //check if init is not null store the value
 
-            val = stoValue(init); // stoVal gets teh value of sto.
+            val = stoValue(init); // stoVal gets tehq value of sto.
             String sName = sto.getName();
             String iName = init.getName();
             //create space
@@ -314,7 +340,7 @@ public class AssemblyCodeGenerator {
 
             if(sto.getAuto()){ // if its auto
 
-                writeInit(init);
+                writeInit(sto, init);
 
             }
             else if(init.getType().isFloat() && !sto.getAuto()){  // if its not auto and float
@@ -326,11 +352,11 @@ public class AssemblyCodeGenerator {
                 writeAssembly(NL);
             }
             else if(sto.getType().isFloat() && init.getType().isInt()){
-                writeInit(init);
+                writeInit(sto, init); // do fitos
             }
             else{
                 //set value
-                writeInit(init);
+                writeInit(sto, init);
             }
             
             sto.setSparcOffset(getOffset());
@@ -344,6 +370,9 @@ public class AssemblyCodeGenerator {
         decreaseIndent();
         decreaseIndent();
     }
+
+
+
     //writes assembly for variables that is glocal or static
     public void writeGlobalStaticVariable(STO sto, STO init){
         increaseIndent();
@@ -420,6 +449,8 @@ public class AssemblyCodeGenerator {
 
     }
 
+
+
     private static final String endFunc_cmt = "! End of function .$.init.%s\n";
     public void writeGlobalAuto(STO sto, STO init){
         String sName = sto.getName();
@@ -443,7 +474,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(String.format(var_comment, sName,iName));
         writeAssembly(TWO_PARAM, SET_OP, sName, O1);
         writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
-        writeInit(init); // do the init registers
+        writeInit(sto, init); // do the init registers
         writeAssembly(NL);
 
         writeAssembly(String.format(endFunc_cmt, sName));
