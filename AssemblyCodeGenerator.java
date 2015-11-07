@@ -116,6 +116,8 @@ public class AssemblyCodeGenerator {
 
     private int floatcounter=0;
 
+    private boolean func = false;
+
 
     public AssemblyCodeGenerator(String fileToWrite) {
         try {
@@ -172,11 +174,14 @@ public class AssemblyCodeGenerator {
         writeAssembly(THREE_PARAM, SAVE_OP, SP, iString(add), SP);
         writeAssembly(RET_OP);
         writeAssembly(RESTORE_OP);
+
+        func = false;
     }
     //simple function decl
     //TODO: does not take care of parameters yet
     public void writeFunctionDecl_1(STO sto){
         offset = 0;
+        func = true;
         infunc = sto.getName();
         String name = sto.getName();
         increaseIndent();
@@ -333,6 +338,10 @@ public class AssemblyCodeGenerator {
     //writes assembly for variables that is glocal or static
     public void writeGlobalStaticVariable(STO sto, STO init){
         increaseIndent();
+        indent_level = 1;
+        if(func){
+            indent_level =2;
+        }
         String sectioncheck;
         Type stotype = sto.getType();
         int size = stotype.getSize();
@@ -423,7 +432,6 @@ public class AssemblyCodeGenerator {
         writeAssembly(TWO_PARAM, SET_OP, sName, O1);
         writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
         writeInit(init); // do the init registers
-        decreaseIndent();
         writeAssembly(NL);
 
         writeAssembly(String.format(endFunc_cmt, sName));
