@@ -429,7 +429,7 @@ public class AssemblyCodeGenerator {
             sectionAlign(TEXT_SEC, iString(stotype.getSize()));
             writeGlobalAuto(sto, init);
         }
-        if (init != null) {
+        if (init != null && sto.isGlobal()) {
             if (sto.getType().isFloat() && init.getType().isInt()) {
                 sectionAlign(TEXT_SEC, iString(stotype.getSize()));
             } else if (init.isStatic()) {
