@@ -110,6 +110,8 @@ public class AssemblyCodeGenerator {
     private static final String f0 = "%f0";
     private static final String L7 = "%l7";
 
+    private static final String I0 = "%i0";
+
     private static final String var_comment = "! %s = %s\n";
 
     private int floatcounter=0;
@@ -174,6 +176,7 @@ public class AssemblyCodeGenerator {
     //simple function decl
     //TODO: does not take care of parameters yet
     public void writeFunctionDecl_1(STO sto){
+        offset = 0;
         infunc = sto.getName();
         String name = sto.getName();
         increaseIndent();
@@ -211,6 +214,7 @@ public class AssemblyCodeGenerator {
         decreaseIndent();
     }
 
+    //used when initializing values e.g x = 2
     public void writeInit(STO init){
         String val = stoValue(init); // stoVal gets teh value of sto.
         String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
@@ -253,8 +257,9 @@ public class AssemblyCodeGenerator {
 
 
     public void writeReturn(STO init){
+        increaseIndent();
         String val = stoValue(init); // stoVal gets teh value of sto.
-        String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
+        String register = init.getType().isFloat() ? f0 : I0; // check for float f0 or o0
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
 
@@ -263,7 +268,7 @@ public class AssemblyCodeGenerator {
                 writeConstFloat(init);
             }
             else {
-                writeAssembly(TWO_PARAM, SET_OP, val, O0);
+                writeAssembly(TWO_PARAM, SET_OP, val, I0);
             }
         }
         else {
@@ -272,6 +277,7 @@ public class AssemblyCodeGenerator {
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
         }
+        decreaseIndent();
     }
     //TODO: take care of when init not there too
     public void writeLocalVariable(STO sto, STO init){
@@ -321,14 +327,16 @@ public class AssemblyCodeGenerator {
 //                decreaseIndent();
 //                writeAssembly(NL);
             }
-            decreaseIndent();
+            
+            sto.setSparcOffset(getOffset());
         }
         else{
 
             //here nothing done yet
             sto.setSparcOffset(getOffset());
-            decreaseIndent();
+            
         }
+        decreaseIndent();
         decreaseIndent();
     }
     //writes assembly for variables that is glocal or static
@@ -534,9 +542,11 @@ public class AssemblyCodeGenerator {
 
     //get the value of the sto when sto is constant
     public String stoValue(STO sto){
-
         String ret = "";
-        if(sto.isConst()) {
+        if(!sto.isConst()){
+            return "0";
+        }        
+        else {
             Type stype = sto.getType();
             if (stype.isInt()) {
                 ret =  Integer.toString(sto.getIntValue());
@@ -551,9 +561,7 @@ public class AssemblyCodeGenerator {
             }
             return ret;
         }
-        else{
-            return "0";
-        }
+        
     }
 
 
