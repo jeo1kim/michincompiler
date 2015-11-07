@@ -234,6 +234,12 @@ public class AssemblyCodeGenerator {
 
         if(init.isConst()){
             writeAssembly(TWO_PARAM, SET_OP, val, O0);
+            if(sto.getType().isFloat()){
+                convertToFloat(init);
+                decreaseIndent();
+                writeAssembly(NL);
+                return;
+            }
         }
         else {
 
@@ -258,13 +264,14 @@ public class AssemblyCodeGenerator {
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
         String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
 
-        writeAssembly(TWO_PARAM, SET_OP, iString(offset-4), L7);
+        int newoffset = offset-4;
+        decreaseOffset();
+        writeAssembly(TWO_PARAM, SET_OP, iString(offset), L7);
         writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
         writeAssembly(TWO_PARAM, ST_OP, O0, "["+f0+"]");
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
         writeAssembly(TWO_PARAM, FITOS, f0, f0);
         writeAssembly(TWO_PARAM, ST_OP, f0, "["+O1+"]");
-        decreaseOffset();
 
     }
 
@@ -321,12 +328,13 @@ public class AssemblyCodeGenerator {
         String register = "";
         String val = ""; //later used for init if init is null to handle null pointer
         sto.setSparcBase("%fp");
+        decreaseOffset();
+        sto.setSparcOffset(getOffset());
 
         if(func){
             indent_level =2;
         }
 
-        decreaseOffset();
 
         if((init != null)){     //check if init is not null store the value
 
@@ -351,21 +359,16 @@ public class AssemblyCodeGenerator {
                 decreaseIndent();
                 writeAssembly(NL);
             }
-            else if(sto.getType().isFloat() && init.getType().isInt()){
-                writeInit(sto, init); // do fitos
-            }
             else{
                 //set value
                 writeInit(sto, init);
             }
             
-            sto.setSparcOffset(getOffset());
         }
         else{
 
             //here nothing done yet
-            sto.setSparcOffset(getOffset());
-            
+
         }
         decreaseIndent();
         decreaseIndent();
