@@ -363,12 +363,6 @@ public class AssemblyCodeGenerator {
                 //set value
                 writeInit(sto, init);
             }
-            
-        }
-        else{
-
-            //here nothing done yet
-
         }
         decreaseIndent();
         decreaseIndent();
@@ -440,6 +434,10 @@ public class AssemblyCodeGenerator {
         }
 
         if(auto){       // if its auto do auto and return
+            sectionAlign(TEXT_SEC,iString(stotype.getSize()) );
+            writeGlobalAuto(sto, init);
+        }
+        if (init != null && sto.getType().isFloat() && init.getType().isInt()){
             sectionAlign(TEXT_SEC,iString(stotype.getSize()) );
             writeGlobalAuto(sto, init);
         }
