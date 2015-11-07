@@ -40,6 +40,25 @@ class ExprSTO extends STO
 		setIsModifiable(true);
 	}
 
+	private int sparcOffset=0;
+
+	private String sparcBase= "";
+
+	public void setSparcBase(String base){
+		sparcBase = base;
+	}
+	public String getSparcBase(){
+		return sparcBase;
+	}
+
+	public void setSparcOffset(int offset){
+		sparcOffset = offset;
+	}
+	public int getSparcOffset(){
+		return sparcOffset;
+	}
+
+
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
