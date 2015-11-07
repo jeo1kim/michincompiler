@@ -296,15 +296,14 @@ public class AssemblyCodeGenerator {
         String val = ""; //later used for init if init is null to handle null pointer
         sto.setSparcBase("%fp");
 
-        //decreaseOffset();
         if(func){
-            indent_level = 2;
+            indent_level =2;
         }
-        decreaseIndent();
+
+        decreaseOffset();
 
         if((init != null)){     //check if init is not null store the value
 
-            increaseIndent();
             val = stoValue(init); // stoVal gets teh value of sto.
             String sName = sto.getName();
             String iName = init.getName();
@@ -317,7 +316,6 @@ public class AssemblyCodeGenerator {
 
                 writeInit(init);
 
-
             }
             else if(init.getType().isFloat() && !sto.getAuto()){  // if its not auto and float
 
@@ -326,6 +324,9 @@ public class AssemblyCodeGenerator {
 
                 decreaseIndent();
                 writeAssembly(NL);
+            }
+            else if(sto.getType().isFloat() && init.getType().isInt()){
+                writeInit(init);
             }
             else{
                 //set value
@@ -427,7 +428,7 @@ public class AssemblyCodeGenerator {
         String register = "";
 
         if(func){
-            indent_level = 2;
+            indent_level =2;
         }
 
         decreaseIndent();
