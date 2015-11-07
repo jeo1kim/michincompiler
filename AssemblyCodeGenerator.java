@@ -167,7 +167,7 @@ public class AssemblyCodeGenerator {
         writeAssembly("%s %s\n", String.format(SAVE_FUNC, sto.getName()), String.format(OFFSET_TOTAL, iString(posoffset)));
 
         decreaseIndent();
-
+        indent_level=0;
         writeAssembly(NL);
         writeAssembly(FINI_FUNC, sto.getName(), "void");
         writeAssembly(":\n");
@@ -235,7 +235,7 @@ public class AssemblyCodeGenerator {
         if (init.isConst()) {
             writeAssembly(TWO_PARAM, SET_OP, val, O0);
             if (sto.getType().isFloat()) {
-                convertToFloat(init);
+                convertToFloat(sto ,init);
                 decreaseIndent();
                 writeAssembly(NL);
                 return;
@@ -246,7 +246,7 @@ public class AssemblyCodeGenerator {
             writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
             if (sto.getType().isFloat() && init.getType().isInt()) {
-                convertToFloat(init);
+                convertToFloat(sto, init);
                 decreaseIndent();
                 writeAssembly(NL);
                 return;
@@ -258,14 +258,14 @@ public class AssemblyCodeGenerator {
     }
 
 
-    public void convertToFloat(STO init) {
+    public void convertToFloat(STO sto, STO init) {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
         String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
 
-        int newoffset = offset - 4;
+        int newoffset =  sto.isGlobal() ? -4:offset;
         decreaseOffset();
-        writeAssembly(TWO_PARAM, SET_OP, iString(offset), L7);
+        writeAssembly(TWO_PARAM, SET_OP, iString(newoffset), L7);
         writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
         writeAssembly(TWO_PARAM, ST_OP, O0, "[" + f0 + "]");
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
@@ -303,6 +303,8 @@ public class AssemblyCodeGenerator {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
 
+        writeAssembly(NL);
+        writeAssembly("! return "+val+";\n");
         if (init.isConst()) {
             if (init.getType().isFloat()) {
                 writeConstFloat(init);
