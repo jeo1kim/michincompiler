@@ -1401,7 +1401,16 @@ class MyParser extends parser {
                 return new ErrorSTO(a.getName());
             } else {
                 //m_symtab.setFunc(null);
-                return new ExprSTO(a.getName());
+                if(a.isConst()){
+                    ag.writeReturn(a);
+                    return a;
+                }else{
+                    //ExprSTO b = new ExprSTO(a.getName());
+                    //b.setType(exprType);
+                    //b.set
+                    ag.writeReturn(a);
+                    return a;
+                }
             }
 
 
