@@ -380,10 +380,9 @@ public class AssemblyCodeGenerator {
         sto.setSparcBase("%g0");
         String name = sto.getName();
 
-        if ((init == null) || (auto = sto.getAuto())) {
+        if ((init == null) || (auto = sto.getAuto()) || init.isStatic()) {
             sectioncheck = BSS_SEC;
         } else {
-
             sectioncheck = sto.getAuto() ? BSS_SEC : DATA_SEC;
 
             val = stoValue(init);   // stoValue gets the value of the sto
