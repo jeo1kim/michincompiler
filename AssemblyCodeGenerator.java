@@ -206,6 +206,9 @@ public class AssemblyCodeGenerator {
         int desoffset;
         String val = "";
         increaseIndent();
+        if(func){
+            indent_level = 2;
+        }
         if((desoffset = stoDes.getSparcOffset()) != 0){
             String sName = stoDes.getName();
             String iName = expr.getName();
@@ -293,7 +296,11 @@ public class AssemblyCodeGenerator {
         String val = ""; //later used for init if init is null to handle null pointer
         sto.setSparcBase("%fp");
 
-        decreaseOffset();
+        //decreaseOffset();
+        if(func){
+            indent_level = 2;
+        }
+        decreaseIndent();
 
         if((init != null)){     //check if init is not null store the value
 
@@ -309,6 +316,7 @@ public class AssemblyCodeGenerator {
             if(sto.getAuto()){ // if its auto
 
                 writeInit(init);
+
 
             }
             else if(init.getType().isFloat() && !sto.getAuto()){  // if its not auto and float
@@ -365,7 +373,6 @@ public class AssemblyCodeGenerator {
             }
         }
 
-        writeAssembly(NL);
         sectionAlign(sectioncheck, iString(stotype.getSize()));
 
 
@@ -418,6 +425,10 @@ public class AssemblyCodeGenerator {
         String iName = init.getName();
         String save = "SAVE..$.init."+sName;
         String register = "";
+
+        if(func){
+            indent_level = 2;
+        }
 
         decreaseIndent();
         writeAssembly(GL_AUTO_INIT, sName);
