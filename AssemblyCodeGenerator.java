@@ -112,6 +112,7 @@ public class AssemblyCodeGenerator {
 
     private static final String var_comment = "! %s = %s\n";
 
+    private int floatcounter=0;
 
 
     public AssemblyCodeGenerator(String fileToWrite) {
@@ -200,20 +201,77 @@ public class AssemblyCodeGenerator {
         if((desoffset = stoDes.getSparcOffset()) != 0){
             String sName = stoDes.getName();
             String iName = expr.getName();
-
-            val = stoValue(expr); // stoVal gets teh value of sto.
-            //create space
             writeAssembly(String.format(var_comment, sName,iName));
+            val = stoValue(expr); // stoVal gets teh value of sto.
             writeAssembly(TWO_PARAM, SET_OP, iString(desoffset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-            //set value
-            writeAssembly(TWO_PARAM, SET_OP, val, O0);
-            writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
-            decreaseIndent();
-            writeAssembly(NL);
-            
+            writeInit(expr);
+
         }
         decreaseIndent();
+    }
+
+    public void writeInit(STO init){
+        String val = stoValue(init); // stoVal gets teh value of sto.
+        String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
+        String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
+        String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
+
+        if(init.isConst()){
+            writeAssembly(TWO_PARAM, SET_OP, val, O0);
+        }
+        else {
+
+            writeAssembly(TWO_PARAM, SET_OP, global, L7);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+        }
+        writeAssembly(TWO_PARAM, ST_OP, register, "["+O1+"]");
+        decreaseIndent();
+        writeAssembly(NL);
+    }
+    public void writeConstFloat(STO init){
+
+        writeAssembly(NL);
+        writeAssembly(SECTION,RODATA_SEC);
+        writeAssembly(ALIGN, iString(init.getType().getSize()));
+        //decreaseIndent();
+        int templvl = indent_level;
+        indent_level = 1;
+        writeAssembly(FLOAT_COUNTER, iString(++floatcounter));
+        //increaseIndent();
+        indent_level = templvl;
+        writeAssembly(FLOAT, stoValue(init));
+        writeAssembly(NL);
+
+        writeAssembly(SECTION, TEXT_SEC);
+        writeAssembly(ALIGN, iString(init.getType().getSize()));
+        writeAssembly(TWO_PARAM, SET_OP, ".$$.float."+iString(floatcounter), L7  );
+
+        writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", f0);
+    }
+
+
+    public void writeReturn(STO init){
+        String val = stoValue(init); // stoVal gets teh value of sto.
+        String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
+        String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
+        String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
+
+        if(init.isConst()){
+            if(init.getType().isFloat()){
+                writeConstFloat(init);
+            }
+            else {
+                writeAssembly(TWO_PARAM, SET_OP, val, O0);
+            }
+        }
+        else {
+
+            writeAssembly(TWO_PARAM, SET_OP, global, L7);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+        }
     }
     //TODO: take care of when init not there too
     public void writeLocalVariable(STO sto, STO init){
@@ -224,8 +282,6 @@ public class AssemblyCodeGenerator {
         String val = ""; //later used for init if init is null to handle null pointer
         sto.setSparcBase("%fp");
 
-        int floatcounter=0;
-        int templvl=0;
 
         decreaseOffset();
 
@@ -243,39 +299,13 @@ public class AssemblyCodeGenerator {
 
             if(sto.getAuto()){ // if its auto
 
-                register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
-                if(sto.isConst()){
-                    writeAssembly(TWO_PARAM, SET_OP, stoValue(init), O0);
-                }
-                else {
-                    writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
-                    writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
-                    writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
-                }
-                writeAssembly(TWO_PARAM, ST_OP, register, "["+O1+"]");
-                decreaseIndent();
-                writeAssembly(NL);
-
+                writeInit(init);
 
             }
             else if(init.getType().isFloat() && !sto.getAuto()){  // if its not auto and float
-                writeAssembly(NL);
-                writeAssembly(SECTION,RODATA_SEC);
-                writeAssembly(ALIGN, iString(init.getType().getSize()));
-                //decreaseIndent();
-                templvl = indent_level;
-                indent_level = 1;
-                writeAssembly(FLOAT_COUNTER, iString(++floatcounter));
-                //increaseIndent();
-                indent_level = templvl;
-                writeAssembly(FLOAT, stoValue(init));
-                writeAssembly(NL);
 
-                writeAssembly(SECTION, TEXT_SEC);
-                writeAssembly(ALIGN, iString(init.getType().getSize()));
-                writeAssembly(TWO_PARAM, SET_OP, ".$$.float."+iString(floatcounter), L7  );
 
-                writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", f0);
+                writeConstFloat(init);
                 writeAssembly(TWO_PARAM, ST_OP, f0, "["+O1+"]");
 
                 decreaseIndent();
@@ -285,11 +315,11 @@ public class AssemblyCodeGenerator {
             }
             else{
             //set value
-                
-                writeAssembly(TWO_PARAM, SET_OP, val, O0);
-                writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
-                decreaseIndent();
-                writeAssembly(NL);
+                writeInit(init);
+//                writeAssembly(TWO_PARAM, SET_OP, val, O0);
+//                writeAssembly(TWO_PARAM, ST_OP, O0, "["+O1+"]");
+//                decreaseIndent();
+//                writeAssembly(NL);
             }
             decreaseIndent();
         }
