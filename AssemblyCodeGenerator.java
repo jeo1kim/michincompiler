@@ -333,7 +333,6 @@ public class AssemblyCodeGenerator {
             indent_level = 2;
         }
 
-
         if ((init != null)) {     //check if init is not null store the value
 
             val = stoValue(init); // stoVal gets tehq value of sto.
@@ -380,16 +379,22 @@ public class AssemblyCodeGenerator {
         sto.setSparcBase("%g0");
         String name = sto.getName();
 
-        if ((init == null) || (auto = sto.getAuto()) || init.isStatic()) {
+        if ((init == null) || (auto = sto.getAuto())) {
             sectioncheck = BSS_SEC;
-        } else {
+        }
+        else {
             sectioncheck = sto.getAuto() ? BSS_SEC : DATA_SEC;
 
             val = stoValue(init);   // stoValue gets the value of the sto
             //any global variable not initialized when declared is set to value 0
-            if (!init.isConst() && sto.isGlobal()) {
-                size = 0;
-                val = iString(size);
+            if ( sto.isGlobal()) {
+                if( init.isStatic()){
+                    sectioncheck = BSS_SEC;
+                }
+                else if(!init.isConst()) {
+                    size = 0;
+                    val = iString(size);
+                }
             }
         }
 
@@ -416,7 +421,8 @@ public class AssemblyCodeGenerator {
 
         if ((sectioncheck == BSS_SEC)) {
             writeAssembly(SKIP, iString(size));
-        } else {
+        }
+        else {
             if (init != null && init.getType().isFloat()) {
                 writeAssembly(FLOAT, stoValue(init));
             } else if (init != null) {
@@ -428,22 +434,22 @@ public class AssemblyCodeGenerator {
             sectionAlign(TEXT_SEC, iString(stotype.getSize()));
             writeGlobalAuto(sto, init);
         }
-        if (init != null && sto.isGlobal()) {
-            if (sto.getType().isFloat() && init.getType().isInt()) {
-                sectionAlign(TEXT_SEC, iString(stotype.getSize()));
-            } else if (init.isStatic()) {
-                sectionAlign(TEXT_SEC, iString(stotype.getSize()));
-            }
-            writeGlobalAuto(sto, init);
+        else {
+            if (init != null && sto.isGlobal()) {
+                if (sto.getType().isFloat() && init.getType().isInt()) {
+                    sectionAlign(TEXT_SEC, iString(stotype.getSize()));
+                    writeGlobalAuto(sto, init);
 
+                } else if (init.isStatic()) {
+                    sectionAlign(TEXT_SEC, iString(stotype.getSize()));
+                    writeGlobalAuto(sto, init);
+
+                }
+
+            }
         }
         sectionAlign(TEXT_SEC, iString(stotype.getSize())); // SECTION and ALIGN
-        //writeAssembly(SECTION, TEXT_SEC);
-        //writeAssembly(ALIGN, iString(stotype.getSize()));
-
-        //writeAssembly(NL);
         decreaseIndent();
-
     }
 
 

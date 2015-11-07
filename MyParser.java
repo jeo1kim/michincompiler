@@ -501,18 +501,15 @@ class MyParser extends parser {
 
         if (!expr.isConst()) {
             VarSTO sto = new VarSTO(id, expr.getType());
-            if (stat) {
-                sto.setStatic(stat); // set variable static
-            }
+            sto.setStatic(stat); // set variable static
+
             sto.setAuto();
             m_symtab.insert(sto);
             ag.writeVariable(sto, expr);
 
         } else {
             ConstSTO sto = new ConstSTO(id, expr.getType());
-            if (stat) {
-                sto.setStatic(stat); // set variable static
-            }
+            sto.setStatic(stat); // set variable static
 
             sto.setAuto();
             m_symtab.insert(sto);
