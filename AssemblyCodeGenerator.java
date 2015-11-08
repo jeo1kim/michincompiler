@@ -774,7 +774,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
 
         decreaseIndent();
-        writeAssembly(GL_AUTO_FINI, sName);
+        writeAssembly(GL_AUTO_FINI, sName+":");
         newline();
         increaseIndent();
         writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP); // might need to change offset
