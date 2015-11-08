@@ -3,6 +3,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Vector;
 
 
 public class AssemblyCodeGenerator {
@@ -72,13 +73,13 @@ public class AssemblyCodeGenerator {
     private static final String LD_OP = "ld     \t";
 
     //arithmetic 
-    private static final String ADD_OP = "add     \t";
+    private static final String ADD_OP = "add    \t";
     private static final String SUB_OP = "sub     \t";
     private static final String MUL_OP = "mul     \t";
     private static final String DIV_OP = "div     \t";
     private static final String MOD_OP = "mod     \t";
 
-    private static final String FADD_OP = "fadds     \t";
+    private static final String FADD_OP = "fadds    \t";
     private static final String FSUB_OP = "fsubs     \t";
     private static final String FMUL_OP = "fmuls     \t";
     private static final String FDIV_OP = "fdivs     \t";
@@ -169,12 +170,12 @@ public class AssemblyCodeGenerator {
 
     // printing
     private static final String ASCIZ = ".asciz \t";
-    private static final String intFmt = ".$$.intFmt:\n";
-    private static final String strFmt = ".$$.strFmt:\n";
-    private static final String strTF = ".$$.strTF:\n";
-    private static final String strEndl = ".$$.strEndl:\n";
-    private static final String strArrBound = ".$$.strArrBound:\n";
-    private static final String strNullPtr = ".$$.strNullPtr:\n";
+    private static final String intFmt = ".$$.intFmt";
+    private static final String strFmt = ".$$.strFmt";
+    private static final String strTF = ".$$.strTF";
+    private static final String strEndl = ".$$.strEndl";
+    private static final String strArrBound = ".$$.strArrBound";
+    private static final String strNullPtr = ".$$.strNullPtr";
 
     private static final String printBool = ".$$.printBool:\n";
     private static final String printBool2 = ".$$.printBool2:\n";
@@ -412,6 +413,18 @@ public class AssemblyCodeGenerator {
 
        
     }
+
+    public void setAddLoad(STO init){
+        String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
+        String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
+        String register = init.getType().isFloat() ? f0 : I0; // check for float f0 or o0
+        String off = init.isGlobal() ? init.getName() : iString(init.getSparcOffset());
+
+        writeAssembly(TWO_PARAM, SET_OP, off, L7);
+        writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
+        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+    }
+
     public void setaddld(String register, String resoffset){
         writeAssembly(TWO_PARAM, SET_OP, resoffset, L7);
         writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
@@ -524,6 +537,8 @@ public class AssemblyCodeGenerator {
         //writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
 
     }
+
+
 
     //convert int to float when needed
     public void convertToFloat(STO sto, STO init) {
@@ -648,6 +663,7 @@ public class AssemblyCodeGenerator {
         String val = "";
         boolean auto = false;
         sto.setSparcBase("%g0");
+
         String name = sto.getName();
 
         if ((init == null) || (auto = sto.getAuto())) {
@@ -746,7 +762,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
 
         writeAssembly(String.format(endFunc_cmt, sName));
-        call(sName + ".fini");
+        call(String.format(GL_AUTO_INIT, sName+".fini"));
         retRest();
 
         writeAssembly(save + String.format(OFFSET_TOTAL, "0"));
@@ -761,11 +777,11 @@ public class AssemblyCodeGenerator {
         retRest();
 
         sectionAlign(INIT_SEC, iString(sto.getType().getSize()));
-        call(sName);
+        call(String.format(GL_AUTO_INIT, sName));
     }
 
     public void call(String name) {
-        writeAssembly(ONE_PARAM, CALL_OP, String.format(GL_AUTO_INIT, name));
+        writeAssembly(ONE_PARAM, CALL_OP, name);
         writeAssembly(NOP_OP);
     }
 
@@ -790,7 +806,73 @@ public class AssemblyCodeGenerator {
         return Integer.toString(val);
     }
 
+    public void writeCout(STO sto){
 
+        Vector<String> st = prepSTO(sto);
+
+        funcIndent();
+        writeAssembly(NL);
+        setAddLoad(sto);
+        callCout(sto);
+
+        funcDedent();
+    }
+
+    public void callCout(STO sto){
+        String stype = sto.getType().getName();
+        String ret = "";
+        switch(stype){
+            case "int": ret = intFmt;
+                break;
+            case "bool": ret = strTF;
+                break;
+        }
+        if(stype == "float"){
+            call("printFloat");
+            return;
+        }
+        else{
+            writeAssembly(TWO_PARAM, SET_OP, ret, O0);
+            call("printf");
+            return;
+        }
+
+    }
+
+    public void writeCoutClose(){
+        funcIndent();
+        writeAssembly(NL);
+        writeAssembly("! cout << endl\n");
+        writeAssembly(TWO_PARAM, SET_OP, strEndl, O0);
+        call("printf");
+        funcDedent();
+
+    }
+
+
+    public Vector<String> prepSTO(STO sto){
+        String name = sto.getName();
+        String base = sto.getSparcBase();
+        String off = iString(sto.getSparcOffset());
+
+        Vector<String> ret = new Vector<>();
+        ret.add(name);
+        ret.add(base);
+        ret.add(off);
+        return ret;
+    }
+
+
+    public void funcIndent(){
+        if (func){
+            indent_level = 2;
+        }
+    }
+    public void funcDedent(){
+        if (func){
+            indent_level = 0;
+        }
+    }
     // 8
     public void decreaseIndent() {
         indent_level--;
@@ -859,12 +941,12 @@ public class AssemblyCodeGenerator {
     public void fmtHeader() {
         increaseIndent();
         sectionAlign(RODATA_SEC, "4");
-        fmt(intFmt, d);
-        fmt(strFmt, s);
-        fmt(strTF, tf);
-        fmt(strEndl, nl);
-        fmt(strArrBound, arrbound);
-        fmt(strNullPtr, nullptr);
+        fmt(intFmt+":\n", d);
+        fmt(strFmt+":\n", s);
+        fmt(strTF+":\n", tf);
+        fmt(strEndl+":\n", nl);
+        fmt(strArrBound+":\n", arrbound);
+        fmt(strNullPtr+":\n", nullptr);
         sectionAlign(TEXT_SEC, "4");
 
         decreaseIndent();

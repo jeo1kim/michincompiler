@@ -1276,8 +1276,18 @@ class MyParser extends parser {
 
     }
 
-    void DoCoutClose(){
+    void DoCout(Vector<STO> cout){
 
+    }
+
+    void DoCout(STO cout){
+
+        ag.writeCout(cout);
+
+    }
+
+    void DoCoutClose(){
+        ag.writeCoutClose();
     }
 
     STO DoConditionCheck(STO condition) {

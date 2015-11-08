@@ -798,7 +798,10 @@ ReadStmt ::=        T_CIN T_ISTREAM Designator T_SEMI
     ;
 
 
-WriteStmt ::=       T_COUT T_OSTREAM WritePairList T_SEMI
+WriteStmt ::=       T_COUT T_OSTREAM WritePairList:_1 T_SEMI
+                    {:
+                        ((MyParser) parser).DoCout(_1);
+                    :}
     ;
 
 
@@ -806,6 +809,7 @@ WritePairList ::=   WritePair:_1
                     {:
                         RESULT = new Vector();
                         RESULT.addElement(_1);
+
                     :}
     |               WritePairList:_1 T_OSTREAM WritePair:_2
                     {:
@@ -818,6 +822,8 @@ WritePairList ::=   WritePair:_1
 WritePair ::=       Expr:_1
                     {:
                         RESULT = _1;
+                        ((MyParser) parser).DoCout(_1);
+
 
                     :}
     |               T_ENDL
