@@ -536,7 +536,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
         writeAssembly(TWO_PARAM, ST_OP, O0, "[" +L7+ "]");
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
-        writeAssembly(TWO_PARAM, FITOS, f0, f0);
+        writeAssembly(TWO_PARAM, FITOS, F1, F1);
 
         //writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
 
