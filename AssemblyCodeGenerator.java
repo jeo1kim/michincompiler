@@ -61,7 +61,10 @@ public class AssemblyCodeGenerator {
     private static final String INC_OP = "inc   \t";
     private static final String DEC_OP = "dec   \t";
     private static final String MOV_OP = "mov   \t";
+
+    private static final String BA_OP = "ba    \t";
     private static final String BE_OP = "be    \t";
+    private static final String BG_OP = "bg    \t";
     private static final String BL_OP = "bl    \t";
     private static final String BLE_OP = "ble    \t";
     private static final String BGE_OP = "bge   \t";
@@ -103,6 +106,8 @@ public class AssemblyCodeGenerator {
     private static final String FLOAT_COUNTER = ".$$.float.%s:\n";
     private static final String CMP_COUNTER = ".$$.cmp.%s";
 
+    private static final String BASIC_FIN_NL = ".$$.%s.%s:\n";
+    private static final String BASIC_FIN = ".$$.%s.%s";
     //global auto
     private static final String GL_AUTO_INIT = ".$.init.%s:";
     private static final String GL_AUTO_FINI = ".$.init.%s.fini:";
@@ -325,6 +330,7 @@ public class AssemblyCodeGenerator {
             iffloat = true;
         }
         String register = iffloat ? f0 : O0;
+        increaseIndent();
         writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
         
 
@@ -389,9 +395,8 @@ public class AssemblyCodeGenerator {
     public void writeComparison(String opname, String register, String resoffset, String reg1, String reg2){
         cmpcounter++;
         writeAssembly(TWO_PARAM, CMP_OP, reg1, reg2);
-        writeAssembly(ONE_PARAM, opname, String.format(CMP_OP, iString(cmpcounter)));
-        newline();
-
+        writeAssembly(ONE_PARAM, opname, String.format(CMP_COUNTER, iString(cmpcounter)));
+        
         writeAssembly(TWO_PARAM, MOV_OP, G0, O0);
         writeAssembly(ONE_PARAM, INC_OP, O0);
 
@@ -407,10 +412,24 @@ public class AssemblyCodeGenerator {
         setaddld(register, resoffset);
 
         writeAssembly(TWO_PARAM, CMP_OP, reg1, reg2);
-        writeAssembly(ONE_PARAM, "be", String.format(CMP_COUNTER, iString(cmpcounter)));
+        writeAssembly(ONE_PARAM, "be", String.format(BASIC_FIN, "endif", iString(cmpcounter)));
         writeAssembly(NOP_OP);
 
        
+    }
+    public void writeIfClose(){
+        increaseIndent();
+        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(cmpcounter)));
+        writeAssembly(NOP_OP);
+
+        decreaseIndent();
+        writeAssembly(BASIC_FIN_NL, "else", iString(cmpcounter));
+        newline(); 
+        
+
+        writeAssembly(BASIC_FIN_NL, "endif", iString(cmpcounter));
+        newline();
+        
     }
     public void setaddld(String register, String resoffset){
         writeAssembly(TWO_PARAM, SET_OP, resoffset, L7);

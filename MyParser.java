@@ -1272,12 +1272,8 @@ class MyParser extends parser {
 
     void DoIfClose(boolean optElse){
         // optElse is true is there is an else stmt
-
-
-    }
-
-    void DoCoutClose(){
-
+        ag.writeIfClose();
+        
     }
 
     STO DoConditionCheck(STO condition) {
