@@ -63,6 +63,7 @@ public class AssemblyCodeGenerator {
     private static final String MOV_OP = "mov   \t";
     private static final String BE_OP = "be    \t";
     private static final String BL_OP = "bl    \t";
+    private static final String BLE_OP = "ble    \t";
     private static final String BGE_OP = "bge   \t";
     private static final String BNE_OP = "bne   \t";
 
@@ -100,6 +101,7 @@ public class AssemblyCodeGenerator {
 
     //private static final String ASCIZ = ".asciz";
     private static final String FLOAT_COUNTER = ".$$.float.%s:\n";
+    private static final String CMP_COUNTER = ".$$.cmp.%s";
 
     //global auto
     private static final String GL_AUTO_INIT = ".$.init.%s:";
@@ -191,6 +193,7 @@ public class AssemblyCodeGenerator {
 
     private static final String var_comment = "! %s = %s\n";
     private int floatcounter = 0;
+    private int cmpcounter = 0;
     private boolean func = false;
     private boolean arithmetic = false;
 
@@ -321,51 +324,104 @@ public class AssemblyCodeGenerator {
         if (a.getType().isFloat() || b.getType().isFloat()) {
             iffloat = true;
         }
-        writeInstructionCase(o, iffloat);
         String register = iffloat ? f0 : O0;
+        writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
+        
 
         //int binaryoffset = 
+        /*
         writeAssembly(TWO_PARAM, SET_OP, iString(result.getSparcOffset()), O1);
         writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
         writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");
-
+        */
         decreaseIndent();
     }
 
-    public void writeInstructionCase(Operator o, boolean iffloat) {
+    public void writeInstructionCase(Operator o, boolean iffloat, String register, String resoffset) {
         String opname = o.getName();
 
         if (!iffloat) {
             switch (opname) {
                 case "+":
-                    writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O0);
+                    writeArithmetic(ADD_OP, register, resoffset, O0, O1);
                     break;
                 case "-":
-                    writeAssembly(THREE_PARAM, SUB_OP, O0, O1, O0);
+                    writeArithmetic(SUB_OP, register, resoffset, O0, O1);
                     break;
                 case "*":
-                    writeAssembly(THREE_PARAM, MUL_OP, O0, O1, O0);
+                    writeArithmetic(MUL_OP, register, resoffset, O0, O1);
                     break;
                 case "/":
-                    writeAssembly(THREE_PARAM, DIV_OP, O0, O1, O0);
+                    writeArithmetic(DIV_OP, register, resoffset, O0, O1);
                     break;
                 case "%":
-                    writeAssembly(THREE_PARAM, MOD_OP, O0, O1, O0);
+                    writeArithmetic(MOD_OP, register, resoffset, O0, O1);
                     break;
+                case ">":
+                    writeComparison(BLE_OP, register, resoffset, O0, O1);
+                    break;
+                case "<":
+                    writeComparison(BGE_OP, register, resoffset, O0, O1);
             }
         } else {
             switch (opname) {
                 case "+":
-                    writeAssembly(THREE_PARAM, FADD_OP, f0, F1, f0);
+                    writeArithmetic(FADD_OP, register, resoffset, f0, F1);
                     break;
                 case "-":
-                    writeAssembly(THREE_PARAM, FSUB_OP, f0, F1, f0);
+                    writeArithmetic(FADD_OP, register, resoffset, f0, F1);
                     break;
                 case "*":
-                    writeAssembly(THREE_PARAM, FMUL_OP, f0, F1, f0);
+                    writeArithmetic(FADD_OP, register, resoffset, f0, F1);
                     break;
             }
         }
+    }
+    public void writeArithmetic(String opname, String register, String resoffset, String reg1, String reg2){
+        writeAssembly(THREE_PARAM, opname, reg1, reg2, reg1);
+
+        /*writeAssembly(TWO_PARAM, SET_OP, resoffset, O1);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+        writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");*/
+        setaddst(register, resoffset);
+    }
+
+    public void writeComparison(String opname, String register, String resoffset, String reg1, String reg2){
+        cmpcounter++;
+        writeAssembly(TWO_PARAM, CMP_OP, reg1, reg2);
+        writeAssembly(ONE_PARAM, opname, String.format(CMP_OP, iString(cmpcounter)));
+        newline();
+
+        writeAssembly(TWO_PARAM, MOV_OP, G0, O0);
+        writeAssembly(ONE_PARAM, INC_OP, O0);
+
+        decreaseIndent();
+        writeAssembly(VARCOLON, String.format(CMP_COUNTER, iString(cmpcounter)));
+
+        increaseIndent();
+        /*writeAssembly(TWO_PARAM, SET_OP, resoffset, O1);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+        writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");*/
+        setaddst(register, resoffset);
+        newline();
+        setaddld(register, resoffset);
+
+        writeAssembly(TWO_PARAM, CMP_OP, reg1, reg2);
+        writeAssembly(ONE_PARAM, "be", String.format(CMP_COUNTER, iString(cmpcounter)));
+        writeAssembly(NOP_OP);
+
+       
+    }
+    public void setaddld(String register, String resoffset){
+        writeAssembly(TWO_PARAM, SET_OP, resoffset, L7);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+    }
+
+    public void setaddst(String register, String resoffset) {
+        writeAssembly(TWO_PARAM, SET_OP, resoffset, O1);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+        writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");
     }
 
     public void writeCallStored(STO init, int x) {
@@ -388,10 +444,13 @@ public class AssemblyCodeGenerator {
                 register = O1;
             }
         }
-
-        writeAssembly(TWO_PARAM, SET_OP, global, L7);
-        writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
-        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+        if(init.isConst()){
+            writeAssembly(TWO_PARAM, SET_OP, val, register);
+        }else{
+            writeAssembly(TWO_PARAM, SET_OP, global, L7);
+            writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+        }
     }
 
     //used when initializing values e.g x = 2
