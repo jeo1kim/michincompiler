@@ -195,6 +195,7 @@ public class AssemblyCodeGenerator {
     private static final String var_comment = "! %s = %s\n";
     private int floatcounter = 0;
     private int cmpcounter = 0;
+    private int strFmtCnt = 0;
     private boolean func = false;
     private boolean arithmetic = false;
 
@@ -565,12 +566,13 @@ public class AssemblyCodeGenerator {
     public void writeConstFloat(STO init) {
 
         String name = FLOAT_COUNTER;
-        int counter = floatcounter;
+        int counter = ++floatcounter;
         boolean str = false;
         String size = init.getType() == null ? "4": iString(init.getType().getSize());
         if(init.getType() == null){
             funcIndent();
             name = ".$$.str."+iString(++strFmtCnt)+":\n";
+            strFmtCnt++;
             counter = strFmtCnt;
             str = true;
         }
@@ -579,7 +581,7 @@ public class AssemblyCodeGenerator {
         sectionAlign(RODATA_SEC, size);
 
         indent_level = 1;
-        writeAssembly(name, iString(++counter));
+        writeAssembly(name, iString(counter));
         indent_level = 2;
 
         if(str){
@@ -837,7 +839,6 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
-    int strFmtCnt = 0;
     public void callCout(STO sto){
 
         if(sto.getType() == null){
