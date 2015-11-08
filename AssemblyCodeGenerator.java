@@ -79,7 +79,7 @@ public class AssemblyCodeGenerator {
     private static final String DIV_OP = "div     \t";
     private static final String MOD_OP = "mod     \t";
 
-    private static final String FADD_OP = "fadds    \t";
+    private static final String FADD_OP = "fadds\t";
     private static final String FSUB_OP = "fsubs     \t";
     private static final String FMUL_OP = "fmuls     \t";
     private static final String FDIV_OP = "fdivs     \t";
@@ -288,6 +288,7 @@ public class AssemblyCodeGenerator {
         int desoffset;
         String val = "";
         increaseIndent();
+
         if (func) {
             indent_level = 2;
         }
@@ -309,6 +310,8 @@ public class AssemblyCodeGenerator {
         //arithmetic = true;
 
         increaseIndent();
+        writeAssembly(NL);
+        funcIndent();
 
         writeCallStored(a, 0);
         decreaseOffset();
@@ -335,6 +338,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
         writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");
         */
+        funcDedent();
         decreaseIndent();
     }
 
@@ -845,6 +849,7 @@ public class AssemblyCodeGenerator {
         writeAssembly("! cout << endl\n");
         writeAssembly(TWO_PARAM, SET_OP, strEndl, O0);
         call("printf");
+        writeAssembly(NL);
         funcDedent();
 
     }
