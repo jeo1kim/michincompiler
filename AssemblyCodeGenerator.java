@@ -52,15 +52,20 @@ public class AssemblyCodeGenerator {
     private static final String RESTORE_OP = "restore\n";
     private static final String NOP_OP = "nop\n";
 
-    private static final String CMP_OP = "cmp";
-    private static final String JMP_OP = "jmp";
-    private static final String CALL_OP = "call" + SEPARATOR;
-    private static final String TST_OP = "tst";
-    private static final String NOT_OP = "not";
-    private static final String NEG_OP = "neg";
-    private static final String INC_OP = "inc";
-    private static final String DEC_OP = "dec";
-    private static final String MOV_OP = "mov";
+    private static final String CMP_OP = "cmp   \t";
+    private static final String JMP_OP = "jmp   \t";
+    private static final String CALL_OP = "call   \t";
+    private static final String TST_OP = "tst   \t";
+    private static final String NOT_OP = "not   \t";
+    private static final String NEG_OP = "neg   \t";
+    private static final String INC_OP = "inc   \t";
+    private static final String DEC_OP = "dec   \t";
+    private static final String MOV_OP = "mov   \t";
+    private static final String BE_OP = "be    \t";
+    private static final String BL_OP = "bl    \t";
+    private static final String BGE_OP = "bge   \t";
+    private static final String BNE_OP = "bne   \t";
+
 
     private static final String ST_OP = "st     \t";
     private static final String LD_OP = "ld     \t";
@@ -76,6 +81,7 @@ public class AssemblyCodeGenerator {
     private static final String FSUB_OP = "fsubs     \t";
     private static final String FMUL_OP = "fmuls     \t";
     private static final String FDIV_OP = "fdivs     \t";
+
 
 
     //section
@@ -105,14 +111,52 @@ public class AssemblyCodeGenerator {
     private static final String FINI_FUNC = "%s.%s.fini";
 
     private static final String NL = "\n";
+    /*
+     * LOCAL REGISTERS
+     */
+    private static final String LO = "%l0";
+    private static final String L1 = "%l1";
+    private static final String L2 = "%l2";
+    private static final String L3 = "%l3";
+    private static final String L4 = "%l4";
+    private static final String L5 = "%l5";
+    private static final String L6 = "%l6";
+
+    /*
+     * OUTPUT REGISTERS
+     */
     private static final String O0 = "%o0";
     private static final String O1 = "%o1";
+    private static final String O2 = "%o2";
+    private static final String O3 = "%o3";
+    private static final String O4 = "%o4";
+    private static final String O5 = "%o5";
+    private static final String O6 = "%o6";
+    private static final String O7 = "%o7";
 
-    //global register
+    /*
+     * INPUT REGISTERS
+     */
+    private static final String I0 = "%i0";
+    private static final String I1 = "%i1";
+    private static final String I2 = "%i2";
+    private static final String I3 = "%i3";
+    private static final String I4 = "%i4";
+    private static final String I5 = "%i5";
+    private static final String I6 = "%i6";
+    private static final String I7 = "%i7";
+
+    /*
+     * GLOBAL REGISTERS
+     */
     private static final String G0 = "%g0";
     private static final String G1 = "%g1";
     private static final String G2 = "%g2";
     private static final String G3 = "%g3";
+    private static final String G4 = "%g4";
+    private static final String G5 = "%g5";
+    private static final String G6 = "%g6";
+    private static final String G7 = "%g7";
 
 
     // for float
@@ -120,15 +164,35 @@ public class AssemblyCodeGenerator {
     private static final String F1 = "%f1";
 
     private static final String L7 = "%l7";
-
-    private static final String I0 = "%i0";
     private static final String FITOS = "fitos  \t";
+
+    // printing
+    private static final String ASCIZ = ".asciz \t";
+    private static final String intFmt = ".$$.intFmt:\n";
+    private static final String strFmt = ".$$.strFmt:\n";
+    private static final String strTF = ".$$.strTF:\n";
+    private static final String strEndl = ".$$.strEndl:\n";
+    private static final String strArrBound = ".$$.strArrBound:\n";
+    private static final String strNullPtr = ".$$.strNullPtr:\n";
+
+    private static final String printBool = ".$$.printBool:\n";
+    private static final String printBool2 = ".$$.printBool2:\n";
+    private static final String arrCheck = ".$$.arrCheck:\n";
+    private static final String arrCheck2 = ".$$.arrCheck2:\n";
+    private static final String ptrCheck = ".$$.ptrCheck:\n";
+    private static final String ptrCheck2 = ".$$.ptrCheck2:\n";
+
+    private static final String d = "\"%d\"";
+    private static final String nl = "\"\\n\"";
+    private static final String s = "\"%s\"";
+    private static final String tf = "\"false\\0\\0\\0true\"";
+    private static final String arrbound = "\"Index value of %d is outside legal range [0,%d).\\n\"";
+    private static final String nullptr = "\"Attempt to dereference NULL pointer.\\n\"";
+
 
 
     private static final String var_comment = "! %s = %s\n";
-
     private int floatcounter = 0;
-
     private boolean func = false;
     private boolean arithmetic = false;
 
@@ -733,6 +797,91 @@ public class AssemblyCodeGenerator {
 
     }
 
+
+    public void fmtHeader(){
+        increaseIndent();
+        sectionAlign(RODATA_SEC, "4");
+        fmt(intFmt, d);
+        fmt(strFmt, s);
+        fmt(strTF, tf);
+        fmt(strEndl, nl);
+        fmt(strArrBound, arrbound);
+        fmt(strNullPtr, nullptr );
+        sectionAlign(TEXT_SEC, "4");
+
+        decreaseIndent();
+
+        writeAssembly( ".$$.printBool:\n");
+        increaseIndent();
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP);
+        writeAssembly(TWO_PARAM, SET_OP, ".$$.strTF", O0);
+        writeAssembly(TWO_PARAM, CMP_OP, G0, I0);
+        writeAssembly(ONE_PARAM, BE_OP, ".$$.printBool2");
+        writeAssembly(NOP_OP);
+        writeAssembly(THREE_PARAM, ADD_OP, O0, "8", O0);
+        decreaseIndent();
+
+        writeAssembly(".$$.printBool2:\n");
+        increaseIndent();
+        writeAssembly(ONE_PARAM, CALL_OP, "printf");
+        writeAssembly(NOP_OP);
+        retRest();
+        writeAssembly(NL);
+        decreaseIndent();
+
+        writeAssembly(".$$.arrCheck:\n");
+        increaseIndent();
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP);
+        writeAssembly(TWO_PARAM, CMP_OP, I0, G0);
+        writeAssembly(ONE_PARAM, BL_OP, ".$$.arrCheck2");
+        writeAssembly(NOP_OP);
+        writeAssembly(TWO_PARAM, CMP_OP, I0, I1);
+        writeAssembly(ONE_PARAM, BGE_OP, ".$$.arrCheck2");
+        writeAssembly(NOP_OP);
+        retRest();
+        writeAssembly(NL);
+        decreaseIndent();
+
+        writeAssembly(".$$.arrCheck2:\n");
+        increaseIndent();
+        writeAssembly(TWO_PARAM, SET_OP, ".$$.strArrBound", O0);
+        writeAssembly(TWO_PARAM, MOV_OP, I0, O1);
+        writeAssembly(ONE_PARAM, CALL_OP, "printf");
+        writeAssembly(TWO_PARAM, MOV_OP, I1, O2);
+        writeAssembly(ONE_PARAM, CALL_OP, "exit");
+        writeAssembly(TWO_PARAM, MOV_OP, "1", O0);
+        retRest();
+        writeAssembly(NL);
+        decreaseIndent();
+
+        writeAssembly( ".$$.ptrCheck:\n");
+        increaseIndent();
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP);
+        writeAssembly(TWO_PARAM, CMP_OP, I0, G0);
+        writeAssembly(ONE_PARAM, BNE_OP, ".$$.ptrCheck2");
+        writeAssembly(NOP_OP);
+        writeAssembly(TWO_PARAM, SET_OP, ".$$.strNullPtr", O0);
+        writeAssembly(ONE_PARAM, CALL_OP, "printf");
+        writeAssembly(NOP_OP);
+        writeAssembly(ONE_PARAM, CALL_OP, "exit");
+        writeAssembly(TWO_PARAM, MOV_OP, "1", O0);
+        decreaseIndent();
+
+        writeAssembly(".$$.ptrCheck2:\n");
+        increaseIndent();
+        retRest();
+        writeAssembly(NL);
+        decreaseIndent();
+
+    }
+
+    public void fmt(String fmt, String typ){
+        decreaseIndent();
+        writeAssembly(fmt);
+        increaseIndent();
+        writeAssembly(ONE_PARAM, ASCIZ, typ);
+
+    }
 
     // 12
    /* public static void main(String args[]) {
