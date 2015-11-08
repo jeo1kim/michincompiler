@@ -1273,7 +1273,11 @@ class MyParser extends parser {
     void DoIfClose(boolean optElse){
         // optElse is true is there is an else stmt
 
-        
+
+    }
+
+    void DoCoutClose(){
+
     }
 
     STO DoConditionCheck(STO condition) {
