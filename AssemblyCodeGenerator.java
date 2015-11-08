@@ -572,7 +572,6 @@ public class AssemblyCodeGenerator {
         if(init.getType() == null){
             funcIndent();
             name = ".$$.str."+iString(++strFmtCnt)+":\n";
-            strFmtCnt++;
             counter = strFmtCnt;
             str = true;
         }
