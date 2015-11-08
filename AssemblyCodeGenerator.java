@@ -83,7 +83,6 @@ public class AssemblyCodeGenerator {
     private static final String FDIV_OP = "fdivs     \t";
 
 
-
     //section
     private static final String SECTION = ".section" + SEPARATOR + "\"%s\"\n";
 
@@ -190,7 +189,6 @@ public class AssemblyCodeGenerator {
     private static final String nullptr = "\"Attempt to dereference NULL pointer.\\n\"";
 
 
-
     private static final String var_comment = "! %s = %s\n";
     private int floatcounter = 0;
     private boolean func = false;
@@ -244,7 +242,7 @@ public class AssemblyCodeGenerator {
         writeAssembly("%s %s\n", String.format(SAVE_FUNC, sto.getName()), String.format(OFFSET_TOTAL, iString(posoffset)));
 
         decreaseIndent();
-        indent_level=0;
+        indent_level = 0;
         writeAssembly(NL);
         writeAssembly(FINI_FUNC, sto.getName(), "void");
         writeAssembly(":\n");
@@ -302,7 +300,7 @@ public class AssemblyCodeGenerator {
         decreaseIndent();
     }
 
-    public void writeBinaryExpr(STO a, Operator o, STO b, STO result){
+    public void writeBinaryExpr(STO a, Operator o, STO b, STO result) {
         boolean iffloat = false;
         //arithmetic = true;
 
@@ -311,16 +309,16 @@ public class AssemblyCodeGenerator {
         writeCallStored(a, 0);
         decreaseOffset();
         result.setSparcOffset(getOffset());
-        if(a.getType().isInt() && b.getType().isFloat()){
+        if (a.getType().isInt() && b.getType().isFloat()) {
             convertToFloatBinary(a, b, 0);
         }
 
         writeCallStored(b, 1);
-        if(a.getType().isFloat() && b.getType().isInt()){
+        if (a.getType().isFloat() && b.getType().isInt()) {
             convertToFloatBinary(a, b, 1);
         }
 
-        if(a.getType().isFloat() || b.getType().isFloat()){
+        if (a.getType().isFloat() || b.getType().isFloat()) {
             iffloat = true;
         }
         writeInstructionCase(o, iffloat);
@@ -334,52 +332,59 @@ public class AssemblyCodeGenerator {
         decreaseIndent();
     }
 
-    public void writeInstructionCase(Operator o, boolean iffloat){
+    public void writeInstructionCase(Operator o, boolean iffloat) {
         String opname = o.getName();
-        
-        if(!iffloat){
-            switch(opname){
-                case "+": writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O0);
+
+        if (!iffloat) {
+            switch (opname) {
+                case "+":
+                    writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O0);
                     break;
-                case "-": writeAssembly(THREE_PARAM, SUB_OP, O0, O1, O0);
+                case "-":
+                    writeAssembly(THREE_PARAM, SUB_OP, O0, O1, O0);
                     break;
-                case "*": writeAssembly(THREE_PARAM, MUL_OP, O0, O1, O0);
+                case "*":
+                    writeAssembly(THREE_PARAM, MUL_OP, O0, O1, O0);
                     break;
-                case "/": writeAssembly(THREE_PARAM, DIV_OP, O0, O1, O0);
+                case "/":
+                    writeAssembly(THREE_PARAM, DIV_OP, O0, O1, O0);
                     break;
-                case "%": writeAssembly(THREE_PARAM, MOD_OP, O0, O1, O0);
+                case "%":
+                    writeAssembly(THREE_PARAM, MOD_OP, O0, O1, O0);
                     break;
             }
-        }
-        else{
-            switch(opname){
-                case "+": writeAssembly(THREE_PARAM, FADD_OP, f0, F1, f0);
+        } else {
+            switch (opname) {
+                case "+":
+                    writeAssembly(THREE_PARAM, FADD_OP, f0, F1, f0);
                     break;
-                case "-": writeAssembly(THREE_PARAM, FSUB_OP, f0, F1, f0);
+                case "-":
+                    writeAssembly(THREE_PARAM, FSUB_OP, f0, F1, f0);
                     break;
-                case "*": writeAssembly(THREE_PARAM, FMUL_OP, f0, F1, f0);
-                    break;                
+                case "*":
+                    writeAssembly(THREE_PARAM, FMUL_OP, f0, F1, f0);
+                    break;
             }
         }
     }
 
-    public void writeCallStored(STO init, int x){
+    public void writeCallStored(STO init, int x) {
         String val = stoValue(init); // stoVal gets teh value of sto.
         String register = init.getType().isFloat() ? "isfl" : "isint"; // check for float f0 or o0
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
 
-        if(x == 0){
-            if(register.equals("isfl")){
+        if (x == 0) {
+            if (register.equals("isfl")) {
                 register = f0;
-            }else {
+            } else {
                 register = O0;
             }
         }
-        if( x == 1 ){
-            if(register.equals("isfl")){
+        if (x == 1) {
+            if (register.equals("isfl")) {
                 register = F1;
-            }else {
+            } else {
                 register = O1;
             }
         }
@@ -399,7 +404,7 @@ public class AssemblyCodeGenerator {
         if (init.isConst()) {
             writeAssembly(TWO_PARAM, SET_OP, val, O0);
             if (sto.getType().isFloat()) {
-                convertToFloat(sto ,init);
+                convertToFloat(sto, init);
                 writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
                 //decreaseIndent();
                 writeAssembly(NL);
@@ -431,17 +436,17 @@ public class AssemblyCodeGenerator {
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
         String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
 
-        if(x == 0){
-            if(register.equals("isfl")){
+        if (x == 0) {
+            if (register.equals("isfl")) {
                 register = f0;
-            }else {
+            } else {
                 register = O0;
             }
         }
-        if( x == 1 ){
-            if(register.equals("isfl")){
+        if (x == 1) {
+            if (register.equals("isfl")) {
                 register = F1;
-            }else {
+            } else {
                 register = O1;
             }
         }
@@ -467,7 +472,7 @@ public class AssemblyCodeGenerator {
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
         String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
 
-        int newoffset =  sto.isGlobal() ? -4:offset;
+        int newoffset = sto.isGlobal() ? -4 : offset;
         decreaseOffset();
         writeAssembly(TWO_PARAM, SET_OP, iString(newoffset), L7);
         writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
@@ -509,7 +514,7 @@ public class AssemblyCodeGenerator {
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
 
         writeAssembly(NL);
-        writeAssembly("! return "+val+";\n");
+        writeAssembly("! return " + val + ";\n");
         if (init.isConst()) {
             if (init.getType().isFloat()) {
                 writeConstFloat(init);
@@ -550,17 +555,24 @@ public class AssemblyCodeGenerator {
             writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
 
-            if (sto.getAuto()) { // if its auto
+//            if (sto.getAuto()) { // if its auto
+//
+//                writeInit(sto, init);
+//
+//            }
 
-                writeInit(sto, init);
+            if (init.isConst()) {
+                if (init.getType().isFloat()) {  // if its not auto and float
 
-            } else if (init.getType().isFloat() && !sto.getAuto()) {  // if its not auto and float
+                    writeConstFloat(init);
+                    writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
+                    decreaseIndent();
+                    writeAssembly(NL);
 
-                writeConstFloat(init);
-                writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
-
-                decreaseIndent();
-                writeAssembly(NL);
+                }
+                else{
+                    writeInit(sto, init);
+                }
             } else {
                 //set value
                 writeInit(sto, init);
@@ -588,17 +600,15 @@ public class AssemblyCodeGenerator {
 
         if ((init == null) || (auto = sto.getAuto())) {
             sectioncheck = BSS_SEC;
-        }
-        else {
+        } else {
             sectioncheck = sto.getAuto() ? BSS_SEC : DATA_SEC;
 
             val = stoValue(init);   // stoValue gets the value of the sto
             //any global variable not initialized when declared is set to value 0
-            if ( sto.isGlobal()) {
-                if( init.isStatic()){
+            if (sto.isGlobal()) {
+                if (init.isStatic()) {
                     sectioncheck = BSS_SEC;
-                }
-                else if(!init.isConst()) {
+                } else if (!init.isConst()) {
                     size = 0;
                     val = iString(size);
                 }
@@ -628,8 +638,7 @@ public class AssemblyCodeGenerator {
 
         if ((sectioncheck == BSS_SEC)) {
             writeAssembly(SKIP, iString(size));
-        }
-        else {
+        } else {
             if (init != null && init.getType().isFloat()) {
                 writeAssembly(FLOAT, stoValue(init));
             } else if (init != null) {
@@ -640,8 +649,7 @@ public class AssemblyCodeGenerator {
         if (auto) {       // if its auto do auto and return
             sectionAlign(TEXT_SEC, iString(stotype.getSize()));
             writeGlobalAuto(sto, init);
-        }
-        else {
+        } else {
             if (init != null && sto.isGlobal()) {
                 if (sto.getType().isFloat() && init.getType().isInt()) {
                     sectionAlign(TEXT_SEC, iString(stotype.getSize()));
@@ -798,7 +806,7 @@ public class AssemblyCodeGenerator {
     }
 
 
-    public void fmtHeader(){
+    public void fmtHeader() {
         increaseIndent();
         sectionAlign(RODATA_SEC, "4");
         fmt(intFmt, d);
@@ -806,12 +814,12 @@ public class AssemblyCodeGenerator {
         fmt(strTF, tf);
         fmt(strEndl, nl);
         fmt(strArrBound, arrbound);
-        fmt(strNullPtr, nullptr );
+        fmt(strNullPtr, nullptr);
         sectionAlign(TEXT_SEC, "4");
 
         decreaseIndent();
 
-        writeAssembly( ".$$.printBool:\n");
+        writeAssembly(".$$.printBool:\n");
         increaseIndent();
         writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP);
         writeAssembly(TWO_PARAM, SET_OP, ".$$.strTF", O0);
@@ -854,7 +862,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
         decreaseIndent();
 
-        writeAssembly( ".$$.ptrCheck:\n");
+        writeAssembly(".$$.ptrCheck:\n");
         increaseIndent();
         writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP);
         writeAssembly(TWO_PARAM, CMP_OP, I0, G0);
@@ -875,7 +883,7 @@ public class AssemblyCodeGenerator {
 
     }
 
-    public void fmt(String fmt, String typ){
+    public void fmt(String fmt, String typ) {
         decreaseIndent();
         writeAssembly(fmt);
         increaseIndent();
