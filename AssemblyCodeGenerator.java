@@ -105,8 +105,8 @@ public class AssemblyCodeGenerator {
     private static final String CMP_COUNTER = ".$$.cmp.%s";
 
     //global auto
-    private static final String GL_AUTO_INIT = ".$.init.%s:";
-    private static final String GL_AUTO_FINI = ".$.init.%s.fini:";
+    private static final String GL_AUTO_INIT = ".$.init.%s";
+    private static final String GL_AUTO_FINI = ".$.init.%s.fini";
 
     //private static final String SAVE_MAIN = "SAVE.%s.void";
     private static final String SAVE_FUNC = "SAVE.%s.void";
@@ -751,7 +751,7 @@ public class AssemblyCodeGenerator {
         }
 
         decreaseIndent();
-        writeAssembly(GL_AUTO_INIT, sName);
+        writeAssembly(GL_AUTO_INIT, sName+":");
         newline();
         increaseIndent();
         writeAssembly(TWO_PARAM, SET_OP, save, G1);
