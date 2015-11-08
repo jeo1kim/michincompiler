@@ -1309,6 +1309,7 @@ class MyParser extends parser {
             m_errors.print(result.getName());
             return new ErrorSTO(result.getName());
         }
+        ag.writeBinaryExpr(a, o, b, result);
         return result;
     }
 
