@@ -707,7 +707,14 @@ IfStmt ::=          T_IF Expr:_1
                     {:
                         ((MyParser) parser).DoConditionCheck(_1);
                     :}
-                    CodeBlock OptElse
+                    CodeBlock
+                    {:
+                        ((MyParser) parser).DoIfClose();
+                    :}
+                    OptElse
+                    {:
+
+                    :}
     ;
 
 
@@ -796,7 +803,7 @@ WriteStmt ::=       T_COUT T_OSTREAM WritePairList T_SEMI
 WritePairList ::=   WritePair
                     {:
 
-                    :{
+                    :}
     |               WritePairList T_OSTREAM WritePair
                     {:
 

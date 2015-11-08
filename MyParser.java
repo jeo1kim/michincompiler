@@ -1270,6 +1270,10 @@ class MyParser extends parser {
         return sto.getType();
     }
 
+    void DoIfClose(){
+        
+    }
+
     STO DoConditionCheck(STO condition) {
         Type conType = condition.getType();
         if (condition.isError()) {
