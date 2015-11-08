@@ -554,7 +554,7 @@ public class AssemblyCodeGenerator {
         decreaseOffset();
         writeAssembly(TWO_PARAM, SET_OP, iString(newoffset), L7);
         writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
-        writeAssembly(TWO_PARAM, ST_OP, O0, "[" + f0 + "]");
+        writeAssembly(TWO_PARAM, ST_OP, O0, "[" + L7 + "]");
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
         writeAssembly(TWO_PARAM, FITOS, f0, f0);
 
