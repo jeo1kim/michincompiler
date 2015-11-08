@@ -794,7 +794,13 @@ WriteStmt ::=       T_COUT T_OSTREAM WritePairList T_SEMI
 
 
 WritePairList ::=   WritePair
+                    {:
+
+                    :{
     |               WritePairList T_OSTREAM WritePair
+                    {:
+
+                    :}
     ;
 
 

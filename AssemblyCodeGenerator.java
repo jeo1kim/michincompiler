@@ -555,20 +555,13 @@ public class AssemblyCodeGenerator {
             writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
 
-//            if (sto.getAuto()) { // if its auto
-//
-//                writeInit(sto, init);
-//
-//            }
 
             if (init.isConst()) {
                 if (init.getType().isFloat()) {  // if its not auto and float
-
                     writeConstFloat(init);
                     writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
                     decreaseIndent();
                     writeAssembly(NL);
-
                 }
                 else{
                     writeInit(sto, init);
@@ -617,7 +610,6 @@ public class AssemblyCodeGenerator {
 
         sectionAlign(sectioncheck, iString(stotype.getSize()));
 
-
         if (!sto.isStatic()) { // global
             writeAssembly(GLOBAL, name);
         }
@@ -660,7 +652,6 @@ public class AssemblyCodeGenerator {
                     writeGlobalAuto(sto, init);
 
                 }
-
             }
         }
         sectionAlign(TEXT_SEC, iString(stotype.getSize())); // SECTION and ALIGN
