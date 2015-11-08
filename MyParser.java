@@ -145,7 +145,7 @@ class MyParser extends parser {
     //----------------------------------------------------------------
     void DoProgramStart() {
         // Opens the global scope.
-
+        ag.fmtHeader();
         m_symtab.openScope();
     }
 
