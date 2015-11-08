@@ -421,7 +421,7 @@ public class AssemblyCodeGenerator {
     public void setAddLoad(STO init){
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
-        String register = init.getType().isFloat() ? f0 : I0; // check for float f0 or o0
+        String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
         String off = init.isGlobal() ? init.getName() : iString(init.getSparcOffset());
 
         writeAssembly(TWO_PARAM, SET_OP, off, L7);
