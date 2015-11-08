@@ -564,22 +564,35 @@ public class AssemblyCodeGenerator {
 
     public void writeConstFloat(STO init) {
 
+        String name = FLOAT_COUNTER;
+        int counter = floatcounter;
+        boolean str = false;
+        String size = init.getType() == null ? "4": iString(init.getType().getSize());
+        if(init.getType() == null){
+            funcIndent();
+            name = ".$$.str."+iString(++strFmtCnt)+":\n";
+            counter = strFmtCnt;
+            str = true;
+        }
+
         writeAssembly(NL);
-        writeAssembly(SECTION, RODATA_SEC);
-        writeAssembly(ALIGN, iString(init.getType().getSize()));
-        //decreaseIndent();
-        int templvl = indent_level;
+        sectionAlign(RODATA_SEC, size);
+
         indent_level = 1;
-        writeAssembly(FLOAT_COUNTER, iString(++floatcounter));
-        //increaseIndent();
-        indent_level = templvl;
+        writeAssembly(name, iString(++counter));
+        indent_level = 2;
+
+        if(str){
+            writeAssembly(ONE_PARAM, ASCIZ, "\""+init.getName()+"\"");
+            writeAssembly(NL);
+            sectionAlign(TEXT_SEC, "4");
+            writeAssembly(NL);
+            return;
+        }
         writeAssembly(FLOAT, stoValue(init));
         writeAssembly(NL);
-
-        writeAssembly(SECTION, TEXT_SEC);
-        writeAssembly(ALIGN, iString(init.getType().getSize()));
+        sectionAlign(TEXT_SEC, size);
         writeAssembly(TWO_PARAM, SET_OP, ".$$.float." + iString(floatcounter), L7);
-
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
     }
 
@@ -816,13 +829,24 @@ public class AssemblyCodeGenerator {
 
         funcIndent();
         writeAssembly(NL);
-        setAddLoad(sto);
+        if(sto.getType() != null) {
+            setAddLoad(sto);
+        }
         callCout(sto);
 
         funcDedent();
     }
 
+    int strFmtCnt = 0;
     public void callCout(STO sto){
+
+        if(sto.getType() == null){
+            writeConstFloat(sto);
+            writeAssembly(TWO_PARAM, SET_OP, strFmt, O0);
+            writeAssembly(TWO_PARAM, SET_OP, ".$$.str."+iString(strFmtCnt), O1);
+            call("printf");
+            return;
+        }
         String stype = sto.getType().getName();
         String ret = "";
         switch(stype){
@@ -831,6 +855,7 @@ public class AssemblyCodeGenerator {
             case "bool": ret = strTF;
                 break;
         }
+
         if(stype == "float"){
             call("printFloat");
             return;
@@ -840,6 +865,7 @@ public class AssemblyCodeGenerator {
             call("printf");
             return;
         }
+
 
     }
 

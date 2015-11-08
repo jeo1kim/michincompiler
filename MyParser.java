@@ -1249,6 +1249,12 @@ class MyParser extends parser {
         return sto;
     }
 
+    void DoString(STO sto){
+        if(sto.getType() == null) {
+            ag.writeConstFloat(sto);
+        }
+    }
+
     //----------------------------------------------------------------
     // CASE: when there is :: for accessing global scope
     //----------------------------------------------------------------

@@ -178,7 +178,6 @@ class ConstSTO extends STO
 	public ConstSTO(String strName)
 	{
 		super(strName);
-		m_value = null; // fix this
 		m_strName = strName;
 		m_isAddressable = false;				// double value are constands non mod. L value
 		m_isModifiable = false;
