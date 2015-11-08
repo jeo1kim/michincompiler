@@ -125,7 +125,7 @@ non terminal
     //StmtList,
     Stmt,
     IfStmt,
-    OptElse,
+    //OptElse,
     ForeachStmt,
     WhileStmt,
     ExitStmt,
@@ -154,6 +154,7 @@ non terminal
     ;
 
 non terminal Boolean
+    OptElse,
     OptStatic,
     OptRef
     ;
@@ -708,18 +709,18 @@ IfStmt ::=          T_IF Expr:_1
                         ((MyParser) parser).DoConditionCheck(_1);
                     :}
                     CodeBlock
+                    OptElse:_2
                     {:
-                        ((MyParser) parser).DoIfClose();
-                    :}
-                    OptElse
-                    {:
-
+                        ((MyParser) parser).DoIfClose(_2);
                     :}
     ;
 
 
 OptElse ::=         T_ELSE CodeBlock
-    |               /* empty */
+                    {:
+                        RESULT = true;
+                    :}
+    |               {: RESULT = false;
     ;
 
 

@@ -1270,7 +1270,9 @@ class MyParser extends parser {
         return sto.getType();
     }
 
-    void DoIfClose(){
+    void DoIfClose(boolean optElse){
+        // optElse is true is there is an else stmt
+
         
     }
 
