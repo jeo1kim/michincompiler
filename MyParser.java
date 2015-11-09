@@ -1249,6 +1249,12 @@ class MyParser extends parser {
         return sto;
     }
 
+    void DoString(STO sto){
+        if(sto.getType() == null) {
+            ag.writeConstFloat(sto);
+        }
+    }
+
     //----------------------------------------------------------------
     // CASE: when there is :: for accessing global scope
     //----------------------------------------------------------------
@@ -1273,7 +1279,21 @@ class MyParser extends parser {
     void DoIfClose(boolean optElse){
         // optElse is true is there is an else stmt
         ag.writeIfClose();
-        
+
+    }
+
+    void DoCout(Vector<STO> cout){
+
+    }
+
+    void DoCout(STO cout){
+
+        ag.writeCout(cout);
+
+    }
+
+    void DoCoutClose(){
+        ag.writeCoutClose();
     }
 
     STO DoConditionCheck(STO condition) {
