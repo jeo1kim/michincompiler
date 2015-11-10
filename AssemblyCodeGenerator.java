@@ -353,11 +353,22 @@ public class AssemblyCodeGenerator {
         }
 
         //writeCallStored(b, 1);
-        if (a.getType().isFloat() && b.getType().isInt()) {
+        else if (a.getType().isFloat() && b.getType().isInt()) {
             convertToFloatBinary(b, 1);
+            floatreg++;
+            if(a.isConst()){
+                writeConstFloat(a);
+            }
         }
 
-        if (a.getType().isFloat() || b.getType().isFloat()) {
+        else if (a.getType().isFloat() || b.getType().isFloat()) {
+            floatreg++;
+            if(a.isConst() && !b.isConst()){
+                writeConstFloat(a);
+            }
+            if(!a.isConst() && b.isConst()){
+                writeConstFloat(b);
+            }
             iffloat = true;
         }
         String register = iffloat ? f0 : O0;
