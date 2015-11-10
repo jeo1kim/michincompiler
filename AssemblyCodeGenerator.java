@@ -1024,6 +1024,16 @@ public class AssemblyCodeGenerator {
     }
 
 
+    public void writeExitExpr(STO init){
+        funcIndent();
+        writeAssembly(TWO_PARAM, SET_OP, init.getName(), O0);
+        writeAssembly(ONE_PARAM, CALL_OP, "exit");
+        writeAssembly(NOP_OP);
+        newline();
+        funcDedent();
+    }
+
+
     public Vector<String> prepSTO(STO sto){
         String name = sto.getName();
         String base = sto.getSparcBase();
