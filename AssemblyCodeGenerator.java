@@ -331,13 +331,22 @@ public class AssemblyCodeGenerator {
         increaseIndent();
         writeAssembly(NL);
         funcIndent();
-        decreaseOffset();
-        result.setSparcOffset(getOffset());
+
 
         writeAssembly( "! (" +a.getName()+")"+o.getName()+"("+b.getName()+")\n");
 
 
+        if(a.isConst() && b.isConst()){
+            String res = result.getBoolValue() == true ? "1":"0";
+            writeAssembly(TWO_PARAM, SET_OP, res, O0);
+            writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
+            writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(cmpcounter)));
+            writeAssembly(NOP_OP);
+            return;
+        }
 
+        decreaseOffset();
+        result.setSparcOffset(getOffset());
         if(a.getType().isBool()){
             andorskipcnt++;
             writeCallStored(a, 0);
@@ -349,48 +358,52 @@ public class AssemblyCodeGenerator {
 
         }
 
-        if (a.getType().isInt() && b.getType().isFloat()) {
+
+        else if (a.getType().isInt() && b.getType().isFloat()) {
+
             writeCallStored(a, 0);
+            convertToFloatBinary(a, 0);
+
+            if(b.isConst()){
+                writeConstFloat(b);
+            }
+
             if(!b.isConst()){
                 writeCallStored(b, 0);
             }
 
-            convertToFloatBinary(a, 0);
-            floatreg++;
-            if(b.isConst()){
-                writeConstFloat(b);
-            }
             iffloat = true;
 
         }
 
         else if (a.getType().isFloat() && b.getType().isInt()) {
+
             if(!a.isConst()){
                 writeCallStored(a, 0);
             }
             writeCallStored(b, 1);
 
-            convertToFloatBinary(b, 1);
-            floatreg++;
             if(a.isConst()){
                 writeConstFloat(a);
             }
+            convertToFloatBinary(b, 1);
+
             iffloat = true;
 
         }
 
         else if (a.getType().isFloat() && b.getType().isFloat()) {
-            floatreg++;
 
             if(a.isConst() && !b.isConst()){
                 writeConstFloat(a);
                 writeCallStored(b, 1);
             }
             if(!a.isConst() && b.isConst()){
-                writeCallStored(a, 1);
+                writeCallStored(a, 0);
+                floatreg++;
                 writeConstFloat(b);
             }
-            else{
+            else if (!a.isConst() && !b.isConst()){
                 cmpcounter++;
                 String res = result.getBoolValue() == true ? "1":"0";
                 writeAssembly(TWO_PARAM, SET_OP, res, O0);
@@ -401,6 +414,7 @@ public class AssemblyCodeGenerator {
             }
             iffloat = true;
         } else {
+
             writeCallStored(a, 0);
             writeCallStored(b, 1);
         }
@@ -762,7 +776,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(FLOAT, stoValue(init));
         sectionAlign(TEXT_SEC, size);
         writeAssembly(TWO_PARAM, SET_OP, ".$$.float." + iString(floatcounter), L7);
-        writefloatreg(floatreg);
+        writefloatreg(floatreg++);
     }
 
     public void writefloatreg(int regnum){
