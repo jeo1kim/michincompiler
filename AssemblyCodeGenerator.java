@@ -349,10 +349,6 @@ public class AssemblyCodeGenerator {
 
         }
 
-            //writeCallStored(a, 0);
-
-            //writeCallStored(b, 0);
-
         if (a.getType().isInt() && b.getType().isFloat()) {
             writeCallStored(a, 0);
             if(!b.isConst()){
@@ -395,6 +391,7 @@ public class AssemblyCodeGenerator {
                 writeConstFloat(b);
             }
             else{
+                cmpcounter++;
                 String res = result.getBoolValue() == true ? "1":"0";
                 writeAssembly(TWO_PARAM, SET_OP, res, O0);
                 writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
@@ -585,9 +582,11 @@ public class AssemblyCodeGenerator {
         newline();
         funcDedent();
         increaseIndent();
+        writeAssembly("\t! else\n");
         writeAssembly(BASIC_FIN_NL, "else", iString(cmpcounter));
-        newline(); 
-        
+        newline();
+
+        writeAssembly("\t! endif\n");
         writeAssembly(BASIC_FIN_NL, "endif", iString(cmpcounter));
         decreaseIndent();
         newline();
