@@ -255,10 +255,8 @@ public class AssemblyCodeGenerator {
 
     public void writeCloseFunc(STO sto) {
         increaseIndent();
-        writeAssembly(ONE_PARAM, CALL_OP, String.format(FINI_FUNC, sto.getName(), "void"));
-        writeAssembly(NOP_OP);
-        writeAssembly(RET_OP);
-        writeAssembly(RESTORE_OP);
+        call( String.format(FINI_FUNC, sto.getName(), "void"));
+        retRest();
 
         int posoffset = Math.abs(getOffset());
         writeAssembly("%s %s\n", String.format(SAVE_FUNC, sto.getName()), String.format(OFFSET_TOTAL, iString(posoffset)));
@@ -271,8 +269,7 @@ public class AssemblyCodeGenerator {
         increaseIndent();
         int add = -92 + getOffset();
         writeAssembly(THREE_PARAM, SAVE_OP, SP, iString(add), SP);
-        writeAssembly(RET_OP);
-        writeAssembly(RESTORE_OP);
+        retRest();
 
         func = false;
     }
@@ -796,19 +793,22 @@ public class AssemblyCodeGenerator {
     }
 
 
-    public void writeReturn(STO init) {
-        increaseIndent();
+    public void writeReturn(STO init, STO func) {
+
+
         String val = stoValue(init); // stoVal gets teh value of sto.
         String register = init.getType().isFloat() ? f0 : I0; // check for float f0 or o0
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
 
+        funcIndent();
         writeAssembly(NL);
         writeAssembly("! return " + val + ";\n");
         if (init.isConst()) {
             if (init.getType().isFloat()) {
                 writeConstFloat(init);
             } else {
+
                 writeAssembly(TWO_PARAM, SET_OP, val, I0);
             }
         } else {
@@ -817,8 +817,12 @@ public class AssemblyCodeGenerator {
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
         }
-        decreaseIndent();
+        call( String.format(FINI_FUNC, func.getName() , "void"));
+        retRest();
+        funcDedent();
+        newline();
     }
+
 
     //TODO: take care of when init not there too
     public void writeLocalVariable(STO sto, STO init) {
@@ -1063,8 +1067,6 @@ public class AssemblyCodeGenerator {
             call("printf");
             return;
         }
-
-
     }
 
     public void writeCoutClose(){
@@ -1075,7 +1077,6 @@ public class AssemblyCodeGenerator {
         call("printf");
         writeAssembly(NL);
         funcDedent();
-
     }
 
 

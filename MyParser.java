@@ -1429,13 +1429,13 @@ class MyParser extends parser {
             } else {
                 //m_symtab.setFunc(null);
                 if(a.isConst()){
-                    ag.writeReturn(a);
+                    ag.writeReturn(a, m_symtab.getFunc());
                     return a;
                 }else{
                     //ExprSTO b = new ExprSTO(a.getName());
                     //b.setType(exprType);
                     //b.set
-                    ag.writeReturn(a);
+                    ag.writeReturn(a, m_symtab.getFunc());
                     return a;
                 }
             }
