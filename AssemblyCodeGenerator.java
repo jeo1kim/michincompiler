@@ -201,8 +201,10 @@ public class AssemblyCodeGenerator {
     private int floatcounter = 0;
     private int cmpcounter = 0;
     private int strFmtCnt = 0;
+    private int andorskipcnt = 0;
     private boolean func = false;
     private boolean arithmetic = false;
+
 
 
     public AssemblyCodeGenerator(String fileToWrite) {
@@ -339,14 +341,56 @@ public class AssemblyCodeGenerator {
         writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
         
 
-        //int binaryoffset = 
-        /*
-        writeAssembly(TWO_PARAM, SET_OP, iString(result.getSparcOffset()), O1);
-        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-        writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");
-        */
         funcDedent();
         decreaseIndent();
+    }
+
+    public void writeIncDecExpr(STO a, Operator o, STO result){
+        boolean iffloat = false;
+        //arithmetic = true;
+
+        increaseIndent();
+        writeAssembly(NL);
+        funcIndent();
+
+        writeCallStored(a, 0);
+        decreaseOffset();
+        result.setSparcOffset(getOffset());
+
+        if (a.getType().isFloat()){
+            writeIncDecFloat(1);
+            iffloat = true;
+        }
+        else {
+            writeAssembly(THREE_PARAM, SET_OP, iString(1), O1);
+        }
+        String register = iffloat ? f0 : O0;
+        increaseIndent();
+        writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
+
+        funcDedent();
+        decreaseIndent();
+    }
+    
+    //used to convert on to float during incdec for float
+    public void writeIncDecFloat(int init) {
+        String name = FLOAT_COUNTER;
+        int counter = ++floatcounter;
+          
+
+        writeAssembly(NL);
+        sectionAlign(RODATA_SEC, "4");
+
+        indent_level = 1;
+        writeAssembly(name, iString(counter));
+        indent_level = 2;
+
+ 
+        writeAssembly(FLOAT, "1.0");
+        writeAssembly(NL);
+        sectionAlign(TEXT_SEC, "4");
+        writeAssembly(TWO_PARAM, SET_OP, ".$$.float." + iString(floatcounter), L7);
+        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", F1);
     }
 
     public void writeInstructionCase(Operator o, boolean iffloat, String register, String resoffset) {
@@ -355,46 +399,51 @@ public class AssemblyCodeGenerator {
         if (!iffloat) {
             switch (opname) {
                 case "+":
-                    writeArithmetic(ADD_OP, register, resoffset, O0, O1);
+                    writeArithmetic(ADD_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "-":
-                    writeArithmetic(SUB_OP, register, resoffset, O0, O1);
+                    writeArithmetic(SUB_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "*":
-                    writeArithmetic(MUL_OP, register, resoffset, O0, O1);
+                    writeArithmetic(MUL_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "/":
-                    writeArithmetic(DIV_OP, register, resoffset, O0, O1);
+                    writeArithmetic(DIV_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "%":
-                    writeArithmetic(MOD_OP, register, resoffset, O0, O1);
+                    writeArithmetic(MOD_OP, register, resoffset, O0, O1, O0);
+                    break;
+                case "++":
+                    writeArithmetic(ADD_OP, register, resoffset, O0, O1, O2);
+                    break;
+                case "--":
+                    writeArithmetic(SUB_OP, register, resoffset, O0, O1, O2);
                     break;
                 case ">":
                     writeComparison(BLE_OP, register, resoffset, O0, O1);
                     break;
                 case "<":
                     writeComparison(BGE_OP, register, resoffset, O0, O1);
+                    break;
+
             }
         } else {
             switch (opname) {
                 case "+":
-                    writeArithmetic(FADD_OP, register, resoffset, f0, F1);
+                    writeArithmetic(FADD_OP, register, resoffset, f0, F1, f0);
                     break;
                 case "-":
-                    writeArithmetic(FADD_OP, register, resoffset, f0, F1);
+                    writeArithmetic(FADD_OP, register, resoffset, f0, F1, f0);
                     break;
                 case "*":
-                    writeArithmetic(FADD_OP, register, resoffset, f0, F1);
+                    writeArithmetic(FADD_OP, register, resoffset, f0, F1, f0);
                     break;
             }
         }
     }
-    public void writeArithmetic(String opname, String register, String resoffset, String reg1, String reg2){
-        writeAssembly(THREE_PARAM, opname, reg1, reg2, reg1);
+    public void writeArithmetic(String opname, String register, String resoffset, String reg1, String reg2, String reg3){
+        writeAssembly(THREE_PARAM, opname, reg1, reg2, reg3);
 
-        /*writeAssembly(TWO_PARAM, SET_OP, resoffset, O1);
-        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-        writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");*/
         setaddst(register, resoffset);
     }
 
@@ -410,9 +459,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(VARCOLON, String.format(CMP_COUNTER, iString(cmpcounter)));
 
         increaseIndent();
-        /*writeAssembly(TWO_PARAM, SET_OP, resoffset, O1);
-        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-        writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");*/
+
         setaddst(register, resoffset);
         newline();
         setaddld(register, resoffset);
@@ -423,7 +470,7 @@ public class AssemblyCodeGenerator {
 
        
     }
-    
+
     public void writeIfClose(){
         increaseIndent();
         writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(cmpcounter)));
@@ -463,6 +510,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");
     }
 
+    //setaddload
     public void writeCallStored(STO init, int x) {
         String val = stoValue(init); // stoVal gets teh value of sto.
         String register = init.getType().isFloat() ? "isfl" : "isint"; // check for float f0 or o0

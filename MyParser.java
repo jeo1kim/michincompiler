@@ -1352,6 +1352,7 @@ class MyParser extends parser {
             return new ErrorSTO(result.getName());
         }
 
+        ag.writeIncDecExpr(a, o, result);
         return result;
     }
 
