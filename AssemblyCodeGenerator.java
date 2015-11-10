@@ -270,7 +270,8 @@ public class AssemblyCodeGenerator {
         writeAssembly(":\n");
         increaseIndent();
         int add = -92 + getOffset();
-        writeAssembly(THREE_PARAM, SAVE_OP, SP, iString(add), SP);
+        //writeAssembly(THREE_PARAM, SAVE_OP, SP, iString(add), SP);
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP);
         writeAssembly(RET_OP);
         writeAssembly(RESTORE_OP);
 
