@@ -350,6 +350,8 @@ public class AssemblyCodeGenerator {
             if(b.isConst()){
                 writeConstFloat(b);
             }
+            iffloat = true;
+
         }
 
         //writeCallStored(b, 1);
@@ -359,6 +361,8 @@ public class AssemblyCodeGenerator {
             if(a.isConst()){
                 writeConstFloat(a);
             }
+            iffloat = true;
+
         }
 
         else if (a.getType().isFloat() || b.getType().isFloat()) {
