@@ -54,6 +54,7 @@ public class AssemblyCodeGenerator {
     private static final String NOP_OP = "nop\n";
 
     private static final String CMP_OP = "cmp   \t";
+    private static final String FCMP_OP = "fcmp    \t";
     private static final String JMP_OP = "jmp   \t";
     private static final String CALL_OP = "call   \t";
     private static final String TST_OP = "tst   \t";
@@ -71,6 +72,9 @@ public class AssemblyCodeGenerator {
     private static final String BGE_OP = "bge   \t";
     private static final String BNE_OP = "bne   \t";
 
+    private static final String FBLE_OP = "fble    \t";
+    private static final String FBGE_OP = "fbge   \t";
+
 
     private static final String ST_OP = "st     \t";
     private static final String LD_OP = "ld     \t";
@@ -81,6 +85,10 @@ public class AssemblyCodeGenerator {
     private static final String MUL_OP = "mul     \t";
     private static final String DIV_OP = "div     \t";
     private static final String MOD_OP = "mod     \t";
+
+    private static final String BW_AND_OP = "add    \t";
+    private static final String BW_OR_OP = "or    \t";
+    private static final String XOR_OP = "xor    \t";
 
     private static final String FADD_OP = "fadds\t";
     private static final String FSUB_OP = "fsubs     \t";
@@ -324,13 +332,22 @@ public class AssemblyCodeGenerator {
         writeCallStored(a, 0);
         decreaseOffset();
         result.setSparcOffset(getOffset());
+        if(a.getType().isBool()){
+            andorskipcnt++;
+            setcmpbenop(a.getIntValue());
+            newline();
+            setcmpbenop(b.getIntValue());
+            writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "andorEnd", iString(andorskipcnt)));
+            writeAssembly(TWO_PARAM, MOV_OP, iString(b.getIntValue()), G0);
+
+        }
         if (a.getType().isInt() && b.getType().isFloat()) {
-            convertToFloatBinary(a, b, 0);
+            convertToFloatBinary(a, 0);
         }
 
         writeCallStored(b, 1);
         if (a.getType().isFloat() && b.getType().isInt()) {
-            convertToFloatBinary(a, b, 1);
+            convertToFloatBinary(b, 1);
         }
 
         if (a.getType().isFloat() || b.getType().isFloat()) {
@@ -340,10 +357,17 @@ public class AssemblyCodeGenerator {
         increaseIndent();
         writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
         
-
         funcDedent();
         decreaseIndent();
     }
+
+    public void setcmpbenop(int a){
+        writeAssembly(TWO_PARAM, SET_OP, iString(a), O0);
+        writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
+        writeAssembly(ONE_PARAM, BE_OP, String.format(BASIC_FIN, "andorSkip", iString(andorskipcnt)));
+        writeAssembly(NOP_OP);
+    }
+
 
     public void writeIncDecExpr(STO a, Operator o, STO result){
         boolean iffloat = false;
@@ -362,7 +386,7 @@ public class AssemblyCodeGenerator {
             iffloat = true;
         }
         else {
-            writeAssembly(THREE_PARAM, SET_OP, iString(1), O1);
+            writeAssembly(TWO_PARAM, SET_OP, iString(1), O1);
         }
         String register = iffloat ? f0 : O0;
         increaseIndent();
@@ -371,7 +395,7 @@ public class AssemblyCodeGenerator {
         funcDedent();
         decreaseIndent();
     }
-    
+
     //used to convert on to float during incdec for float
     public void writeIncDecFloat(int init) {
         String name = FLOAT_COUNTER;
@@ -413,6 +437,15 @@ public class AssemblyCodeGenerator {
                 case "%":
                     writeArithmetic(MOD_OP, register, resoffset, O0, O1, O0);
                     break;
+                case "^":
+                    writeArithmetic(XOR_OP, register, resoffset, O0, O1, O0);
+                    break;    
+                case "|":
+                    writeArithmetic(BW_OR_OP, register, resoffset, O0, O1, O0);
+                    break;
+                case "&":
+                    writeArithmetic(BW_AND_OP, register, resoffset, O0, O1, O0);
+                    break;
                 case "++":
                     writeArithmetic(ADD_OP, register, resoffset, O0, O1, O2);
                     break;
@@ -438,6 +471,13 @@ public class AssemblyCodeGenerator {
                 case "*":
                     writeArithmetic(FADD_OP, register, resoffset, f0, F1, f0);
                     break;
+                case ">":
+                    writeComparison(FBLE_OP, register, resoffset, f0, F1);
+                    break;
+                case "<":
+                    writeComparison(FBGE_OP, register, resoffset, f0, F1);
+                    break;
+
             }
         }
     }
@@ -449,7 +489,13 @@ public class AssemblyCodeGenerator {
 
     public void writeComparison(String opname, String register, String resoffset, String reg1, String reg2){
         cmpcounter++;
-        writeAssembly(TWO_PARAM, CMP_OP, reg1, reg2);
+        if(reg1 == f0){
+            writeAssembly(TWO_PARAM, FCMP_OP, reg1, reg2);
+            writeAssembly(NOP_OP);
+        }else{
+            writeAssembly(TWO_PARAM, CMP_OP, reg1, reg2);
+        }
+        
         writeAssembly(ONE_PARAM, opname, String.format(CMP_COUNTER, iString(cmpcounter)));
         
         writeAssembly(TWO_PARAM, MOV_OP, G0, O0);
@@ -577,24 +623,18 @@ public class AssemblyCodeGenerator {
 
     //convert int to float when needed
     //made a function similar to convertofloat but used in binary.
-    public void convertToFloatBinary(STO sto, STO init, int x) {
+    public void convertToFloatBinary(STO init, int x) {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
-        String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
-
+        String register = ""; // check for float f0 or o0
+        String order = "";
         if (x == 0) {
-            if (register.equals("isfl")) {
-                register = f0;
-            } else {
-                register = O0;
-            }
+            register = f0;
+            order = O0;
         }
         if (x == 1) {
-            if (register.equals("isfl")) {
-                register = F1;
-            } else {
-                register = O1;
-            }
+            register = F1;
+            order = O1;
         }
 
         //int newoffset =  sto.isGlobal() ? -4:offset;
@@ -603,10 +643,10 @@ public class AssemblyCodeGenerator {
         //sto.setSparcOffset(newoffset);
         //offset = newoffset;
         writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), L7);
-        writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
-        writeAssembly(TWO_PARAM, ST_OP, O1, "[" +L7+ "]");
-        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", F1);
-        writeAssembly(TWO_PARAM, FITOS, F1, F1);
+        writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
+        writeAssembly(TWO_PARAM, ST_OP, order, "[" +L7+ "]");
+        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+        writeAssembly(TWO_PARAM, FITOS, register, register);
 
         //writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
 
