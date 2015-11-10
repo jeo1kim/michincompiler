@@ -1612,7 +1612,9 @@ class MyParser extends parser {
 
         //if assignable to int then return expr
         // double check what to return when you exit
-        return new ExprSTO(a.getName());
+        ExprSTO sto = new ExprSTO(a.getName());
+        ag.writeExitExpr(sto);
+        return sto;
     }
 
     // Helper Function

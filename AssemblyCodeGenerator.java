@@ -86,7 +86,7 @@ public class AssemblyCodeGenerator {
     private static final String DIV_OP = "div     \t";
     private static final String MOD_OP = "mod     \t";
 
-    private static final String BW_AND_OP = "add    \t";
+    private static final String BW_AND_OP = "and    \t";
     private static final String BW_OR_OP = "or    \t";
     private static final String XOR_OP = "xor    \t";
 
@@ -374,7 +374,10 @@ public class AssemblyCodeGenerator {
                 writeConstFloat(b);
             }
             iffloat = true;
+        }else {
+            writeCallStored(b, 1);
         }
+        
         String register = iffloat ? f0 : O0;
         increaseIndent();
         writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
@@ -1025,6 +1028,16 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
         funcDedent();
 
+    }
+
+
+    public void writeExitExpr(STO init){
+        funcIndent();
+        writeAssembly(TWO_PARAM, SET_OP, init.getName(), O0);
+        writeAssembly(ONE_PARAM, CALL_OP, "exit");
+        writeAssembly(NOP_OP);
+        newline();
+        funcDedent();
     }
 
 
