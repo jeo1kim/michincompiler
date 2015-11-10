@@ -1287,7 +1287,10 @@ class MyParser extends parser {
     }
 
     void DoCout(STO cout){
-
+        if(cout.getName() =="\"\\n\""){
+            ag.writeCoutClose();
+            return;
+        }
         ag.writeCout(cout);
 
     }

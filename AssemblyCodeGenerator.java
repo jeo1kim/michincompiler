@@ -331,12 +331,16 @@ public class AssemblyCodeGenerator {
         increaseIndent();
         writeAssembly(NL);
         funcIndent();
-
-        writeCallStored(a, 0);
         decreaseOffset();
         result.setSparcOffset(getOffset());
+
+        writeAssembly( "! (" +a.getName()+")"+o.getName()+"("+b.getName()+")\n");
+
+
+
         if(a.getType().isBool()){
             andorskipcnt++;
+            writeCallStored(a, 0);
             setcmpbenop(a.getIntValue());
             newline();
             setcmpbenop(b.getIntValue());
@@ -344,7 +348,17 @@ public class AssemblyCodeGenerator {
             writeAssembly(TWO_PARAM, MOV_OP, iString(b.getIntValue()), G0);
 
         }
+
+            //writeCallStored(a, 0);
+
+            //writeCallStored(b, 0);
+
         if (a.getType().isInt() && b.getType().isFloat()) {
+            writeCallStored(a, 0);
+            if(!b.isConst()){
+                writeCallStored(b, 0);
+            }
+
             convertToFloatBinary(a, 0);
             floatreg++;
             if(b.isConst()){
@@ -354,8 +368,12 @@ public class AssemblyCodeGenerator {
 
         }
 
-        //writeCallStored(b, 1);
         else if (a.getType().isFloat() && b.getType().isInt()) {
+            if(!a.isConst()){
+                writeCallStored(a, 0);
+            }
+            writeCallStored(b, 1);
+
             convertToFloatBinary(b, 1);
             floatreg++;
             if(a.isConst()){
@@ -365,16 +383,28 @@ public class AssemblyCodeGenerator {
 
         }
 
-        else if (a.getType().isFloat() || b.getType().isFloat()) {
+        else if (a.getType().isFloat() && b.getType().isFloat()) {
             floatreg++;
+
             if(a.isConst() && !b.isConst()){
                 writeConstFloat(a);
+                writeCallStored(b, 1);
             }
             if(!a.isConst() && b.isConst()){
+                writeCallStored(a, 1);
                 writeConstFloat(b);
             }
+            else{
+                String res = result.getBoolValue() == true ? "1":"0";
+                writeAssembly(TWO_PARAM, SET_OP, res, O0);
+                writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
+                writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(cmpcounter)));
+                writeAssembly(NOP_OP);
+                return;
+            }
             iffloat = true;
-        }else {
+        } else {
+            writeCallStored(a, 0);
             writeCallStored(b, 1);
         }
         
@@ -507,9 +537,11 @@ public class AssemblyCodeGenerator {
         }
     }
     public void writeArithmetic(String opname, String register, String resoffset, String reg1, String reg2, String reg3){
+        funcIndent();
         writeAssembly(THREE_PARAM, opname, reg1, reg2, reg3);
 
         setaddst(register, resoffset);
+        funcDedent();
     }
 
     public void writeComparison(String opname, String register, String resoffset, String reg1, String reg2){
@@ -533,28 +565,31 @@ public class AssemblyCodeGenerator {
 
         increaseIndent();
 
-        setaddst(register, resoffset);
+        setaddst(O0, resoffset);
         newline();
-        setaddld(register, resoffset);
+        setaddld(O0, resoffset); // might need to fix
 
-        writeAssembly(TWO_PARAM, CMP_OP, reg1, reg2);
-        writeAssembly(ONE_PARAM, "be", String.format(BASIC_FIN, "endif", iString(cmpcounter)));
+        writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
+        writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(cmpcounter)));
         writeAssembly(NOP_OP);
         funcDedent();
        
     }
 
     public void writeIfClose(){
+        newline();
+        funcIndent();
         increaseIndent();
         writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(cmpcounter)));
         writeAssembly(NOP_OP);
-
-        decreaseIndent();
+        newline();
+        funcDedent();
+        increaseIndent();
         writeAssembly(BASIC_FIN_NL, "else", iString(cmpcounter));
         newline(); 
         
-
         writeAssembly(BASIC_FIN_NL, "endif", iString(cmpcounter));
+        decreaseIndent();
         newline();
         
     }
