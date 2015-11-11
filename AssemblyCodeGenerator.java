@@ -457,7 +457,7 @@ public class AssemblyCodeGenerator {
             }
 
             if (!b.isConst()) {
-                writeCallStored(b, 0);
+                writeCallStored(b, 1);
             }
 
             iffloat = true;
