@@ -214,7 +214,7 @@ public class AssemblyCodeGenerator {
 
     private static final String var_comment = "! %s = %s\n";
     private static final String var_comment_op = "! %s, %s\n";
-    private int floatcounter;
+    private int floatcounter =0;
     private int cmpcounter = 0;
     //private int ifcounter = 0;
     private int strFmtCnt = 0;
@@ -985,7 +985,6 @@ public class AssemblyCodeGenerator {
         decreaseOffset();
         sto.setSparcOffset(getOffset());
 
-        floatcounter = 0;
 
         if (func) {
             indent_level = 2;
