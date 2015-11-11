@@ -311,7 +311,7 @@ public class AssemblyCodeGenerator {
             writeAssembly(TWO_PARAM, SET_OP, sto.getName(), O1);
             writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
         } else {
-            writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
+            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
         }
     }
@@ -886,7 +886,7 @@ public class AssemblyCodeGenerator {
 
         int newoffset = sto.isGlobal() ? -4 : offset;
         decreaseOffset();
-        writeAssembly(TWO_PARAM, SET_OP, iString(newoffset), L7);
+        writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), L7);
         writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
         writeAssembly(TWO_PARAM, ST_OP, O0, "[" + L7 + "]");
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
