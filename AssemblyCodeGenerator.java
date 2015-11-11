@@ -183,6 +183,9 @@ public class AssemblyCodeGenerator {
     private static final String f0 = "%f0";
     private static final String F1 = "%f1";
     private static final String F2 = "%f2";
+    private static final String F3 = "%f3";
+    private static final String F4 = "%f4";
+    private static final String F5 = "%f5";
 
 
     private static final String L7 = "%l7";
@@ -256,6 +259,18 @@ public class AssemblyCodeGenerator {
         } else {
             writeLocalVariable(sto, init);
         }
+    }
+
+    public void writeFuncCall(STO func){
+
+        newline();
+        writeAssembly("! "+func.getName()+"(...)\n");
+        call(func.getName()+".void");
+        decreaseOffset();
+        func.setSparcOffset(offset);
+        setaddst(O0, iString(offset));
+
+
     }
 
 
@@ -942,6 +957,8 @@ public class AssemblyCodeGenerator {
             case "2":
                 reg = F2;
                 break;
+            case "3":
+                reg = F3;
         }
 
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", reg);
@@ -1109,51 +1126,7 @@ public class AssemblyCodeGenerator {
     }
 
 
-    private static final String endFunc_cmt = "! End of function .$.init.%s\n";
 
-    public void writeGlobalAuto(STO sto, STO init) {
-        String sName = sto.getName();
-        String iName = init.getName();
-        String save = "SAVE..$.init." + sName;
-        String register = "";
-
-        if (func) {
-            indent_level = 2;
-        }
-
-        decreaseIndent();
-        writeAssembly(GL_AUTO_INIT, sName + ":");
-        newline();
-        increaseIndent();
-        writeAssembly(TWO_PARAM, SET_OP, save, G1);
-        writeAssembly(THREE_PARAM, SAVE_OP, SP, G1, SP);
-
-        writeAssembly(NL);
-        increaseIndent();
-        writeAssembly(String.format(var_comment, sName, iName));
-        writeAssembly(TWO_PARAM, SET_OP, sName, O1);
-        writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
-        writeInit(sto, init); // do the init registers
-        writeAssembly(NL);
-
-        writeAssembly(String.format(endFunc_cmt, sName));
-        call(String.format(GL_AUTO_INIT, sName + ".fini"));
-        retRest();
-
-        writeAssembly(save + String.format(OFFSET_TOTAL, "0"));
-        writeAssembly(NL);
-        writeAssembly(NL);
-
-        decreaseIndent();
-        writeAssembly(GL_AUTO_INIT, sName + ".fini:");
-        newline();
-        increaseIndent();
-        writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP); // might need to change offset
-        retRest();
-
-        sectionAlign(INIT_SEC, iString(sto.getType().getSize()));
-        call(String.format(GL_AUTO_INIT, sName));
-    }
 
     public void call(String name) {
         writeAssembly(ONE_PARAM, CALL_OP, name);
@@ -1276,6 +1249,51 @@ public class AssemblyCodeGenerator {
     }
 
 
+    private static final String endFunc_cmt = "! End of function .$.init.%s\n";
+
+    public void writeGlobalAuto(STO sto, STO init) {
+        String sName = sto.getName();
+        String iName = init.getName();
+        String save = "SAVE..$.init." + sName;
+        String register = "";
+
+        if (func) {
+            indent_level = 2;
+        }
+
+        decreaseIndent();
+        writeAssembly(GL_AUTO_INIT, sName + ":");
+        newline();
+        increaseIndent();
+        writeAssembly(TWO_PARAM, SET_OP, save, G1);
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, G1, SP);
+
+        writeAssembly(NL);
+        increaseIndent();
+        writeAssembly(String.format(var_comment, sName, iName));
+        writeAssembly(TWO_PARAM, SET_OP, sName, O1);
+        writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
+        writeInit(sto, init); // do the init registers
+        writeAssembly(NL);
+
+        writeAssembly(String.format(endFunc_cmt, sName));
+        call(String.format(GL_AUTO_INIT, sName + ".fini"));
+        retRest();
+
+        writeAssembly(save + String.format(OFFSET_TOTAL, "0"));
+        writeAssembly(NL);
+        writeAssembly(NL);
+
+        decreaseIndent();
+        writeAssembly(GL_AUTO_INIT, sName + ".fini:");
+        newline();
+        increaseIndent();
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP); // might need to change offset
+        retRest();
+
+        sectionAlign(INIT_SEC, iString(sto.getType().getSize()));
+        call(String.format(GL_AUTO_INIT, sName));
+    }
     public void funcIndent() {
         if (func) {
             indent_level = 2;

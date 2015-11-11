@@ -1009,10 +1009,13 @@ class MyParser extends parser {
         if (func.isRef()) {
             ret.markModVal();
             ret.setRef(true);
+            ag.writeFuncCall(ret);
             return ret;
         } else if (!func.isRef()) {
             ret.markRVal();
+            ag.writeFuncCall(ret);
             return ret;
+
         }
         System.out.println("here");
         return temp;
