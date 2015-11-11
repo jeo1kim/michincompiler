@@ -1191,7 +1191,11 @@ public class AssemblyCodeGenerator {
         if (sto.getType() != null) {
             writeAssembly("! cout << " + sto.getName() + "\n");
             if (sto.isConst()) {
-                writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O1);
+                if(sto.getType().isFloat()){
+                    writeConstFloat(sto);
+                }else {
+                    writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O1);
+                }
                 callCout(sto);
                 return;
             }
