@@ -265,11 +265,10 @@ public class AssemblyCodeGenerator {
 
         newline();
         writeAssembly("! "+func.getName()+"(...)\n");
-        call(func.getName()+".void");
+        call(func.getName() + ".void");
         decreaseOffset();
         func.setSparcOffset(offset);
         setaddst(O0, iString(offset));
-
 
     }
 
@@ -618,7 +617,14 @@ public class AssemblyCodeGenerator {
                     writeArithmetic(SUB_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "*":
-                    writeArithmetic(MUL_OP, register, resoffset, O0, O1, O0);
+
+                    funcIndent();
+                    //writeAssembly(THREE_PARAM, opname, reg1, reg2, reg3);
+                    call(".mul");
+                    writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
+                    setaddst(register, resoffset);
+                    funcDedent();
+                    //writeArithmetic(MUL_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "/":
                     writeArithmetic(DIV_OP, register, resoffset, O0, O1, O0);
@@ -669,7 +675,7 @@ public class AssemblyCodeGenerator {
                     writeArithmetic(FADD_OP, register, resoffset, f0, F1, f0);
                     break;
                 case "*":
-                    writeArithmetic(FADD_OP, register, resoffset, f0, F1, f0);
+                    writeArithmetic(FMUL_OP, register, resoffset, f0, F1, f0);
                     break;
                 case ">":
                     writeComparison(FBLE_OP, register, resoffset, f0, F1);
