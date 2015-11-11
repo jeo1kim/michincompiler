@@ -619,7 +619,6 @@ public class AssemblyCodeGenerator {
                 case "*":
 
                     funcIndent();
-                    //writeAssembly(THREE_PARAM, opname, reg1, reg2, reg3);
                     call(".mul");
                     writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
                     setaddst(register, resoffset);
@@ -627,7 +626,13 @@ public class AssemblyCodeGenerator {
                     //writeArithmetic(MUL_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "/":
-                    writeArithmetic(DIV_OP, register, resoffset, O0, O1, O0);
+
+                    funcIndent();
+                    call(".div");
+                    writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
+                    setaddst(register, resoffset);
+                    funcDedent();
+                    //writeArithmetic(DIV_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "%":
                     writeArithmetic(MOD_OP, register, resoffset, O0, O1, O0);
