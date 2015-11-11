@@ -48,7 +48,7 @@ public class AssemblyCodeGenerator {
 
     //synthetic instructions
     private static final String SET_OP = "set    \t";
-    private static final String SAVE_OP = "save\t";
+    private static final String SAVE_OP = "save    \t";
     private static final String RET_OP = "ret\n";
     private static final String RESTORE_OP = "restore\n";
     private static final String NOP_OP = "nop\n";
@@ -214,7 +214,7 @@ public class AssemblyCodeGenerator {
 
     private static final String var_comment = "! %s = %s\n";
     private static final String var_comment_op = "! %s, %s\n";
-    private int floatcounter = 0;
+    private int floatcounter;
     private int cmpcounter = 0;
     //private int ifcounter = 0;
     private int strFmtCnt = 0;
@@ -575,6 +575,7 @@ public class AssemblyCodeGenerator {
     //used to convert on to float during incdec for float
     public void writeIncDecFloat(int init) {
         String name = FLOAT_COUNTER;
+
         int counter = ++floatcounter;
 
 
@@ -980,6 +981,8 @@ public class AssemblyCodeGenerator {
         sto.setSparcBase("%fp");
         decreaseOffset();
         sto.setSparcOffset(getOffset());
+
+        floatcounter = 0;
 
         if (func) {
             indent_level = 2;
