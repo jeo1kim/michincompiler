@@ -1310,6 +1310,7 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error4_Test, conType.getName()));
             return new ErrorSTO(condition.getName());
         }
+        ag.writeIfCase(condition);
         return condition;
     }
 

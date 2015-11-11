@@ -712,13 +712,20 @@ public class AssemblyCodeGenerator {
 
         setaddst(O0, resoffset);
         newline();
-        setaddld(O0, resoffset); // might need to fix
+        funcDedent();
+
+    }
+
+    public void writeIfCase(STO sto ){
+
+        funcIndent();
+
+        setaddld(O0, sto.getName()); // might need to fix
 
         writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
         writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(andorskipcnt)));
         writeAssembly(NOP_OP);
         funcDedent();
-
     }
 
     public void writeIfClose() {
@@ -1171,7 +1178,16 @@ public class AssemblyCodeGenerator {
         funcIndent();
         writeAssembly(NL);
         if (sto.getType() != null) {
+            writeAssembly("! cout << "+sto.getName()+"\n");
             setAddLoad(sto);
+        }
+        if (sto.getType() == null) {
+            writeConstFloat(sto);
+            writeAssembly("! cout << "+sto.getName()+"\n");
+            writeAssembly(TWO_PARAM, SET_OP, strFmt, O0);
+            writeAssembly(TWO_PARAM, SET_OP, ".$$.str." + iString(strFmtCnt), O1);
+            call("printf");
+            return;
         }
         callCout(sto);
 
@@ -1180,13 +1196,8 @@ public class AssemblyCodeGenerator {
 
     public void callCout(STO sto) {
 
-        if (sto.getType() == null) {
-            writeConstFloat(sto);
-            writeAssembly(TWO_PARAM, SET_OP, strFmt, O0);
-            writeAssembly(TWO_PARAM, SET_OP, ".$$.str." + iString(strFmtCnt), O1);
-            call("printf");
-            return;
-        }
+
+
         String stype = sto.getType().getName();
         String ret = "";
         switch (stype) {
@@ -1218,7 +1229,6 @@ public class AssemblyCodeGenerator {
         writeAssembly("! cout << endl\n");
         writeAssembly(TWO_PARAM, SET_OP, strEndl, O0);
         call("printf");
-        writeAssembly(NL);
         funcDedent();
     }
 
