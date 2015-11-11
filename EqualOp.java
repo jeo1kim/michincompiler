@@ -16,6 +16,17 @@ public class EqualOp extends ComparisonOp {
         //setSize(size);
     }
 
+    private boolean comparsion = true;
+
+
+    public boolean isComparison(){
+        return comparsion;
+    }
+
+    public void setComparison(boolean comp){
+        comparsion = comp;
+    }
+
     STO checkOperands(STO a, STO b) {
         Type aType = a.getType();
         Type bType = b.getType();

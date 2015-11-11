@@ -5,6 +5,16 @@ abstract class Operator {
     // Name of the Type (e.g., int, bool, some structdef, etc.)
     private String m_OpName;
     //private int m_size;
+    private boolean comparsion = false;
+
+
+    public boolean isComparison(){
+        return comparsion;
+    }
+
+    public void setComparison(boolean comp){
+        comparsion = comp;
+    }
 
     //----------------------------------------------------------------
     //

@@ -16,6 +16,16 @@ public class GTEOp extends ComparisonOp {
         setName(strName);
         //setSize(size);
     }
+    private boolean comparsion = true;
+
+
+    public boolean isComparison(){
+        return comparsion;
+    }
+
+    public void setComparison(boolean comp){
+        comparsion = comp;
+    }
     //----------------------------------------------------------------
     //
     //----------------------------------------------------------------

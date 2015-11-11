@@ -380,11 +380,13 @@ public class AssemblyCodeGenerator {
 
         //if both is const set and cmp
         if((a.isConst() && b.isConst()) && (!a.getType().isBool() || !b.getType().isBool())){
-            String res = result.getBoolValue() == true ? "1":"0";
-            writeAssembly(TWO_PARAM, SET_OP, res, O0);
-            writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
-            writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(andorskipcnt)));
-            writeAssembly(NOP_OP);
+           if( o.isComparison()) {
+               String res = result.getBoolValue() == true ? "1" : "0";
+               writeAssembly(TWO_PARAM, SET_OP, res, O0);
+               writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
+               writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(andorskipcnt)));
+               writeAssembly(NOP_OP);
+           }
             return;
         }
 
@@ -1184,11 +1186,16 @@ public class AssemblyCodeGenerator {
 
         funcIndent();
         writeAssembly(NL);
-        if (sto.getType() != null) {
+        if(sto.isConst()){
+            writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O1);
+            callCout(sto);
+            return;
+        }
+        else if (sto.getType() != null) {
             writeAssembly("! cout << "+sto.getName()+"\n");
             setAddLoad(sto);
         }
-        if (sto.getType() == null) {
+        else if (sto.getType() == null) {
             writeConstFloat(sto);
             writeAssembly("! cout << "+sto.getName()+"\n");
             writeAssembly(TWO_PARAM, SET_OP, strFmt, O0);
@@ -1196,6 +1203,7 @@ public class AssemblyCodeGenerator {
             call("printf");
             return;
         }
+
         callCout(sto);
 
         funcDedent();

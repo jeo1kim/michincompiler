@@ -14,6 +14,16 @@ public class NotEqualOp extends ComparisonOp {
         setName(strName);
         //setSize(size);
     }
+    private boolean comparsion = true;
+
+
+    public boolean isComparison(){
+        return comparsion;
+    }
+
+    public void setComparison(boolean comp){
+        comparsion = comp;
+    }
 
     STO checkOperands(STO a, STO b) {
         Type aType = a.getType();
