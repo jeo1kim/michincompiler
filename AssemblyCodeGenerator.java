@@ -1186,13 +1186,14 @@ public class AssemblyCodeGenerator {
 
         funcIndent();
         writeAssembly(NL);
-        if(sto.isConst()){
-            writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O1);
-            callCout(sto);
-            return;
-        }
-        else if (sto.getType() != null) {
+
+        if (sto.getType() != null) {
             writeAssembly("! cout << "+sto.getName()+"\n");
+            if(sto.isConst()){
+                writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O1);
+                callCout(sto);
+                return;
+            }
             setAddLoad(sto);
         }
         else if (sto.getType() == null) {
@@ -1203,7 +1204,7 @@ public class AssemblyCodeGenerator {
             call("printf");
             return;
         }
-
+        
         callCout(sto);
 
         funcDedent();
