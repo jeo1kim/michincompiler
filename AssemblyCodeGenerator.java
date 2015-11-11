@@ -857,6 +857,7 @@ public class AssemblyCodeGenerator {
         }
         if (x == 1) {
             register = F1;
+            floatreg = 1;
             order = O1;
         }
 
