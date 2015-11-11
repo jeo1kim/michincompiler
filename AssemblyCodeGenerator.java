@@ -48,7 +48,7 @@ public class AssemblyCodeGenerator {
 
     //synthetic instructions
     private static final String SET_OP = "set    \t";
-    private static final String SAVE_OP = "save    \t";
+    private static final String SAVE_OP = "save\t";
     private static final String RET_OP = "ret\n";
     private static final String RESTORE_OP = "restore\n";
     private static final String NOP_OP = "nop\n";
@@ -753,7 +753,10 @@ public class AssemblyCodeGenerator {
     public void setAddLoad(STO init) {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
-        String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
+        String register = init.getType().isFloat() ? f0 : O1; // check for float f0 or o0
+        if(init.getType().isBool()){
+            register = O0;
+        }
         String off = init.isGlobal() ? init.getName() : iString(init.getSparcOffset());
 
         writeAssembly(TWO_PARAM, SET_OP, off, L7);
@@ -1226,7 +1229,9 @@ public class AssemblyCodeGenerator {
         }
     }
 
+    public int oreg;
     public void writeCoutClose() {
+        oreg = 0;
         funcIndent();
         writeAssembly(NL);
         writeAssembly("! cout << endl\n");
