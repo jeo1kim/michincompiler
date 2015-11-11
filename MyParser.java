@@ -568,6 +568,7 @@ class MyParser extends parser {
             sto.setValue(exp.getValue());
             sto.markModLVal();
             m_symtab.insert(sto);
+            ag.writeVariable(sto, exp);
             return;
         }
     }
@@ -598,6 +599,7 @@ class MyParser extends parser {
         sto.setValue(exp.getValue());
         sto.markModLVal();
         m_symtab.insert(sto);
+        ag.writeVariable(sto, exp);
         return;
     }
 
