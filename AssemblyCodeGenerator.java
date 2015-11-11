@@ -216,7 +216,6 @@ public class AssemblyCodeGenerator {
     private boolean arithmetic = false;
 
 
-
     public AssemblyCodeGenerator(String fileToWrite) {
         try {
             fileWriter = new FileWriter(fileToWrite);
@@ -255,7 +254,7 @@ public class AssemblyCodeGenerator {
 
     public void writeCloseFunc(STO sto) {
         increaseIndent();
-        call( String.format(FINI_FUNC, sto.getName(), "void"));
+        call(String.format(FINI_FUNC, sto.getName(), "void"));
         retRest();
 
         int posoffset = Math.abs(getOffset());
@@ -321,6 +320,7 @@ public class AssemblyCodeGenerator {
     }
 
     public int floatreg;
+
     public void writeBinaryExpr(STO a, Operator o, STO b, STO result) {
         boolean iffloat = false;
         //arithmetic = true;
@@ -330,11 +330,11 @@ public class AssemblyCodeGenerator {
         funcIndent();
 
 
-        writeAssembly( "! (" +a.getName()+")"+o.getName()+"("+b.getName()+")\n");
+        writeAssembly("! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")\n");
 
 
-        if(a.isConst() && b.isConst()){
-            String res = result.getBoolValue() == true ? "1":"0";
+        if (a.isConst() && b.isConst()) {
+            String res = result.getBoolValue() == true ? "1" : "0";
             writeAssembly(TWO_PARAM, SET_OP, res, O0);
             writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
             writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(cmpcounter)));
@@ -344,7 +344,7 @@ public class AssemblyCodeGenerator {
 
         decreaseOffset();
         result.setSparcOffset(getOffset());
-        if(a.getType().isBool()){
+        if (a.getType().isBool()) {
             andorskipcnt++;
             writeCallStored(a, 0);
             setcmpbenop(a.getIntValue());
@@ -352,62 +352,49 @@ public class AssemblyCodeGenerator {
             setcmpbenop(b.getIntValue());
             writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "andorEnd", iString(andorskipcnt)));
             writeAssembly(TWO_PARAM, MOV_OP, iString(b.getIntValue()), G0);
-
-        }
-
-
-        else if (a.getType().isInt() && b.getType().isFloat()) {
+        } else if (a.getType().isInt() && b.getType().isFloat()) {
 
             writeCallStored(a, 0);
             convertToFloatBinary(a, 0);
 
-            if(b.isConst()){
+            if (b.isConst()) {
                 writeConstFloat(b);
             }
 
-            if(!b.isConst()){
+            if (!b.isConst()) {
                 writeCallStored(b, 0);
             }
 
             iffloat = true;
 
-        }
+        } else if (a.getType().isFloat() && b.getType().isInt()) {
 
-        else if (a.getType().isFloat() && b.getType().isInt()) {
-
-            if(!a.isConst()){
+            if (!a.isConst()) {
                 writeCallStored(a, 0);
             }
             writeCallStored(b, 1);
 
-            if(a.isConst()){
+            if (a.isConst()) {
                 writeConstFloat(a);
             }
             convertToFloatBinary(b, 1);
 
             iffloat = true;
 
-        }
+        } else if (a.getType().isFloat() && b.getType().isFloat()) {
 
-        else if (a.getType().isFloat() && b.getType().isFloat()) {
-
-            if(a.isConst() && !b.isConst()){
+            if (a.isConst() && !b.isConst()) {
                 writeConstFloat(a);
                 writeCallStored(b, 1);
             }
-            if(!a.isConst() && b.isConst()){
+            if (!a.isConst() && b.isConst()) {
                 writeCallStored(a, 0);
                 floatreg++;
                 writeConstFloat(b);
-            }
-            else if (!a.isConst() && !b.isConst()){
-                cmpcounter++;
-                String res = result.getBoolValue() == true ? "1":"0";
-                writeAssembly(TWO_PARAM, SET_OP, res, O0);
-                writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
-                writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(cmpcounter)));
-                writeAssembly(NOP_OP);
-                return;
+            } else if (!a.isConst() && !b.isConst()) {
+                writeCallStored(a, 0);
+                writeCallStored(b, 1);
+
             }
             iffloat = true;
         } else {
@@ -415,16 +402,16 @@ public class AssemblyCodeGenerator {
             writeCallStored(a, 0);
             writeCallStored(b, 1);
         }
-        
+
         String register = iffloat ? f0 : O0;
         increaseIndent();
         writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
-        
+
         funcDedent();
         decreaseIndent();
     }
 
-    public void setcmpbenop(int a){
+    public void setcmpbenop(int a) {
         writeAssembly(TWO_PARAM, SET_OP, iString(a), O0);
         writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
         writeAssembly(ONE_PARAM, BE_OP, String.format(BASIC_FIN, "andorSkip", iString(andorskipcnt)));
@@ -432,7 +419,7 @@ public class AssemblyCodeGenerator {
     }
 
 
-    public void writeIncDecExpr(STO a, Operator o, STO result){
+    public void writeIncDecExpr(STO a, Operator o, STO result) {
         boolean iffloat = false;
         //arithmetic = true;
 
@@ -444,11 +431,10 @@ public class AssemblyCodeGenerator {
         decreaseOffset();
         result.setSparcOffset(getOffset());
 
-        if (a.getType().isFloat()){
+        if (a.getType().isFloat()) {
             writeIncDecFloat(1);
             iffloat = true;
-        }
-        else {
+        } else {
             writeAssembly(TWO_PARAM, SET_OP, iString(1), O1);
         }
         String register = iffloat ? f0 : O0;
@@ -463,7 +449,7 @@ public class AssemblyCodeGenerator {
     public void writeIncDecFloat(int init) {
         String name = FLOAT_COUNTER;
         int counter = ++floatcounter;
-          
+
 
         writeAssembly(NL);
         sectionAlign(RODATA_SEC, "4");
@@ -472,7 +458,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(name, iString(counter));
         indent_level = 2;
 
- 
+
         writeAssembly(FLOAT, "1.0");
         writeAssembly(NL);
         sectionAlign(TEXT_SEC, "4");
@@ -502,7 +488,7 @@ public class AssemblyCodeGenerator {
                     break;
                 case "^":
                     writeArithmetic(XOR_OP, register, resoffset, O0, O1, O0);
-                    break;    
+                    break;
                 case "|":
                     writeArithmetic(BW_OR_OP, register, resoffset, O0, O1, O0);
                     break;
@@ -544,7 +530,8 @@ public class AssemblyCodeGenerator {
             }
         }
     }
-    public void writeArithmetic(String opname, String register, String resoffset, String reg1, String reg2, String reg3){
+
+    public void writeArithmetic(String opname, String register, String resoffset, String reg1, String reg2, String reg3) {
         funcIndent();
         writeAssembly(THREE_PARAM, opname, reg1, reg2, reg3);
 
@@ -552,19 +539,19 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
-    public void writeComparison(String opname, String register, String resoffset, String reg1, String reg2){
+    public void writeComparison(String opname, String register, String resoffset, String reg1, String reg2) {
         funcIndent();
         newline();
         cmpcounter++;
-        if(reg1 == f0){
+        if (reg1 == f0) {
             writeAssembly(TWO_PARAM, FCMP_OP, reg1, reg2);
             writeAssembly(NOP_OP);
-        }else{
+        } else {
             writeAssembly(TWO_PARAM, CMP_OP, reg1, reg2);
         }
-        
+
         writeAssembly(ONE_PARAM, opname, String.format(CMP_COUNTER, iString(cmpcounter)));
-        
+
         writeAssembly(TWO_PARAM, MOV_OP, G0, O0);
         writeAssembly(ONE_PARAM, INC_OP, O0);
 
@@ -581,10 +568,10 @@ public class AssemblyCodeGenerator {
         writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(cmpcounter)));
         writeAssembly(NOP_OP);
         funcDedent();
-       
+
     }
 
-    public void writeIfClose(){
+    public void writeIfClose() {
         newline();
         funcIndent();
         increaseIndent();
@@ -601,11 +588,11 @@ public class AssemblyCodeGenerator {
         writeAssembly(BASIC_FIN_NL, "endif", iString(cmpcounter));
         decreaseIndent();
         newline();
-        
+
     }
 
 
-    public void setAddLoad(STO init){
+    public void setAddLoad(STO init) {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
         String register = init.getType().isFloat() ? f0 : O1; // check for float f0 or o0
@@ -616,7 +603,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
     }
 
-    public void setaddld(String register, String resoffset){
+    public void setaddld(String register, String resoffset) {
         writeAssembly(TWO_PARAM, SET_OP, resoffset, L7);
         writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
@@ -649,9 +636,9 @@ public class AssemblyCodeGenerator {
                 register = O1;
             }
         }
-        if(init.isConst()){
+        if (init.isConst()) {
             writeAssembly(TWO_PARAM, SET_OP, val, register);
-        }else{
+        } else {
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
@@ -716,14 +703,13 @@ public class AssemblyCodeGenerator {
         //offset = newoffset;
         writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), L7);
         writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
-        writeAssembly(TWO_PARAM, ST_OP, order, "[" +L7+ "]");
+        writeAssembly(TWO_PARAM, ST_OP, order, "[" + L7 + "]");
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
         writeAssembly(TWO_PARAM, FITOS, register, register);
 
         //writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
 
     }
-
 
 
     //convert int to float when needed
@@ -749,10 +735,10 @@ public class AssemblyCodeGenerator {
         String name = FLOAT_COUNTER;
         int counter = ++floatcounter;
         boolean str = false;
-        String size = init.getType() == null ? "4": iString(init.getType().getSize());
-        if(init.getType() == null){
+        String size = init.getType() == null ? "4" : iString(init.getType().getSize());
+        if (init.getType() == null) {
             funcIndent();
-            name = ".$$.str."+iString(++strFmtCnt)+":\n";
+            name = ".$$.str." + iString(++strFmtCnt) + ":\n";
             counter = strFmtCnt;
             str = true;
         }
@@ -763,8 +749,8 @@ public class AssemblyCodeGenerator {
         writeAssembly(name, iString(counter));
         indent_level = 2;
 
-        if(str){
-            writeAssembly(ONE_PARAM, ASCIZ, "\""+init.getName()+"\"");
+        if (str) {
+            writeAssembly(ONE_PARAM, ASCIZ, "\"" + init.getName() + "\"");
             writeAssembly(NL);
             sectionAlign(TEXT_SEC, "4");
             writeAssembly(NL);
@@ -776,16 +762,19 @@ public class AssemblyCodeGenerator {
         writefloatreg(floatreg++);
     }
 
-    public void writefloatreg(int regnum){
+    public void writefloatreg(int regnum) {
 
         String reg = "";
-        switch(iString(regnum)){
+        switch (iString(regnum)) {
 
-            case "0": reg = f0;
+            case "0":
+                reg = f0;
                 break;
-            case "1": reg = F1;
+            case "1":
+                reg = F1;
                 break;
-            case "2": reg = F2;
+            case "2":
+                reg = F2;
                 break;
         }
 
@@ -817,7 +806,7 @@ public class AssemblyCodeGenerator {
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
         }
-        call( String.format(FINI_FUNC, func.getName() , "void"));
+        call(String.format(FINI_FUNC, func.getName(), "void"));
         retRest();
         funcDedent();
         newline();
@@ -856,8 +845,7 @@ public class AssemblyCodeGenerator {
                     writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
                     decreaseIndent();
                     writeAssembly(NL);
-                }
-                else{
+                } else {
                     writeInit(sto, init);
                 }
             } else {
@@ -967,7 +955,7 @@ public class AssemblyCodeGenerator {
         }
 
         decreaseIndent();
-        writeAssembly(GL_AUTO_INIT, sName+":");
+        writeAssembly(GL_AUTO_INIT, sName + ":");
         newline();
         increaseIndent();
         writeAssembly(TWO_PARAM, SET_OP, save, G1);
@@ -982,7 +970,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
 
         writeAssembly(String.format(endFunc_cmt, sName));
-        call(String.format(GL_AUTO_INIT, sName+".fini"));
+        call(String.format(GL_AUTO_INIT, sName + ".fini"));
         retRest();
 
         writeAssembly(save + String.format(OFFSET_TOTAL, "0"));
@@ -990,7 +978,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
 
         decreaseIndent();
-        writeAssembly(GL_AUTO_INIT, sName+".fini:");
+        writeAssembly(GL_AUTO_INIT, sName + ".fini:");
         newline();
         increaseIndent();
         writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP); // might need to change offset
@@ -1026,13 +1014,13 @@ public class AssemblyCodeGenerator {
         return Integer.toString(val);
     }
 
-    public void writeCout(STO sto){
+    public void writeCout(STO sto) {
 
         Vector<String> st = prepSTO(sto);
 
         funcIndent();
         writeAssembly(NL);
-        if(sto.getType() != null) {
+        if (sto.getType() != null) {
             setAddLoad(sto);
         }
         callCout(sto);
@@ -1040,36 +1028,37 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
-    public void callCout(STO sto){
+    public void callCout(STO sto) {
 
-        if(sto.getType() == null){
+        if (sto.getType() == null) {
             writeConstFloat(sto);
             writeAssembly(TWO_PARAM, SET_OP, strFmt, O0);
-            writeAssembly(TWO_PARAM, SET_OP, ".$$.str."+iString(strFmtCnt), O1);
+            writeAssembly(TWO_PARAM, SET_OP, ".$$.str." + iString(strFmtCnt), O1);
             call("printf");
             return;
         }
         String stype = sto.getType().getName();
         String ret = "";
-        switch(stype){
-            case "int": ret = intFmt;
+        switch (stype) {
+            case "int":
+                ret = intFmt;
                 break;
-            case "bool": ret = strTF;
+            case "bool":
+                ret = strTF;
                 break;
         }
 
-        if(stype == "float"){
+        if (stype == "float") {
             call("printFloat");
             return;
-        }
-        else{
+        } else {
             writeAssembly(TWO_PARAM, SET_OP, ret, O0);
             call("printf");
             return;
         }
     }
 
-    public void writeCoutClose(){
+    public void writeCoutClose() {
         funcIndent();
         writeAssembly(NL);
         writeAssembly("! cout << endl\n");
@@ -1080,7 +1069,7 @@ public class AssemblyCodeGenerator {
     }
 
 
-    public void writeExitExpr(STO init){
+    public void writeExitExpr(STO init) {
         funcIndent();
         writeAssembly(TWO_PARAM, SET_OP, init.getName(), O0);
         writeAssembly(ONE_PARAM, CALL_OP, "exit");
@@ -1090,7 +1079,7 @@ public class AssemblyCodeGenerator {
     }
 
 
-    public Vector<String> prepSTO(STO sto){
+    public Vector<String> prepSTO(STO sto) {
         String name = sto.getName();
         String base = sto.getSparcBase();
         String off = iString(sto.getSparcOffset());
@@ -1103,16 +1092,18 @@ public class AssemblyCodeGenerator {
     }
 
 
-    public void funcIndent(){
-        if (func){
+    public void funcIndent() {
+        if (func) {
             indent_level = 2;
         }
     }
-    public void funcDedent(){
-        if (func){
+
+    public void funcDedent() {
+        if (func) {
             indent_level = 0;
         }
     }
+
     // 8
     public void decreaseIndent() {
         indent_level--;
@@ -1181,12 +1172,12 @@ public class AssemblyCodeGenerator {
     public void fmtHeader() {
         increaseIndent();
         sectionAlign(RODATA_SEC, "4");
-        fmt(intFmt+":\n", d);
-        fmt(strFmt+":\n", s);
-        fmt(strTF+":\n", tf);
-        fmt(strEndl+":\n", nl);
-        fmt(strArrBound+":\n", arrbound);
-        fmt(strNullPtr+":\n", nullptr);
+        fmt(intFmt + ":\n", d);
+        fmt(strFmt + ":\n", s);
+        fmt(strTF + ":\n", tf);
+        fmt(strEndl + ":\n", nl);
+        fmt(strArrBound + ":\n", arrbound);
+        fmt(strNullPtr + ":\n", nullptr);
         sectionAlign(TEXT_SEC, "4");
 
         decreaseIndent();
