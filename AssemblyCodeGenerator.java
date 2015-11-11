@@ -332,10 +332,10 @@ public class AssemblyCodeGenerator {
         //create space
 
         writeAssembly(String.format(var_comment, sName, iName));
-        writeAssigntmentSto(stoDes);
-
 
         if (expr.isConst()) {
+            writeAssigntmentSto(stoDes);
+
             if (expr.getType().isFloat()) {  // if its not auto and float
                 writeConstFloat(expr);
                 writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
@@ -344,19 +344,22 @@ public class AssemblyCodeGenerator {
             } else {
                 writeInit(stoDes, expr);
             }
-        } else {
-            //set value
-            writeInit(stoDes, expr);
         }
 
-        if ((desoffset = stoDes.getSparcOffset()) != 0) {
+//        else if (!expr.isConst()){//(desoffset = stoDes.getSparcOffset()) != 0) {
+//
+//            //writeAssembly(String.format(var_comment, sName, iName));
+//            val = stoValue(expr); // stoVal gets teh value of sto.
+//            writeAssembly(TWO_PARAM, SET_OP, iString(stoDes.getSparcOffset()), O1);
+//            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+//            writeInit(stoDes, expr);
+//
+//        }
+        else {
+            //set value
+            writeAssigntmentSto(stoDes);
 
-            writeAssembly(String.format(var_comment, sName, iName));
-            val = stoValue(expr); // stoVal gets teh value of sto.
-            writeAssembly(TWO_PARAM, SET_OP, iString(desoffset), O1);
-            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             writeInit(stoDes, expr);
-
         }
         decreaseIndent();
     }
@@ -977,8 +980,7 @@ public class AssemblyCodeGenerator {
 
     //TODO: take care of when init not there too
     public void writeLocalVariable(STO sto, STO init) {
-        increaseIndent();
-        increaseIndent();
+        funcIndent();
         String sectioncheck;
         String register = "";
         String val = ""; //later used for init if init is null to handle null pointer
@@ -1017,8 +1019,7 @@ public class AssemblyCodeGenerator {
                 writeInit(sto, init);
             }
         }
-        decreaseIndent();
-        decreaseIndent();
+        funcDedent();
     }
 
 
