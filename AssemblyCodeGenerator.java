@@ -450,6 +450,11 @@ public class AssemblyCodeGenerator {
                 increaseIndent();
             }
 
+            if(a.isConst() && b.isConst()){
+                increaseOffset();
+                result.setSparcOffset(getOffset());
+            }
+            newline();
 //            if(a.isConst() && b.isConst()){
 //                increaseOffset();
 //                result.setSparcOffset(getOffset());
@@ -533,24 +538,21 @@ public class AssemblyCodeGenerator {
         increaseIndent();
         funcIndent();
         andorskipcnt++;
-        if (a.isConst()) {
-            writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
-        } else {
+        if (!a.isConst()) {
             writeCallStored(a, 0);
             writeAssembly(THREE_PARAM, XOR_OP, O0, "1", O0);
 
             decreaseOffset();
             result.setSparcOffset(getOffset());
-
-            setaddst(iString(result.getSparcOffset()), O0);
+        } 
+            /*setaddst(O0, iString(result.getSparcOffset()));
             newline();
 
-            setaddld(iString(result.getSparcOffset()), O0);
-        }
+            setaddld(O0, iString(result.getSparcOffset()));*/
 
-        writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
+        /*writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
         writeAssembly(ONE_PARAM, BE_OP, String.format(BASIC_FIN, "else", iString(andorskipcnt)));
-        writeAssembly(NOP_OP);
+        writeAssembly(NOP_OP);*/
 
 
     }
@@ -686,19 +688,19 @@ public class AssemblyCodeGenerator {
                     writeComparison(FBLE_OP, register, resoffset, f0, F1);
                     break;
                 case ">=":
-                    writeComparison(FBL_OP, register, resoffset, O0, O1);
+                    writeComparison(FBL_OP, register, resoffset, f0, F1);
                     break;
                 case "<":
                     writeComparison(FBGE_OP, register, resoffset, f0, F1);
                     break;
                 case "<=":
-                    writeComparison(FBG_OP, register, resoffset, O0, O1);
+                    writeComparison(FBG_OP, register, resoffset, f0, F1);
                     break;
                 case "==":
-                    writeComparison(FBNE_OP, register, resoffset, O0, O1);
+                    writeComparison(FBNE_OP, register, resoffset, f0, F1);
                     break;
                 case "!=":
-                    writeComparison(FBE_OP, register, resoffset, O0, O1);
+                    writeComparison(FBE_OP, register, resoffset, f0, F1);
                     break;
             }
         }
@@ -734,7 +736,7 @@ public class AssemblyCodeGenerator {
 
         increaseIndent();
 
-        setaddst(O0, resoffset);
+        //setaddst(O0, resoffset);
         newline();
         funcDedent();
 
@@ -743,12 +745,25 @@ public class AssemblyCodeGenerator {
     public void writeIfCase(STO sto) {
 
         funcIndent();
-
-        setaddld(O0, sto.getName()); // might need to fix
+        // might need to fix
+        // fix for bool: need to print offset if it is bool comparison
+        if(sto.getType().isBool()){
+            if(sto.isConst()){
+                writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), O0);
+            }
+            else{
+                setaddst(O0, iString(sto.getSparcOffset()));
+                newline();
+                setaddld(O0, iString(sto.getSparcOffset()));
+            }
+        }else{
+            setaddld(O0, sto.getName()); // might need to fix //not sure its for which case?
+        }
 
         writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
         writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(andorskipcnt)));
         writeAssembly(NOP_OP);
+        newline();
         funcDedent();
     }
 

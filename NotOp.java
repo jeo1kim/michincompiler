@@ -28,11 +28,16 @@ public class NotOp extends UnaryOp {
         }
         else {
 //            return a; // if its a bool type just return
-            if (a.getBoolValue() == true) {
-                return new ConstSTO(a.getName(), a.getType(), 0);
-            } else if (a.getBoolValue() == false) {
-                return new ConstSTO(a.getName(), a.getType(), 1);
+            if(a.isConst()){
+                if (a.getBoolValue() == true) {
+                    return new ConstSTO(a.getName(), a.getType(), 0);
+                } else if (a.getBoolValue() == false) {
+                    return new ConstSTO(a.getName(), a.getType(), 1);
 
+                }
+            }
+            else {               
+                return new ExprSTO(a.getName(), a.getType());
             }
 
         }
