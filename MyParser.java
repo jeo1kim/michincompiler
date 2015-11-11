@@ -1390,6 +1390,7 @@ class MyParser extends parser {
             return new ErrorSTO("DoUnaryOp" + a.getName() + o.getName());
         }
 
+        ag.writeNotExpr(a, o, result);
         return result;
     }
 

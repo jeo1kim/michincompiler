@@ -74,10 +74,15 @@ public class AssemblyCodeGenerator {
 
     private static final String FBLE_OP = "fble  \t";
     private static final String FBGE_OP = "fbge   \t";
+    private static final String FBG_OP = "fbg    \t";
+    private static final String FBL_OP = "fbl    \t";
+    private static final String FBE_OP = "fbe    \t";
+    private static final String FBNE_OP = "fbne   \t";
 
 
     private static final String ST_OP = "st     \t";
     private static final String LD_OP = "ld     \t";
+
 
     //arithmetic 
     private static final String ADD_OP = "add    \t";
@@ -208,8 +213,10 @@ public class AssemblyCodeGenerator {
 
 
     private static final String var_comment = "! %s = %s\n";
+    private static final String var_comment_op = "! %s, %s\n";
     private int floatcounter = 0;
     private int cmpcounter = 0;
+    //private int ifcounter = 0;
     private int strFmtCnt = 0;
     private int andorskipcnt = 0;
     private boolean func = false;
@@ -268,7 +275,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(":\n");
         increaseIndent();
         int add = -92 + getOffset();
-        writeAssembly(THREE_PARAM, SAVE_OP, SP, iString(add), SP);
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP);
         retRest();
 
         func = false;
@@ -321,6 +328,7 @@ public class AssemblyCodeGenerator {
     }
 
     public int floatreg;
+    //for binary expr
     public void writeBinaryExpr(STO a, Operator o, STO b, STO result) {
         boolean iffloat = false;
         //arithmetic = true;
@@ -329,34 +337,81 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
         funcIndent();
 
-
         writeAssembly( "! (" +a.getName()+")"+o.getName()+"("+b.getName()+")\n");
 
 
-        if(a.isConst() && b.isConst()){
+        //if both is const set and cmp
+        if((a.isConst() && b.isConst()) && (!a.getType().isBool() || !b.getType().isBool())){
             String res = result.getBoolValue() == true ? "1":"0";
             writeAssembly(TWO_PARAM, SET_OP, res, O0);
             writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
-            writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(cmpcounter)));
+            writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(andorskipcnt)));
             writeAssembly(NOP_OP);
             return;
         }
 
         decreaseOffset();
         result.setSparcOffset(getOffset());
-        if(a.getType().isBool()){
+        //if it is boolean expr 
+        if(a.getType().isBool() && b.getType().isBool()){
             andorskipcnt++;
-            writeCallStored(a, 0);
-            setcmpbenop(a.getIntValue());
+            if(a.isConst()){
+                writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
+            } else {
+                writeCallStored(a, 0);
+            }
+            cmpbenop("andorSkip");
             newline();
-            setcmpbenop(b.getIntValue());
+
+            if(b.isConst()){
+                writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O0);
+            } else {
+                writeCallStored(b, 0);
+            }
+            cmpbenop("andorSkip");
+            
             writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "andorEnd", iString(andorskipcnt)));
-            writeAssembly(TWO_PARAM, MOV_OP, iString(b.getIntValue()), G0);
+            String tempstore = O0;
+            int templast = 0;
+            if(a.isConst() && b.isConst()){
+                tempstore = G0;
+            }
 
+            if(o.getName() == "&&"){
+                writeAssembly(TWO_PARAM, MOV_OP, iString(1), tempstore);
+                decreaseIndent();
+                writeAssembly(BASIC_FIN_NL, "andorSkip", iString(andorskipcnt));
+                increaseIndent();
+                writeAssembly(TWO_PARAM, MOV_OP, iString(0), tempstore);
+                decreaseIndent();
+                writeAssembly(BASIC_FIN_NL, "andorEnd", iString(andorskipcnt));
+                increaseIndent();
+            }
+            else{
+                writeAssembly(TWO_PARAM, MOV_OP, iString(0), tempstore);
+                decreaseIndent();
+                writeAssembly(BASIC_FIN_NL, "andorSkip", iString(andorskipcnt));
+                increaseIndent();
+                templast = 1;
+                writeAssembly(TWO_PARAM, MOV_OP, iString(1), tempstore);
+                decreaseIndent();
+                writeAssembly(BASIC_FIN_NL, "andorEnd", iString(andorskipcnt));
+                increaseIndent();
+            }
+
+            if(a.isConst() && b.isConst()){
+                increaseOffset();
+                result.setSparcOffset(getOffset());
+                writeAssembly(TWO_PARAM, SET_OP, iString(templast), O0);
+            }else {
+                setaddst(O0, iString(result.getSparcOffset()));
+                newline();
+                setaddld(O0, iString(result.getSparcOffset()));
+            }
+            cmpbenop("else");
+            //writeAssembly(TWO_PARAM, MOV_OP, iString(b.getIntValue()), G0);
         }
-
-
-        else if (a.getType().isInt() && b.getType().isFloat()) {
+        else if (a.getType().isInt() && b.getType().isFloat()) { //if a is int and b is float
 
             writeCallStored(a, 0);
             convertToFloatBinary(a, 0);
@@ -389,7 +444,7 @@ public class AssemblyCodeGenerator {
 
         }
 
-        else if (a.getType().isFloat() && b.getType().isFloat()) {
+        else if (a.getType().isFloat() && b.getType().isFloat()) { //if both is float
 
             if(a.isConst() && !b.isConst()){
                 writeConstFloat(a);
@@ -424,17 +479,46 @@ public class AssemblyCodeGenerator {
         decreaseIndent();
     }
 
-    public void setcmpbenop(int a){
-        writeAssembly(TWO_PARAM, SET_OP, iString(a), O0);
+    public void cmpbenop(String word){
         writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
-        writeAssembly(ONE_PARAM, BE_OP, String.format(BASIC_FIN, "andorSkip", iString(andorskipcnt)));
+        writeAssembly(ONE_PARAM, BE_OP, String.format(BASIC_FIN, word, iString(andorskipcnt)));
         writeAssembly(NOP_OP);
     }
 
+    //for not expr
+    public void writeNotExpr(STO a, Operator o, STO result){
+        writeAssembly(var_comment_op, o.getName(), a.getName());
 
+        increaseIndent();
+        funcIndent();
+        andorskipcnt++;
+        if(a.isConst()){
+            writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
+        }
+        else{
+            writeCallStored(a, 0);
+            writeAssembly(THREE_PARAM, XOR_OP, O0, "1", O0);
+
+            decreaseOffset();
+            result.setSparcOffset(getOffset());
+
+            setaddst(iString(result.getSparcOffset()), O0);
+            newline();
+
+            setaddld(iString(result.getSparcOffset()), O0);
+        }
+
+        writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
+        writeAssembly(ONE_PARAM, BE_OP, String.format(BASIC_FIN, "else", iString(andorskipcnt)));
+        writeAssembly(NOP_OP);
+
+
+    }
+    //for incdecrxpr
     public void writeIncDecExpr(STO a, Operator o, STO result){
         boolean iffloat = false;
         //arithmetic = true;
+        writeAssembly(var_comment_op, o.getName(), a.getName());
 
         increaseIndent();
         writeAssembly(NL);
@@ -518,10 +602,21 @@ public class AssemblyCodeGenerator {
                 case ">":
                     writeComparison(BLE_OP, register, resoffset, O0, O1);
                     break;
+                case ">=":
+                    writeComparison(BL_OP, register, resoffset, O0, O1);
+                    break;
                 case "<":
                     writeComparison(BGE_OP, register, resoffset, O0, O1);
                     break;
-
+                case "<=":
+                    writeComparison(BG_OP, register, resoffset, O0, O1);
+                    break;
+                case "==":
+                    writeComparison(BNE_OP, register, resoffset, O0, O1);
+                    break;
+                case "!=":
+                    writeComparison(BE_OP, register, resoffset, O0, O1);
+                    break;
             }
         } else {
             switch (opname) {
@@ -537,13 +632,25 @@ public class AssemblyCodeGenerator {
                 case ">":
                     writeComparison(FBLE_OP, register, resoffset, f0, F1);
                     break;
+                case ">=":
+                    writeComparison(FBL_OP, register, resoffset, O0, O1);
+                    break;
                 case "<":
                     writeComparison(FBGE_OP, register, resoffset, f0, F1);
                     break;
-
+                case "<=":
+                    writeComparison(FBG_OP, register, resoffset, O0, O1);
+                    break;
+                case "==":
+                    writeComparison(FBNE_OP, register, resoffset, O0, O1);
+                    break;
+                case "!=":
+                    writeComparison(FBE_OP, register, resoffset, O0, O1);
+                    break;
             }
         }
     }
+
     public void writeArithmetic(String opname, String register, String resoffset, String reg1, String reg2, String reg3){
         funcIndent();
         writeAssembly(THREE_PARAM, opname, reg1, reg2, reg3);
@@ -556,6 +663,7 @@ public class AssemblyCodeGenerator {
         funcIndent();
         newline();
         cmpcounter++;
+        andorskipcnt++;
         if(reg1 == f0){
             writeAssembly(TWO_PARAM, FCMP_OP, reg1, reg2);
             writeAssembly(NOP_OP);
@@ -578,7 +686,7 @@ public class AssemblyCodeGenerator {
         setaddld(O0, resoffset); // might need to fix
 
         writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
-        writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(cmpcounter)));
+        writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(andorskipcnt)));
         writeAssembly(NOP_OP);
         funcDedent();
        
@@ -588,17 +696,17 @@ public class AssemblyCodeGenerator {
         newline();
         funcIndent();
         increaseIndent();
-        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(cmpcounter)));
+        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(andorskipcnt)));
         writeAssembly(NOP_OP);
         newline();
         funcDedent();
         increaseIndent();
         writeAssembly("\t! else\n");
-        writeAssembly(BASIC_FIN_NL, "else", iString(cmpcounter));
+        writeAssembly(BASIC_FIN_NL, "else", iString(andorskipcnt));
         newline();
 
         writeAssembly("\t! endif\n");
-        writeAssembly(BASIC_FIN_NL, "endif", iString(cmpcounter));
+        writeAssembly(BASIC_FIN_NL, "endif", iString(andorskipcnt));
         decreaseIndent();
         newline();
         
