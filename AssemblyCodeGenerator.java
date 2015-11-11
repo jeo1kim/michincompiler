@@ -321,6 +321,7 @@ public class AssemblyCodeGenerator {
         int desoffset;
         String val = "";
         increaseIndent();
+        floatreg = 0;
 
         if (func) {
             indent_level = 2;
@@ -1003,6 +1004,7 @@ public class AssemblyCodeGenerator {
 
             if (init.isConst()) {
                 if (init.getType().isFloat()) {  // if its not auto and float
+                    floatreg = 0;
                     writeConstFloat(init);
                     writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
                     decreaseIndent();
