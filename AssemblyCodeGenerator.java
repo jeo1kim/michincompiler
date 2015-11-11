@@ -868,7 +868,8 @@ public class AssemblyCodeGenerator {
         writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), L7);
         writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
         writeAssembly(TWO_PARAM, ST_OP, order, "[" + L7 + "]");
-        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+        //writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+        writefloatreg(floatreg++);
         writeAssembly(TWO_PARAM, FITOS, register, register);
 
         //writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
