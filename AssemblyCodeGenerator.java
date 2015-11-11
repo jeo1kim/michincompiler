@@ -346,15 +346,15 @@ public class AssemblyCodeGenerator {
             }
         }
 
-//        else if (!expr.isConst()){//(desoffset = stoDes.getSparcOffset()) != 0) {
-//
-//            //writeAssembly(String.format(var_comment, sName, iName));
-//            val = stoValue(expr); // stoVal gets teh value of sto.
-//            writeAssembly(TWO_PARAM, SET_OP, iString(stoDes.getSparcOffset()), O1);
-//            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-//            writeInit(stoDes, expr);
-//
-//        }
+        else if (!expr.isConst()){//(desoffset = stoDes.getSparcOffset()) != 0) {
+
+            //writeAssembly(String.format(var_comment, sName, iName));
+            val = stoValue(expr); // stoVal gets teh value of sto.
+            writeAssembly(TWO_PARAM, SET_OP, iString(stoDes.getSparcOffset()), O1);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+            writeInit(stoDes, expr);
+
+        }
         else {
             //set value
             writeAssigntmentSto(stoDes);
