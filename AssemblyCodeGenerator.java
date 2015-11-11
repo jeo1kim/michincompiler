@@ -439,16 +439,16 @@ public class AssemblyCodeGenerator {
                 increaseIndent();
             }
 
-            if(a.isConst() && b.isConst()){
-                increaseOffset();
-                result.setSparcOffset(getOffset());
-                writeAssembly(TWO_PARAM, SET_OP, iString(templast), O0);
-            }else {
-                setaddst(O0, iString(result.getSparcOffset()));
-                newline();
-                setaddld(O0, iString(result.getSparcOffset()));
-            }
-            cmpbenop("else");
+//            if(a.isConst() && b.isConst()){
+//                increaseOffset();
+//                result.setSparcOffset(getOffset());
+//                writeAssembly(TWO_PARAM, SET_OP, iString(templast), O0);
+//            }else {
+//                setaddst(O0, iString(result.getSparcOffset()));
+//                newline();
+//                setaddld(O0, iString(result.getSparcOffset()));
+//            }
+            //cmpbenop("else");
             //writeAssembly(TWO_PARAM, MOV_OP, iString(b.getIntValue()), G0);
         }
         else if (a.getType().isInt() && b.getType().isFloat()) { //if a is int and b is float
