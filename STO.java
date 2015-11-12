@@ -10,6 +10,7 @@ import java.util.Vector;
 
 abstract class STO
 {
+	public int ifcounter;
 	private String m_strName;
 	private Type m_type;
 	private boolean m_isAddressable;

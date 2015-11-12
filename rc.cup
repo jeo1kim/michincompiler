@@ -712,7 +712,7 @@ IfStmt ::=          T_IF Expr:_1
                     CodeBlock
                     OptElse:_2
                     {:
-                        ((MyParser) parser).DoIfClose(_2);
+                        ((MyParser) parser).DoIfClose(_1);
                     :}
     ;
 
