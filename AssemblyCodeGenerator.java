@@ -54,7 +54,7 @@ public class AssemblyCodeGenerator {
     private static final String NOP_OP = "nop\n";
 
     private static final String CMP_OP = "cmp   \t";
-    private static final String FCMP_OP = "fcmp  \t";
+    private static final String FCMP_OP = "fcmps \t";
     private static final String JMP_OP = "jmp   \t";
     private static final String CALL_OP = "call   \t";
     private static final String TST_OP = "tst   \t";
@@ -761,7 +761,7 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeIfCase(STO sto) {
-
+        sto.ifcounter = andorskipcnt;
         funcIndent();
         // might need to fix
         // fix for bool: need to print offset if it is bool comparison
@@ -785,7 +785,7 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
-    public void writeIfClose() {
+    public void writeIfClose(STO sto) {
         newline();
         funcIndent();
         increaseIndent();
@@ -795,11 +795,11 @@ public class AssemblyCodeGenerator {
         funcDedent();
         increaseIndent();
         writeAssembly("\t! else\n");
-        writeAssembly(BASIC_FIN_NL, "else", iString(andorskipcnt));
+        writeAssembly(BASIC_FIN_NL, "else", iString(sto.ifcounter));
         newline();
 
         writeAssembly("\t! endif\n");
-        writeAssembly(BASIC_FIN_NL, "endif", iString(andorskipcnt));
+        writeAssembly(BASIC_FIN_NL, "endif", iString(sto.ifcounter));
         decreaseIndent();
         newline();
 

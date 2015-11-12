@@ -1281,9 +1281,9 @@ class MyParser extends parser {
         return sto.getType();
     }
 
-    void DoIfClose(boolean optElse){
+    void DoIfClose(STO sto){
         // optElse is true is there is an else stmt
-        ag.writeIfClose();
+        ag.writeIfClose(sto);
 
     }
 
