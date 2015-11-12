@@ -86,19 +86,19 @@ public class AssemblyCodeGenerator {
 
     //arithmetic 
     private static final String ADD_OP = "add    \t";
-    private static final String SUB_OP = "sub     \t";
-    private static final String MUL_OP = "mul     \t";
-    private static final String DIV_OP = "div     \t";
-    private static final String MOD_OP = "mod     \t";
+    private static final String SUB_OP = "sub    \t";
+    private static final String MUL_OP = "mul    \t";
+    private static final String DIV_OP = "div    \t";
+    private static final String MOD_OP = "mod    \t";
 
     private static final String BW_AND_OP = "and    \t";
     private static final String BW_OR_OP = "or    \t";
     private static final String XOR_OP = "xor    \t";
 
-    private static final String FADD_OP = "fadds\t";
-    private static final String FSUB_OP = "fsubs     \t";
-    private static final String FMUL_OP = "fmuls     \t";
-    private static final String FDIV_OP = "fdivs     \t";
+    private static final String FADD_OP = "fadds    \t";
+    private static final String FSUB_OP = "fsubs    \t";
+    private static final String FMUL_OP = "fmuls    \t";
+    private static final String FDIV_OP = "fdivs    \t";
 
 
     //section
@@ -578,8 +578,21 @@ public class AssemblyCodeGenerator {
             writeAssembly(TWO_PARAM, SET_OP, iString(1), O1);
         }
         String register = iffloat ? f0 : O0;
+        if(a.getPrePost() == "pre"){
+            if(register.equals(f0)){
+                register = F2;
+            }
+            else {
+                register = O2;
+            }
+        }
+
         increaseIndent();
         writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
+
+        funcIndent();
+        setAddStore(a);
+        funcDedent();
 
         funcDedent();
         decreaseIndent();
@@ -628,7 +641,6 @@ public class AssemblyCodeGenerator {
                     //writeArithmetic(MUL_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "/":
-
                     funcIndent();
                     call(".div");
                     writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
@@ -684,6 +696,12 @@ public class AssemblyCodeGenerator {
                 case "*":
                     writeArithmetic(FMUL_OP, register, resoffset, f0, F1, f0);
                     break;
+                case "++":
+                    writeArithmetic(FADD_OP, resoffset, resoffset, f0, F1, F2);
+                    break;
+                case "--":
+                    writeArithmetic(FSUB_OP, resoffset, resoffset, f0, F1, F2);
+                    break;
                 case ">":
                     writeComparison(FBLE_OP, register, resoffset, f0, F1);
                     break;
@@ -736,7 +754,7 @@ public class AssemblyCodeGenerator {
 
         increaseIndent();
 
-        //setaddst(O0, resoffset);
+        setaddst(O0, resoffset);
         newline();
         funcDedent();
 
@@ -806,6 +824,20 @@ public class AssemblyCodeGenerator {
         writeAssembly(TWO_PARAM, SET_OP, resoffset, L7);
         writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+    }
+
+    public void setAddStore(STO init) {
+    String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
+    String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
+    String register = init.getType().isFloat() ? F2 : O2; // check for float f0 or o0
+    if (init.getType().isBool()) {
+        register = O0;
+    }
+    String off = init.isGlobal() ? init.getName() : iString(init.getSparcOffset());
+
+    writeAssembly(TWO_PARAM, SET_OP, off, O1);
+    writeAssembly(THREE_PARAM, ADD_OP, globalreg, O1, O1);
+    writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");
     }
 
     public void setaddst(String register, String resoffset) {

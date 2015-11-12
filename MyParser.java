@@ -1349,8 +1349,9 @@ class MyParser extends parser {
     }
 
 
-    STO DoIncDecOp(STO a, Operator o) {
+    STO DoIncDecOp(STO a, Operator o, String prepost) {
         STO result = o.checkOperands(a);
+        a.setPrePost(prepost);
 
         if (a.isError()) {
             return a;

@@ -23,6 +23,7 @@ abstract class STO
 	private boolean m_isGlobal = false;
 	private boolean m_static;
 	private boolean m_auto = false;
+	private String m_prepost = "";
 
 	private int sparcOffset=0;
 	private String sparcBase= "";
@@ -40,6 +41,13 @@ abstract class STO
 	}
 	public boolean getAuto(){
 		return m_auto;
+	}
+
+	public void setPrePost(String prepost){
+		m_prepost = prepost;
+	}
+	public String getPrePost(){
+		return m_prepost;
 	}
 
 	public void setSparcOffset(int offset){
