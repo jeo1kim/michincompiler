@@ -454,6 +454,10 @@ public class AssemblyCodeGenerator {
                 increaseOffset();
                 result.setSparcOffset(getOffset());
             }
+
+            if(!result.isConst()){
+                setaddst(O0, iString(result.getSparcOffset()));
+            }
             newline();
 //            if(a.isConst() && b.isConst()){
 //                increaseOffset();
