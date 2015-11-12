@@ -87,18 +87,18 @@ public class AssemblyCodeGenerator {
     //arithmetic 
     private static final String ADD_OP = "add    \t";
     private static final String SUB_OP = "sub    \t";
-    private static final String MUL_OP = "mul    \t";
-    private static final String DIV_OP = "div    \t";
-    private static final String MOD_OP = "mod    \t";
+    private static final String MUL_OP = ".mul";
+    private static final String DIV_OP = ".div";
+    private static final String MOD_OP = ".rem";
 
     private static final String BW_AND_OP = "and    \t";
     private static final String BW_OR_OP = "or    \t";
     private static final String XOR_OP = "xor    \t";
 
-    private static final String FADD_OP = "fadds    \t";
-    private static final String FSUB_OP = "fsubs    \t";
-    private static final String FMUL_OP = "fmuls    \t";
-    private static final String FDIV_OP = "fdivs    \t";
+    private static final String FADD_OP = "fadds   \t";
+    private static final String FSUB_OP = "fsubs   \t";
+    private static final String FMUL_OP = "fmuls   \t";
+    private static final String FDIV_OP = "fdivs   \t";
 
 
     //section
@@ -384,8 +384,9 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
         funcIndent();
 
-
-        writeAssembly("! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")\n");
+        //String comment = "! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")";
+        writeAssembly("! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")");
+        newline();
 
 
         //if both is const set and cmp
@@ -459,17 +460,7 @@ public class AssemblyCodeGenerator {
                 setaddst(O0, iString(result.getSparcOffset()));
             }
             newline();
-//            if(a.isConst() && b.isConst()){
-//                increaseOffset();
-//                result.setSparcOffset(getOffset());
-//                writeAssembly(TWO_PARAM, SET_OP, iString(templast), O0);
-//            }else {
-//                setaddst(O0, iString(result.getSparcOffset()));
-//                newline();
-//                setaddld(O0, iString(result.getSparcOffset()));
-//            }
-            //cmpbenop("else");
-            //writeAssembly(TWO_PARAM, MOV_OP, iString(b.getIntValue()), G0);
+
         } else if (a.getType().isInt() && b.getType().isFloat()) { //if a is int and b is float
 
             writeCallStored(a, 0);
@@ -636,9 +627,8 @@ public class AssemblyCodeGenerator {
                     writeArithmetic(SUB_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "*":
-
                     funcIndent();
-                    call(".mul");
+                    call(MUL_OP);
                     writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
                     setaddst(register, resoffset);
                     funcDedent();
@@ -646,14 +636,18 @@ public class AssemblyCodeGenerator {
                     break;
                 case "/":
                     funcIndent();
-                    call(".div");
+                    call(DIV_OP);
                     writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
                     setaddst(register, resoffset);
                     funcDedent();
                     //writeArithmetic(DIV_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "%":
-                    writeArithmetic(MOD_OP, register, resoffset, O0, O1, O0);
+                    funcIndent();
+                    call(MOD_OP);
+                    writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
+                    setaddst(register, resoffset);
+                    funcDedent();
                     break;
                 case "^":
                     writeArithmetic(XOR_OP, register, resoffset, O0, O1, O0);
@@ -695,7 +689,7 @@ public class AssemblyCodeGenerator {
                     writeArithmetic(FADD_OP, register, resoffset, f0, F1, f0);
                     break;
                 case "-":
-                    writeArithmetic(FADD_OP, register, resoffset, f0, F1, f0);
+                    writeArithmetic(FSUB_OP, register, resoffset, f0, F1, f0);
                     break;
                 case "*":
                     writeArithmetic(FMUL_OP, register, resoffset, f0, F1, f0);
