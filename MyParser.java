@@ -1366,8 +1366,14 @@ class MyParser extends parser {
         return result;
     }
 
+    //need fix only got expr out to take care of expr
     STO MarkUnary(String unary, STO a) {
         ConstSTO con;
+        if(!a.isConst()){
+            ExprSTO exp = new ExprSTO(a.getName(), a.getType());
+            ag.writeMarkUnary(unary, a, exp);
+            return exp;
+        }
         if (a.getType().isNumeric() || a.isConst() || a.isExpr() || a.isVar()) {
             if (unary == "-") {
                 con = new ConstSTO(a.getName(), a.getType());
@@ -1377,9 +1383,9 @@ class MyParser extends parser {
                 return con;
             } else {
                 con = new ConstSTO(a.getName(), a.getType());
+                con.setValue(a.getValue());
                 return con;
             }
-
         }
 
         return new ErrorSTO("error in mark unary");

@@ -903,7 +903,6 @@ public class AssemblyCodeGenerator {
                 return;
             }
         } else {
-
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
@@ -1187,7 +1186,23 @@ public class AssemblyCodeGenerator {
         decreaseIndent();
     }
 
-
+    public void writeMarkUnary(String unary, STO init, STO des){
+        funcIndent();
+        //if(!a.isConst()){
+        writeAssembly(var_comment, init.getName(), unary+des.getName());
+        decreaseOffset();
+        des.setSparcOffset(getOffset());
+            writeCallStored(init, 0);
+            if(unary == "-"){
+                writeAssembly(TWO_PARAM, NEG_OP, O0, O0);
+            }
+            else{
+                writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
+            }
+            setaddst(O0, iString(des.getSparcOffset()));
+        //}
+        funcDedent();
+    }
 
 
     public void call(String name) {
@@ -1419,7 +1434,6 @@ public class AssemblyCodeGenerator {
             if (stype.isInt()) {
                 ret = Integer.toString(sto.getIntValue());
             }
-
             if (stype.isFloat()) {
                 ret = Float.toString(sto.getFloatValue());
             }
