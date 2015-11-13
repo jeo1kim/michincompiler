@@ -414,69 +414,76 @@ public class AssemblyCodeGenerator {
         //if it is boolean expr 
         if (a.getType().isBool() && b.getType().isBool()) {
             andorskipcnt++;
-            if (a.isConst()) {
-                writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
-            } else {
-                writeCallStored(a, 0);
-            }
+            if(o.getName() == "&&" || o.getName() == "||"){
+                if (a.isConst()) {
+                    writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
+                } else {
+                    writeCallStored(a, 0);
+                }
+                cmpbenop("andorSkip");
+                newline();
 
-            if((o.getName() == "&&") || o.getName() == "||"){
                 if (b.isConst()) {
                     writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O0);
                 } else {
                     writeCallStored(b, 0);
                 }
                 cmpbenop("andorSkip");
+
+                writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "andorEnd", iString(andorskipcnt)));
+                String tempstore = O0;
+                int templast = 0;
+                if (a.isConst() && b.isConst()) {
+                    tempstore = G0;
+                }
+
+                if (o.getName() == "&&") {
+                    writeAssembly(TWO_PARAM, MOV_OP, iString(1), tempstore);
+                    decreaseIndent();
+                    writeAssembly(BASIC_FIN_NL, "andorSkip", iString(andorskipcnt));
+                    increaseIndent();
+                    writeAssembly(TWO_PARAM, MOV_OP, iString(0), tempstore);
+                    decreaseIndent();
+                    writeAssembly(BASIC_FIN_NL, "andorEnd", iString(andorskipcnt));
+                    increaseIndent();
+                } else {
+                    writeAssembly(TWO_PARAM, MOV_OP, iString(0), tempstore);
+                    decreaseIndent();
+                    writeAssembly(BASIC_FIN_NL, "andorSkip", iString(andorskipcnt));
+                    increaseIndent();
+                    templast = 1;
+                    writeAssembly(TWO_PARAM, MOV_OP, iString(1), tempstore);
+                    decreaseIndent();
+                    writeAssembly(BASIC_FIN_NL, "andorEnd", iString(andorskipcnt));
+                    increaseIndent();
+                }
+
+                if(a.isConst() && b.isConst()){
+                    increaseOffset();
+                    result.setSparcOffset(getOffset());
+                }
+
+                //it does not print out setaddst if both value is const
+                if(!result.isConst()){
+                    setaddst(O0, iString(result.getSparcOffset()));
+                }
                 newline();
-            }else {
-                //for == and !=
+                return;
+            }else{
+                //for cases such as == and !=
+                if (a.isConst()) {
+                    writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
+                } else {
+                    writeCallStored(a, 0);
+                }
+                newline();
+
                 if (b.isConst()) {
                     writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O1);
                 } else {
                     writeCallStored(b, 1);
                 }
             }
-
-            writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "andorEnd", iString(andorskipcnt)));
-            String tempstore = O0;
-            int templast = 0;
-            if (a.isConst() && b.isConst()) {
-                tempstore = G0;
-            }
-
-            if (o.getName() == "&&") {
-                writeAssembly(TWO_PARAM, MOV_OP, iString(1), tempstore);
-                decreaseIndent();
-                writeAssembly(BASIC_FIN_NL, "andorSkip", iString(andorskipcnt));
-                increaseIndent();
-                writeAssembly(TWO_PARAM, MOV_OP, iString(0), tempstore);
-                decreaseIndent();
-                writeAssembly(BASIC_FIN_NL, "andorEnd", iString(andorskipcnt));
-                increaseIndent();
-            } else if (o.getName() == "||"){
-                writeAssembly(TWO_PARAM, MOV_OP, iString(0), tempstore);
-                decreaseIndent();
-                writeAssembly(BASIC_FIN_NL, "andorSkip", iString(andorskipcnt));
-                increaseIndent();
-                templast = 1;
-                writeAssembly(TWO_PARAM, MOV_OP, iString(1), tempstore);
-                decreaseIndent();
-                writeAssembly(BASIC_FIN_NL, "andorEnd", iString(andorskipcnt));
-                increaseIndent();
-            }
-
-            if(a.isConst() && b.isConst()){
-                increaseOffset();
-                result.setSparcOffset(getOffset());
-            }
-
-            //it does not print out setaddst if both value is const
-            if(!result.isConst()){
-                setaddst(O0, iString(result.getSparcOffset()));
-            }
-            newline();
-            return;
-
         } else {
             if(a.isConst() && b.isConst()){
                 //increase offset again because it is not stored inside register
@@ -539,12 +546,12 @@ public class AssemblyCodeGenerator {
                 writeCallStored(b, 1);
             }
 
-            
-            String register = iffloat ? f0 : O0;
-            increaseIndent();
-            writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
-            
-        }
+        }            
+        String register = iffloat ? f0 : O0;
+        increaseIndent();
+        writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
+        
+        
         funcDedent();
         decreaseIndent();
     }
