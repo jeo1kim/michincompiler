@@ -823,7 +823,7 @@ public class AssemblyCodeGenerator {
         newline();
         funcIndent();
         increaseIndent();
-        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(ifcounter)));
+        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(sto.ifcounter)));
         writeAssembly(NOP_OP);
         newline();
         funcDedent();
