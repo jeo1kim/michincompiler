@@ -470,8 +470,7 @@ public class AssemblyCodeGenerator {
             newline();
 
         } else {
-            if((a.isConst() && b.isGlobal()) || (a.isGlobal() && b.isConst()) 
-            || (a.isGlobal() && b.isGlobal())){
+            if(!a.isModLValue() && !b.isModLValue()){
                 //increase offset again because it is not stored inside register
                 increaseOffset();
                 result.setSparcOffset(getOffset());
@@ -1259,17 +1258,12 @@ public class AssemblyCodeGenerator {
             if (sto.isConst()) {
                 if(sto.getType().isFloat()){
                     writeConstFloat(sto);
-                }
-                else if(sto.getSparcBase() =="%fp"){
-                    setAddLoad(sto);
-                }
-                else {
+                }else {
                     writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O1);
                 }
                 callCout(sto);
                 return;
             }
-
             setAddLoad(sto);
         } else if (sto.getType() == null) {
             writeConstFloat(sto);
