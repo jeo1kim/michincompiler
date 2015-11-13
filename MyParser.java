@@ -1630,7 +1630,10 @@ class MyParser extends parser {
         //if assignable to int then return expr
         // double check what to return when you exit
         ExprSTO sto = new ExprSTO(a.getName());
+        sto.setSparcOffset(a.getSparcOffset());
+
         ag.writeExitExpr(sto);
+        
         return sto;
     }
 

@@ -1343,7 +1343,14 @@ public class AssemblyCodeGenerator {
 
     public void writeExitExpr(STO init) {
         funcIndent();
-        writeAssembly(TWO_PARAM, SET_OP, init.getName(), O0);
+
+        //it needs to go to set if const and if not to else but somehow isConst not work here
+        //need to fix later 
+        if(init.isConst()){
+            writeAssembly(TWO_PARAM, SET_OP, init.getName(), O0);
+        }else {
+            setaddld(O0, iString(init.getSparcOffset()));
+        }
         writeAssembly(ONE_PARAM, CALL_OP, "exit");
         writeAssembly(NOP_OP);
         newline();
