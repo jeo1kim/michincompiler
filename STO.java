@@ -22,6 +22,8 @@ abstract class STO
 	private Vector<STO> paramSTO;
 	private boolean m_return_top_level = false;
 	private boolean m_isGlobal = false;
+	private boolean m_isLocal = false;
+
 	private boolean m_static;
 	private boolean m_auto = false;
 	private String m_prepost = "";
@@ -63,9 +65,14 @@ abstract class STO
 
 	private boolean structFuck = false;
 
-	public boolean isGlobal(){
+	public boolean isLocal(){
 		return m_isGlobal;
 	}
+	public void setLocal(){
+		m_isGlobal = true;
+	}	public boolean isGlobal(){
+	return m_isGlobal;
+}
 	public void setGlobal(){
 		m_isGlobal = true;
 	}

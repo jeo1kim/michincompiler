@@ -1259,12 +1259,17 @@ public class AssemblyCodeGenerator {
             if (sto.isConst()) {
                 if(sto.getType().isFloat()){
                     writeConstFloat(sto);
-                }else {
+                }
+                else if(sto.getSparcBase() =="%fp"){
+                    setAddLoad(sto);
+                }
+                else {
                     writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O1);
                 }
                 callCout(sto);
                 return;
             }
+
             setAddLoad(sto);
         } else if (sto.getType() == null) {
             writeConstFloat(sto);
