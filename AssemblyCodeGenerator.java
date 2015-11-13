@@ -219,7 +219,7 @@ public class AssemblyCodeGenerator {
     private static final String var_comment_op = "! %s, %s\n";
     private int floatcounter = 0;
     private int cmpcounter = 0;
-    //private int ifcounter = 0;
+    private int ifcounter = 0;
     private int strFmtCnt = 0;
     private int andorskipcnt = 0;
     private boolean func = false;
@@ -339,12 +339,13 @@ public class AssemblyCodeGenerator {
         if (func) {
             indent_level = 2;
         }
-
+ 
         String sName = stoDes.getName();
         String iName = expr.getName();
         //create space
 
         writeAssembly(String.format(var_comment, sName, iName));
+        //writeAssembly("current offset in Assign: %s\n", iString(getOffset()));
 
 
         if (expr.isConst()) {
@@ -384,8 +385,9 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
         funcIndent();
 
-        //String comment = "! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")";
-        //writeAssembly("! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")");
+
+        writeAssembly("! (" + a.getName() + ")" + checkmod(o.getName()) + "(" + b.getName() + ")");
+
         newline();
 
 
@@ -404,10 +406,10 @@ public class AssemblyCodeGenerator {
         if(!func){
             return;
         }
-        //writeAssembly("here???");
-
+    
         decreaseOffset();
         result.setSparcOffset(getOffset());
+        //writeAssembly("current offset: %s\n", iString(getOffset()));
 
         //if it is boolean expr 
         if (a.getType().isBool() && b.getType().isBool()) {
@@ -461,66 +463,81 @@ public class AssemblyCodeGenerator {
                 result.setSparcOffset(getOffset());
             }
 
+            //it does not print out setaddst if both value is const
             if(!result.isConst()){
                 setaddst(O0, iString(result.getSparcOffset()));
             }
             newline();
 
-        } else if (a.getType().isInt() && b.getType().isFloat()) { //if a is int and b is float
-
-            writeCallStored(a, 0);
-            convertToFloatBinary(a, 0);
-
-            if (b.isConst()) {
-                writeConstFloat(b);
-            }
-
-            if (!b.isConst()) {
-                writeCallStored(b, 1);
-            }
-
-            iffloat = true;
-
-        } else if (a.getType().isFloat() && b.getType().isInt()) {
-
-            if (!a.isConst()) {
-                writeCallStored(a, 0);
-            }
-            writeCallStored(b, 1);
-
-            if (a.isConst()) {
-                writeConstFloat(a);
-            }
-            convertToFloatBinary(b, 1);
-
-            iffloat = true;
-
-        } else if (a.getType().isFloat() && b.getType().isFloat()) { //if both is float
-
-            if (a.isConst() && !b.isConst()) {
-                writeConstFloat(a);
-                writeCallStored(b, 1);
-            }
-            if (!a.isConst() && b.isConst()) {
-                writeCallStored(a, 0);
-                floatreg++;
-                writeConstFloat(b);
-            } else if (!a.isConst() && !b.isConst()) {
-                writeCallStored(a, 0);
-                writeCallStored(b, 1);
-
-            }
-            iffloat = true;
         } else {
-            //writeAssembly("/////////////////binary");
-            writeCallStored(a, 0);
-            writeCallStored(b, 1);
+            if((a.isConst() && b.isGlobal()) || (a.isGlobal() && b.isConst()) 
+            || (a.isGlobal() && b.isGlobal())){
+                //increase offset again because it is not stored inside register
+                increaseOffset();
+                result.setSparcOffset(getOffset());
+                return;
+            }
+            if (a.getType().isInt() && b.getType().isFloat()) { //if a is int and b is float
+
+                writeCallStored(a, 0);
+                convertToFloatBinary(a, 0);
+
+                if (b.isConst()) {
+                    writeConstFloat(b);
+                }
+
+                if (!b.isConst()) {
+                    writeCallStored(b, 1);
+                }
+
+                iffloat = true;
+
+            } else if (a.getType().isFloat() && b.getType().isInt()) {
+
+                if (!a.isConst()) {
+                    writeCallStored(a, 0);
+                }
+                writeCallStored(b, 1);
+
+                if (a.isConst()) {
+                    writeConstFloat(a);
+                }
+                convertToFloatBinary(b, 1);
+
+                iffloat = true;
+
+            } else if (a.getType().isFloat() && b.getType().isFloat()) { //if both is float
+
+                if (a.isConst() && !b.isConst()) {
+                    writeConstFloat(a);
+                    writeCallStored(b, 1);
+                }
+                if (!a.isConst() && b.isConst()) {
+                    writeCallStored(a, 0);
+                    floatreg++;
+                    writeConstFloat(b);
+                } else if (!a.isConst() && !b.isConst()) {
+                    writeCallStored(a, 0);
+                    writeCallStored(b, 1);
+
+                }
+                iffloat = true;
+            } else if(!o.isComparison()){
+                //writeAssembly("/////////////////binary");
+                writeCallStored(a, 0);
+                writeCallStored(b, 1);
+            } else if(a.isConst() && b.isConst()){
+                //it is for when a and b is const and o is comparison like > < 
+                increaseOffset();
+                result.setSparcOffset(getOffset());
+            }
+
+            if(!o.isComparison()){
+                String register = iffloat ? f0 : O0;
+                increaseIndent();
+                writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
+            }
         }
-
-        String register = iffloat ? f0 : O0;
-        increaseIndent();
-        writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
-
         funcDedent();
         decreaseIndent();
     }
@@ -764,7 +781,8 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeIfCase(STO sto) {
-        sto.ifcounter = andorskipcnt;
+        ifcounter++;
+        sto.ifcounter = ifcounter;
         funcIndent();
         // might need to fix
         // fix for bool: need to print offset if it is bool comparison
@@ -773,7 +791,6 @@ public class AssemblyCodeGenerator {
                 writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), O0);
             }
             else{
-                setaddst(O0, iString(sto.getSparcOffset()));
                 newline();
                 setaddld(O0, iString(sto.getSparcOffset()));
             }
@@ -782,7 +799,7 @@ public class AssemblyCodeGenerator {
         }
 
         writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
-        writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(andorskipcnt)));
+        writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(ifcounter)));
         writeAssembly(NOP_OP);
         newline();
         funcDedent();
@@ -792,7 +809,7 @@ public class AssemblyCodeGenerator {
         newline();
         funcIndent();
         increaseIndent();
-        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(andorskipcnt)));
+        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(ifcounter)));
         writeAssembly(NOP_OP);
         newline();
         funcDedent();
@@ -1251,7 +1268,9 @@ public class AssemblyCodeGenerator {
             setAddLoad(sto);
         } else if (sto.getType() == null) {
             writeConstFloat(sto);
-            writeAssembly("! cout << " + sto.getName() + "\n");
+            String mod = checkmod(sto.getName());
+            writeAssembly("! cout << "+mod);
+            newline();
             writeAssembly(TWO_PARAM, SET_OP, strFmt, O0);
             writeAssembly(TWO_PARAM, SET_OP, ".$$.str." + iString(strFmtCnt), O1);
             call("printf");
@@ -1263,6 +1282,12 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
+    public String checkmod(String sto){
+        if(sto.contains("%")){
+            return sto.replace("%", "%%");
+        }
+        return sto;
+    }
     public void callCout(STO sto) {
 
 
