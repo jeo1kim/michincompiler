@@ -56,6 +56,11 @@ public class EqualOp extends ComparisonOp {
         else if (((aType.isNumeric()) && (bType.isNumeric())) || (aType.isBool() && bType.isBool())) {
             if (a.isConst() && b.isConst()) {
                 int val = a.getValue().compareTo(b.getValue());
+                if(val == 0){
+                    val = 1;
+                }else{
+                    val = 0;
+                }
                 return new ConstSTO(a.getName() + getName() + b.getName(), new BoolType(), val);
             }
             return new ExprSTO(a.getName() + getName() + b.getName(), new BoolType());

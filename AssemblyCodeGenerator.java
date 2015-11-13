@@ -419,16 +419,23 @@ public class AssemblyCodeGenerator {
             } else {
                 writeCallStored(a, 0);
             }
-            cmpbenop("andorSkip");
-            newline();
 
-
-            if (b.isConst()) {
-                writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O0);
-            } else {
-                writeCallStored(b, 0);
+            if((o.getName() == "&&") || o.getName() == "||"){
+                if (b.isConst()) {
+                    writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O0);
+                } else {
+                    writeCallStored(b, 0);
+                }
+                cmpbenop("andorSkip");
+                newline();
+            }else {
+                //for == and !=
+                if (b.isConst()) {
+                    writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O1);
+                } else {
+                    writeCallStored(b, 1);
+                }
             }
-            cmpbenop("andorSkip");
 
             writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "andorEnd", iString(andorskipcnt)));
             String tempstore = O0;
@@ -446,7 +453,7 @@ public class AssemblyCodeGenerator {
                 decreaseIndent();
                 writeAssembly(BASIC_FIN_NL, "andorEnd", iString(andorskipcnt));
                 increaseIndent();
-            } else {
+            } else if (o.getName() == "||"){
                 writeAssembly(TWO_PARAM, MOV_OP, iString(0), tempstore);
                 decreaseIndent();
                 writeAssembly(BASIC_FIN_NL, "andorSkip", iString(andorskipcnt));
@@ -468,9 +475,10 @@ public class AssemblyCodeGenerator {
                 setaddst(O0, iString(result.getSparcOffset()));
             }
             newline();
+            return;
 
         } else {
-            if(!a.isModLValue() && !b.isModLValue()){
+            if(a.isConst() && b.isConst()){
                 //increase offset again because it is not stored inside register
                 increaseOffset();
                 result.setSparcOffset(getOffset());
@@ -521,21 +529,21 @@ public class AssemblyCodeGenerator {
 
                 }
                 iffloat = true;
-            } else if(!o.isComparison()){
-                //writeAssembly("/////////////////binary");
-                writeCallStored(a, 0);
-                writeCallStored(b, 1);
             } else if(a.isConst() && b.isConst()){
                 //it is for when a and b is const and o is comparison like > < 
                 increaseOffset();
                 result.setSparcOffset(getOffset());
             }
-
-            if(!o.isComparison()){
-                String register = iffloat ? f0 : O0;
-                increaseIndent();
-                writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
+            else {
+                writeCallStored(a, 0);
+                writeCallStored(b, 1);
             }
+
+            
+            String register = iffloat ? f0 : O0;
+            increaseIndent();
+            writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
+            
         }
         funcDedent();
         decreaseIndent();
