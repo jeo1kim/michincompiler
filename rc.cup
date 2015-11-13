@@ -710,6 +710,9 @@ IfStmt ::=          T_IF Expr:_1
                         ((MyParser) parser).DoConditionCheck(_1);
                     :}
                     CodeBlock
+                    {:
+                        ((MyParser) parser).DoBeforeElse(_1);
+                    :}
                     OptElse:_2
                     {:
                         ((MyParser) parser).DoIfClose(_1);

@@ -391,18 +391,6 @@ public class AssemblyCodeGenerator {
         newline();
 
 
-        //IF case already taken care in writeif func no need commenting out until the need is found 
-        //if both is const set and cmp
-        /*if ((a.isConst() && b.isConst()) && (!a.getType().isBool() || !b.getType().isBool())) {
-            if (o.isComparison()) {
-                String res = result.getBoolValue() == true ? "1" : "0";
-                writeAssembly(TWO_PARAM, SET_OP, res, O0);
-                writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
-                writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(andorskipcnt)));
-                writeAssembly(NOP_OP);
-            }
-            return;
-        }*/
         if(!func){
             return;
         }
@@ -415,13 +403,15 @@ public class AssemblyCodeGenerator {
         if (a.getType().isBool() && b.getType().isBool()) {
             andorskipcnt++;
             if(o.getName() == "&&" || o.getName() == "||"){
-                if (a.isConst()) {
-                    writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
-                } else {
-                    writeCallStored(a, 0);
+                if(!b.isFunc()){
+                    if (a.isConst()) {
+                        writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
+                    } else {
+                        writeCallStored(a, 0);
+                    }
+                    cmpbenop("andorSkip");
+                    newline();
                 }
-                cmpbenop("andorSkip");
-                newline();
 
                 if (b.isConst()) {
                     writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O0);
@@ -806,7 +796,8 @@ public class AssemblyCodeGenerator {
             }
             else{
                 newline();
-                setaddld(O0, iString(sto.getSparcOffset()));
+                //setaddld(O0, iString(sto.getSparcOffset()));
+                writeCallStored(sto, 0);
             }
         }else{
             setaddld(O0, sto.getName()); // might need to fix //not sure its for which case?
@@ -819,7 +810,7 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
-    public void writeIfClose(STO sto) {
+    public void writeBeforeElse(STO sto){
         newline();
         funcIndent();
         increaseIndent();
@@ -832,9 +823,18 @@ public class AssemblyCodeGenerator {
         writeAssembly(BASIC_FIN_NL, "else", iString(sto.ifcounter));
         newline();
 
+        
+        decreaseIndent();
+        newline();
+    }
+    public void writeIfClose(STO sto) {
+        newline();
+        funcIndent();
+        decreaseIndent();
         writeAssembly("\t! endif\n");
         writeAssembly(BASIC_FIN_NL, "endif", iString(sto.ifcounter));
-        decreaseIndent();
+        funcDedent();
+        increaseIndent();
         newline();
 
     }
