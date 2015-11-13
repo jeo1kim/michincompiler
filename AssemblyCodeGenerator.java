@@ -385,7 +385,7 @@ public class AssemblyCodeGenerator {
         funcIndent();
 
         //String comment = "! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")";
-        writeAssembly("! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")");
+        writeAssembly("! (" + a.getName() + ")" + checkmod(o.getName()) + "(" + b.getName() + ")");
         newline();
 
 
@@ -1246,7 +1246,9 @@ public class AssemblyCodeGenerator {
             setAddLoad(sto);
         } else if (sto.getType() == null) {
             writeConstFloat(sto);
-            writeAssembly("! cout << " + sto.getName() + "\n");
+            String mod = checkmod(sto.getName());
+            writeAssembly("! cout << "+mod);
+            newline();
             writeAssembly(TWO_PARAM, SET_OP, strFmt, O0);
             writeAssembly(TWO_PARAM, SET_OP, ".$$.str." + iString(strFmtCnt), O1);
             call("printf");
@@ -1258,6 +1260,12 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
+    public String checkmod(String sto){
+        if(sto.contains("%")){
+            return sto.replace("%", "%%");
+        }
+        return sto;
+    }
     public void callCout(STO sto) {
 
 
