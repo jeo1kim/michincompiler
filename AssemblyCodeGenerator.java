@@ -385,12 +385,13 @@ public class AssemblyCodeGenerator {
         funcIndent();
 
         //String comment = "! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")";
-        writeAssembly("! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")");
+        //writeAssembly("! (" + a.getName() + ")" + o.getName() + "(" + b.getName() + ")");
         newline();
 
 
+        //IF case already taken care in writeif func no need commenting out until the need is found 
         //if both is const set and cmp
-        if ((a.isConst() && b.isConst()) && (!a.getType().isBool() || !b.getType().isBool())) {
+        /*if ((a.isConst() && b.isConst()) && (!a.getType().isBool() || !b.getType().isBool())) {
             if (o.isComparison()) {
                 String res = result.getBoolValue() == true ? "1" : "0";
                 writeAssembly(TWO_PARAM, SET_OP, res, O0);
@@ -399,7 +400,11 @@ public class AssemblyCodeGenerator {
                 writeAssembly(NOP_OP);
             }
             return;
+        }*/
+        if(!func){
+            return;
         }
+        //writeAssembly("here???");
 
         decreaseOffset();
         result.setSparcOffset(getOffset());
@@ -507,7 +512,7 @@ public class AssemblyCodeGenerator {
             }
             iffloat = true;
         } else {
-
+            //writeAssembly("/////////////////binary");
             writeCallStored(a, 0);
             writeCallStored(b, 1);
         }
@@ -741,7 +746,7 @@ public class AssemblyCodeGenerator {
         } else {
             writeAssembly(TWO_PARAM, CMP_OP, reg1, reg2);
         }
-
+        //writeAssembly("///////////////////");
         writeAssembly(ONE_PARAM, opname, String.format(CMP_COUNTER, iString(cmpcounter)));
 
         writeAssembly(TWO_PARAM, MOV_OP, G0, O0);
