@@ -217,11 +217,12 @@ public class AssemblyCodeGenerator {
 
     private static final String var_comment = "! %s = %s\n";
     private static final String var_comment_op = "! %s, %s\n";
-    private int floatcounter = 0;
-    private int cmpcounter = 0;
-    private int ifcounter = 0;
-    private int strFmtCnt = 0;
-    private int andorskipcnt = 0;
+    private int floatcounter = 0; //count number of float
+    private int cmpcounter = 0;  //count cmp
+    private int ifcounter = 0;  //count how many if is called
+    private int strFmtCnt = 0;  
+    private int andorskipcnt = 0;  //count how many and & or are there
+    private int loopcounter = 0; //count how many loops are there 
     private boolean func = false;
     private boolean arithmetic = false;
 
@@ -574,8 +575,6 @@ public class AssemblyCodeGenerator {
         /*writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
         writeAssembly(ONE_PARAM, BE_OP, String.format(BASIC_FIN, "else", iString(andorskipcnt)));
         writeAssembly(NOP_OP);*/
-
-
     }
 
     //for incdecrxpr
@@ -782,6 +781,36 @@ public class AssemblyCodeGenerator {
         newline();
         funcDedent();
 
+    }
+
+    public void writeLoopStart(String loopname){
+        loopcounter++;
+        funcIndent();
+        decreaseIndent();
+        writeAssembly(BASIC_FIN_NL, "loopcheck", iString(loopcounter));
+
+        funcDedent();
+    }
+    public void writeWhileCase(STO sto){
+        sto.loopcounter = loopcounter;
+
+    }
+    public void writeWhileClose(STO sto){
+        newline();
+        funcIndent();
+        increaseIndent();
+        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopCheck", iString(sto.loopcounter)));
+        writeAssembly(NOP_OP);
+        newline();
+        funcDedent();
+        increaseIndent();
+        writeAssembly("\t! else\n");
+        writeAssembly(BASIC_FIN_NL, "loopEnd", iString(sto.loopcounter));
+        newline();
+
+        
+        decreaseIndent();
+        newline();
     }
 
     public void writeIfCase(STO sto) {

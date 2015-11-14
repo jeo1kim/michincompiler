@@ -1281,6 +1281,9 @@ class MyParser extends parser {
         return sto.getType();
     }
 
+    void DoLoopStart(String loopname){
+        ag.writeLoopStart(loopname);
+    }
     void DoBeforeElse(STO sto){
         ag.writeBeforeElse(sto);
     }
@@ -1291,6 +1294,9 @@ class MyParser extends parser {
 
     }
 
+    void DoWhileClose(STO sto){
+        ag.writeWhileClose(sto);
+    }
     void DoCout(Vector<STO> cout){
 
     }
@@ -1308,7 +1314,7 @@ class MyParser extends parser {
         ag.writeCoutClose();
     }
 
-    STO DoConditionCheck(STO condition) {
+    STO DoConditionCheck(STO condition, String stmtname) {
         Type conType = condition.getType();
         if (condition.isError()) {
             return condition;
@@ -1319,7 +1325,12 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error4_Test, conType.getName()));
             return new ErrorSTO(condition.getName());
         }
-        ag.writeIfCase(condition);
+        if(stmtname == "if"){
+            ag.writeIfCase(condition);
+        }
+        if(stmtname == "while"){
+            ag.writeWhileCase(condition);
+        }
         return condition;
     }
 
