@@ -1300,6 +1300,10 @@ class MyParser extends parser {
 
     }
 
+    void DoIn(STO sto){
+        ag.writeCin(sto);
+    }
+
     void DoCoutClose(){
         ag.writeCoutClose();
     }

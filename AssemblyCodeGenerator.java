@@ -804,6 +804,7 @@ public class AssemblyCodeGenerator {
     }
 
 
+
     public void setAddLoad(STO init) {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
@@ -1295,6 +1296,23 @@ public class AssemblyCodeGenerator {
             call("printf");
             return;
         }
+    }
+
+    public void writeCin(STO sto){
+        Type stype = sto.getType();
+        String register = sto.getType().isFloat() ? f0 : O1; // check for float f0 or o0
+
+
+        newline();
+        writeAssembly("! cin >> "+sto.getName()+"\n");
+        if(stype.isInt()){
+            call("inputInt");
+        }
+        else if(stype.isFloat()){
+            call("inputFloat");
+        }
+        setaddst(register, iString(sto.getSparcOffset()));
+
     }
 
     public int oreg;
