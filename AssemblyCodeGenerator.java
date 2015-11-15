@@ -1190,7 +1190,7 @@ public class AssemblyCodeGenerator {
             writeCallStored(init, 0);
             if(unary == "-"){
                 if(des.getType().isFloat()){
-                    writeAssembly(TWO_PARAM, "fneg\t", O0, O0);
+                    writeAssembly(TWO_PARAM, "fnegS\t", O0, O0);
 
                 }else {
                     writeAssembly(TWO_PARAM, NEG_OP, O0, O0);
