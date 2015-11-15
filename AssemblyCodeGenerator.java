@@ -95,7 +95,7 @@ public class AssemblyCodeGenerator {
     private static final String BW_OR_OP = "or    \t";
     private static final String XOR_OP = "xor    \t";
 
-    private static final String FADD_OP = "fadds   \t";
+    private static final String FADD_OP = "fadds  \t";
     private static final String FSUB_OP = "fsubs   \t";
     private static final String FMUL_OP = "fmuls   \t";
     private static final String FDIV_OP = "fdivs   \t";
