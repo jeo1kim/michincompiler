@@ -1191,14 +1191,16 @@ public class AssemblyCodeGenerator {
             if(unary == "-"){
                 if(des.getType().isFloat()){
                     writeAssembly(TWO_PARAM, "fnegS\t", O0, O0);
+                    setaddst(f0, iString(des.getSparcOffset()));
 
                 }else {
                     writeAssembly(TWO_PARAM, NEG_OP, O0, O0);
+                    setaddst(O0, iString(des.getSparcOffset()));
                 }
             } else{
                 writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
+                setaddst(O0, iString(des.getSparcOffset()));
             }
-            setaddst(O0, iString(des.getSparcOffset()));
         //}
         funcDedent();
     }
