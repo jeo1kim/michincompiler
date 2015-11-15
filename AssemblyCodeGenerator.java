@@ -1189,9 +1189,13 @@ public class AssemblyCodeGenerator {
         des.setSparcOffset(getOffset());
             writeCallStored(init, 0);
             if(unary == "-"){
-                writeAssembly(TWO_PARAM, NEG_OP, O0, O0);
-            }
-            else{
+                if(des.getType().isFloat()){
+                    writeAssembly(TWO_PARAM, "fneg\t", O0, O0);
+
+                }else {
+                    writeAssembly(TWO_PARAM, NEG_OP, O0, O0);
+                }
+            } else{
                 writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
             }
             setaddst(O0, iString(des.getSparcOffset()));
