@@ -512,6 +512,8 @@ public class AssemblyCodeGenerator {
             writeCallStored(b, 1);
         }
 
+        System.err.println(a.getValue());
+        System.err.println(b.getValue());
         String register = iffloat ? f0 : O0;
         increaseIndent();
         writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
@@ -621,6 +623,7 @@ public class AssemblyCodeGenerator {
         if (!iffloat) {
             switch (opname) {
                 case "+":
+
                     writeArithmetic(ADD_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "-":
@@ -1190,7 +1193,7 @@ public class AssemblyCodeGenerator {
             writeCallStored(init, 0);
             if(unary == "-"){
                 if(des.getType().isFloat()){
-                    writeAssembly(TWO_PARAM, "fnegS\t", O0, O0);
+                    writeAssembly(TWO_PARAM, "fnegs\t", f0, f0);
                     setaddst(f0, iString(des.getSparcOffset()));
 
                 }else {
