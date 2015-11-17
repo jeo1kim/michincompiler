@@ -95,7 +95,7 @@ public class AssemblyCodeGenerator {
     private static final String BW_OR_OP = "or    \t";
     private static final String XOR_OP = "xor    \t";
 
-    private static final String FADD_OP = "fadds   \t";
+    private static final String FADD_OP = "fadds  \t";
     private static final String FSUB_OP = "fsubs   \t";
     private static final String FMUL_OP = "fmuls   \t";
     private static final String FDIV_OP = "fdivs   \t";
@@ -537,7 +537,12 @@ public class AssemblyCodeGenerator {
                 writeCallStored(b, 1);
             }
 
+
         }            
+
+        //System.err.println(a.getValue());
+        //System.err.println(b.getValue());
+
         String register = iffloat ? f0 : O0;
         increaseIndent();
         writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
@@ -646,6 +651,7 @@ public class AssemblyCodeGenerator {
         if (!iffloat) {
             switch (opname) {
                 case "+":
+
                     writeArithmetic(ADD_OP, register, resoffset, O0, O1, O0);
                     break;
                 case "-":
@@ -867,6 +873,7 @@ public class AssemblyCodeGenerator {
         newline();
 
     }
+
 
 
     public void setAddLoad(STO init) {
@@ -1250,12 +1257,18 @@ public class AssemblyCodeGenerator {
         des.setSparcOffset(getOffset());
             writeCallStored(init, 0);
             if(unary == "-"){
-                writeAssembly(TWO_PARAM, NEG_OP, O0, O0);
-            }
-            else{
+                if(des.getType().isFloat()){
+                    writeAssembly(TWO_PARAM, "fnegs\t", f0, f0);
+                    setaddst(f0, iString(des.getSparcOffset()));
+
+                }else {
+                    writeAssembly(TWO_PARAM, NEG_OP, O0, O0);
+                    setaddst(O0, iString(des.getSparcOffset()));
+                }
+            } else{
                 writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
+                setaddst(O0, iString(des.getSparcOffset()));
             }
-            setaddst(O0, iString(des.getSparcOffset()));
         //}
         funcDedent();
     }
@@ -1352,6 +1365,23 @@ public class AssemblyCodeGenerator {
             call("printf");
             return;
         }
+    }
+
+    public void writeCin(STO sto){
+        Type stype = sto.getType();
+        String register = sto.getType().isFloat() ? f0 : O1; // check for float f0 or o0
+
+
+        newline();
+        writeAssembly("! cin >> "+sto.getName()+"\n");
+        if(stype.isInt()){
+            call("inputInt");
+        }
+        else if(stype.isFloat()){
+            call("inputFloat");
+        }
+        setaddst(register, iString(sto.getSparcOffset()));
+
     }
 
     public int oreg;
