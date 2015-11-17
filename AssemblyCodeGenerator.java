@@ -1084,10 +1084,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", reg);
     }
 
-
     public void writeReturn(STO init, STO func) {
-
-
         String val = stoValue(init); // stoVal gets teh value of sto.
         String register = init.getType().isFloat() ? f0 : I0; // check for float f0 or o0
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
