@@ -1005,15 +1005,20 @@ class MyParser extends parser {
         }
 
         ExprSTO ret = new ExprSTO(sto.getName(), func.getType());
+        int count = 0;
+        for(STO i : argTyp){
+            ag.writeFuncCallParam(i, count);
+            count++;
+        }
         // check if func sto was called by ref and assign R val or mod l val
         if (func.isRef()) {
             ret.markModVal();
             ret.setRef(true);
-            ag.writeFuncCall(ret);
+            ag.writeFuncCall(ret, sto);
             return ret;
         } else if (!func.isRef()) {
             ret.markRVal();
-            ag.writeFuncCall(ret);
+            ag.writeFuncCall(ret, sto);
             return ret;
 
         }
@@ -1022,7 +1027,7 @@ class MyParser extends parser {
 
     }
 
-    STO DoSizeOf(Type type, Vector<STO> array ){ // array hold constant lit sto
+    STO DoSizeOf(Type type, Vector<STO> array){ // array hold constant lit sto
         ConstSTO ret;
         int size = type.getSize();
 
@@ -1235,22 +1240,21 @@ class MyParser extends parser {
         if (m_symtab.getStruct() != null) {
             if ((sto = m_symtab.accessLocal(strID)) == null) {
                 if ((sto = m_symtab.accessGlobal(strID)) == null) {
-
                     m_nNumErrors++;
                     m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
                     sto = new ErrorSTO(strID);
-
+                
                 }
             }
         }
         else if ((sto = m_symtab.access(strID)) == null) {
-
             m_nNumErrors++;
             m_errors.print(Formatter.toString(ErrorMsg.undeclared_id, strID));
             sto = new ErrorSTO(strID);
-        }
-        //System.err.println(sto.getType().getName() + sto.getName());
 
+        }
+        //System.err.println(sto.getName() + sto.getSparcOffset());
+        //System.err.println(sto.getType().getName() + sto.getName());
         return sto;
     }
 
@@ -1281,12 +1285,22 @@ class MyParser extends parser {
         return sto.getType();
     }
 
+    void DoLoopStart(String loopname){
+        ag.writeLoopStart(loopname);
+    }
+    void DoBeforeElse(STO sto){
+        ag.writeBeforeElse(sto);
+    }
+
     void DoIfClose(STO sto){
         // optElse is true is there is an else stmt
         ag.writeIfClose(sto);
 
     }
 
+    void DoWhileClose(STO sto){
+        ag.writeWhileClose(sto);
+    }
     void DoCout(Vector<STO> cout){
 
     }
@@ -1308,7 +1322,7 @@ class MyParser extends parser {
         ag.writeCoutClose();
     }
 
-    STO DoConditionCheck(STO condition) {
+    STO DoConditionCheck(STO condition, String stmtname) {
         Type conType = condition.getType();
         if (condition.isError()) {
             return condition;
@@ -1319,7 +1333,12 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error4_Test, conType.getName()));
             return new ErrorSTO(condition.getName());
         }
-        ag.writeIfCase(condition);
+        if(stmtname == "if"){
+            ag.writeIfCase(condition);
+        }
+        if(stmtname == "while"){
+            ag.writeWhileCase(condition);
+        }
         return condition;
     }
 
@@ -1635,7 +1654,10 @@ class MyParser extends parser {
         //if assignable to int then return expr
         // double check what to return when you exit
         ExprSTO sto = new ExprSTO(a.getName());
+        sto.setSparcOffset(a.getSparcOffset());
+
         ag.writeExitExpr(sto);
+        
         return sto;
     }
 
@@ -1679,6 +1701,7 @@ class MyParser extends parser {
         ExprSTO ret = new ExprSTO(expr.getName(), ptr);
         ret.markRVal();
         ret.setRef(true);
+
         return ret;
     }
 

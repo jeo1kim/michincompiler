@@ -46,6 +46,9 @@ abstract class ComparisonOp extends BinaryOp {
             if (a.isConst() && b.isConst())
             {
                 int result = calculate(a.getValue(), b.getValue(),opName);
+                if(result == -1){
+                    result = 0;
+                }
                 ConstSTO ret = new ConstSTO( a.getName()+ getName() + b.getName() , new BoolType(), result);
                 ret.markRVal();
                 return ret;
@@ -65,13 +68,20 @@ abstract class ComparisonOp extends BinaryOp {
         int result = 9999999;
 
         switch (opname) {
-            case "<": result = a.compareTo(b);
+            case "<": result = b.compareTo(a);
                 break;
-            case "<=": result =  a.compareTo(b);
+            case "<=": 
+                result = b.compareTo(a);
+                if(result == 0){
+                    result = 1;
+                }
                 break;
             case ">": result = a.compareTo(b);
                 break;
             case ">=": result = a.compareTo(b);
+                if(result == 0){
+                    result = 1;
+                }
                 break;
         }
 
