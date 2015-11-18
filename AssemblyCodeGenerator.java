@@ -838,7 +838,7 @@ public class AssemblyCodeGenerator {
         loopcounter++;
         funcIndent();
         decreaseIndent();
-        writeAssembly(BASIC_FIN_NL, "loopcheck", iString(loopcounter));
+        writeAssembly(BASIC_FIN_NL, "loopCheck", iString(loopcounter));
 
         funcDedent();
     }
@@ -1169,7 +1169,8 @@ public class AssemblyCodeGenerator {
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
         }
-        call(String.format(FINI_FUNC, func.getName(), "void"));
+        String param = paramtypelist(func);
+        call(String.format(FINI_FUNC, func.getName(), param));
         retRest();
         funcDedent();
         newline();
