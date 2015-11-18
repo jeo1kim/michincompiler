@@ -842,10 +842,32 @@ public class AssemblyCodeGenerator {
 
         funcDedent();
     }
+
     public void writeWhileCase(STO sto){
         sto.loopcounter = loopcounter;
 
+        funcIndent();
+        writeAssembly("! Check Loop Condition\n");
+        if(sto.getType().isBool()){
+            if(sto.isConst()){
+                writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), O0);
+            }
+            else{
+                newline();
+                //setaddld(O0, iString(sto.getSparcOffset()));
+                writeCallStored(sto, 0);
+            }
+        }else{
+            setaddld(O0, sto.getName()); // might need to fix //not sure its for which case?
+        }
+
+        writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
+        writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "loopEnd", iString(sto.loopcounter)));
+        writeAssembly(NOP_OP);
+        newline();
+        funcDedent();
     }
+
     public void writeWhileClose(STO sto){
         newline();
         funcIndent();
@@ -868,6 +890,7 @@ public class AssemblyCodeGenerator {
         ifcounter++;
         sto.ifcounter = ifcounter;
         funcIndent();
+        writeAssembly("! if condition\n");
         // might need to fix
         // fix for bool: need to print offset if it is bool comparison
         if(sto.getType().isBool()){
