@@ -70,10 +70,10 @@ public abstract class ArithmeticOp extends BinaryOp {
         else{
             // case where one of the expression is not a Const
             STO c = !(aType instanceof intType) ? a : b;
-            BigDecimal result = calculate(a.getValue(), b.getValue(), opName);
+            //BigDecimal result = calculate(a.getValue(), b.getValue(), opName);
             ExprSTO ret = new ExprSTO(a.getName()+b.getName(), c.getType());
             ret.markRVal();
-            ret.setValue(result);
+            //ret.setValue(result);
             return ret;
         }
     }
