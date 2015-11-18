@@ -127,8 +127,8 @@ public class AssemblyCodeGenerator {
     private static final String GL_AUTO_FINI = ".$.init.%s.fini";
 
     //private static final String SAVE_MAIN = "SAVE.%s.void";
-    private static final String SAVE_FUNC = "SAVE.%s.void";
-    private static final String FINI_FUNC = "%s.%s.fini";
+    private static final String SAVE_FUNC = "SAVE.%s%s";
+    private static final String FINI_FUNC = "%s%s.fini";
 
     private static final String NL = "\n";
     /*
@@ -262,30 +262,51 @@ public class AssemblyCodeGenerator {
         }
     }
 
-    public void writeFuncCall(STO func){
+    public void writeFuncCall(STO newex, STO oldfunc){
+        funcIndent();
+        writeAssembly("! "+ newex.getName()+"(...)\n");
+        String param = paramtypelist(oldfunc);
+        //decreaseOffset();
+        //newex.setSparcOffset(offset);
+        //setaddst(O0, iString(offset));
+        call(newex.getName() + param);
+        funcDedent();
+    }
 
+    public void writeFuncCallParam(STO sto, int count){
         newline();
-        writeAssembly("! "+func.getName()+"(...)\n");
-        call(func.getName() + ".void");
-        decreaseOffset();
-        func.setSparcOffset(offset);
-        setaddst(O0, iString(offset));
-
+        funcIndent();
+        writeAssembly("! "+ sto.getName()+"\n");
+        if(sto.isRef()){
+            setadd(sto, count);
+        }
+        else if(sto.isConst()){
+            if(sto.getType().isFloat()){
+                writeConstFloat(sto);
+                writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
+            }
+            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
+        }
+        else {
+            setaddld("%o"+iString(count), iString(sto.getSparcOffset()));
+        }
+        funcDedent();
     }
 
 
     public void writeCloseFunc(STO sto) {
         increaseIndent();
-        call(String.format(FINI_FUNC, sto.getName(), "void"));
+        String param = paramtypelist(sto);
+        call(String.format(FINI_FUNC, sto.getName(), param));
         retRest();
 
         int posoffset = Math.abs(getOffset());
-        writeAssembly("%s %s\n", String.format(SAVE_FUNC, sto.getName()), String.format(OFFSET_TOTAL, iString(posoffset)));
+        writeAssembly("%s %s\n", String.format(SAVE_FUNC, sto.getName(), param), String.format(OFFSET_TOTAL, iString(posoffset)));
 
         decreaseIndent();
         indent_level = 0;
         writeAssembly(NL);
-        writeAssembly(FINI_FUNC, sto.getName(), "void");
+        writeAssembly(FINI_FUNC, sto.getName(), param);
         writeAssembly(":\n");
         increaseIndent();
         int add = -92 + getOffset();
@@ -307,14 +328,38 @@ public class AssemblyCodeGenerator {
         writeAssembly(GLOBAL, name);
         decreaseIndent();
         writeAssembly(VARCOLON, name);
-        String funcvoid = name + ".void";
+
+        //void if there is no parameter 
+        String param = paramtypelist(sto);
+
+        String funcvoid = name + param;
         writeAssembly(VARCOLON, funcvoid);
 
         increaseIndent();
-        writeAssembly(TWO_PARAM, SET_OP, String.format(SAVE_FUNC, name), "%g1");
+        writeAssembly(TWO_PARAM, SET_OP, String.format(SAVE_FUNC, name, param), "%g1");
         writeAssembly(THREE_PARAM, SAVE_OP, SP, "%g1", SP);
+        writeAssembly(NL);
+
+        //void if there is no parameter
+        if(sto.getParamVec() != null){
+            Vector<STO> paramlist = sto.getParamVec();
+            int count = 0;
+            int valplace = 68;
+            for(STO i : paramlist){
+                if(i.getType().isFloat()){
+                    writeAssembly(TWO_PARAM, ST_OP, "%f"+iString(count), "["+FP+"+"+iString(valplace)+"]");
+                }
+                else{
+                    writeAssembly(TWO_PARAM, ST_OP, "%i"+iString(count), "["+FP+"+"+iString(valplace)+"]");
+
+                }
+                count++;
+                valplace += 4;
+            }
+        }
         decreaseIndent();
         writeAssembly(NL);
+
 
         decreaseIndent();
         //decreaseIndent();
@@ -916,6 +961,17 @@ public class AssemblyCodeGenerator {
         writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");
     }
 
+    //simple function used in designator_dot 3 funccall when made
+    public void setadd(STO sto, int count){
+        String off = sto.isGlobal() ? sto.getName() : iString(sto.getSparcOffset());
+        String globalreg = sto.getSparcBase() == "%g0" ? G0 : FP;
+        String valplace =  "%o"+iString(count);
+
+        writeAssembly(TWO_PARAM, SET_OP, off, valplace);
+        writeAssembly(THREE_PARAM, ADD_OP, globalreg, valplace, valplace);
+        newline();
+    }
+
     //setaddload
     public void writeCallStored(STO init, int x) {
         String val = stoValue(init); // stoVal gets teh value of sto.
@@ -1273,7 +1329,21 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
-
+    public String paramtypelist(STO sto){
+        String param = "";
+        //void if there is no parameter
+        if(sto.getParamVec().size() != 0){
+            Vector<STO> paramlist = sto.getParamVec();
+            for(STO i : paramlist){
+                param += ".";
+                param += i.getType().getName();
+            }       
+        }
+        else{
+            param = ".void";
+        }
+        return param;
+    }
     public void call(String name) {
         writeAssembly(ONE_PARAM, CALL_OP, name);
         writeAssembly(NOP_OP);
