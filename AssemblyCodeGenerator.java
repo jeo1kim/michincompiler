@@ -199,6 +199,8 @@ public class AssemblyCodeGenerator {
     private static final String strEndl = ".$$.strEndl";
     private static final String strArrBound = ".$$.strArrBound";
     private static final String strNullPtr = ".$$.strNullPtr";
+    private static final String arrCheckCall = ".$$.arrCheck";
+    private static final String ptrCheckCall = ".$$.ptrCheck";
 
     private static final String printBool = ".$$.printBool:\n";
     private static final String printBool2 = ".$$.printBool2:\n";
@@ -223,6 +225,7 @@ public class AssemblyCodeGenerator {
     private int strFmtCnt = 0;  
     private int andorskipcnt = 0;  //count how many and & or are there
     private int loopcounter = 0; //count how many loops are there 
+    private int arraycounter = 0; //count number of arrays
     private boolean func = false;
     private boolean arithmetic = false;
 
@@ -395,7 +398,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(String.format(var_comment, sName, iName));
         //writeAssembly("current offset in Assign: %s\n", iString(getOffset()));
 
-
+        writeAssembly("! %s\n", iName);
         if (expr.isConst()) {
             writeAssigntmentSto(stoDes);
 
@@ -1200,7 +1203,51 @@ public class AssemblyCodeGenerator {
         funcDedent();
         newline();
     }
+    public void writeArrayDeclLocal(STO stoDes, STO expr, STO sto){
 
+        int size = sto.getType().getSize();
+        int tempsize = size*4;
+        funcIndent();
+        writeAssembly("! %s[%s]\n", stoDes.getName(), iString(0));
+        writeAssembly(TWO_PARAM, SET_OP, iString(stoDes.getIntValue()), O0);
+        writeAssembly(TWO_PARAM, SET_OP, iString(size), O1);
+        call(arrCheckCall);
+        writeAssembly(TWO_PARAM, SET_OP, "4", O1);
+        call(MUL_OP);
+        writeAssembly(TWO_PARAM, MOV_OP, O0, O1);
+        //writeAssembly(".............");
+
+        writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()), O0);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
+        call(ptrCheckCall);
+        writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O0);
+        decreaseOffset();
+        stoDes.setSparcOffset(getOffset());
+        setaddst(O0, iString(stoDes.getSparcOffset()));
+        newline();
+        funcDedent();
+    
+        
+    }
+    public void writeArrayDeclGlobal(STO sto, Vector<STO> array, Type temp){
+        int size = temp.getSize();
+        int tempsize = size*4;
+        if (sto.isStatic() || sto.isGlobal()) {
+            increaseIndent();
+            sectionAlign(BSS_SEC, "4");
+            writeAssembly(GLOBAL, sto.getName());
+            decreaseIndent();
+            writeAssembly(VARCOLON, sto.getName());
+            increaseIndent();
+   
+            writeAssembly(SKIP, iString(tempsize));
+            sectionAlign(TEXT_SEC, "4");
+            decreaseIndent();
+
+        }
+        this.offset -= tempsize;
+        sto.setSparcOffset(getOffset());
+    }
 
     //TODO: take care of when init not there too
     public void writeLocalVariable(STO sto, STO init) {

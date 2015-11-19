@@ -389,6 +389,9 @@ class MyParser extends parser {
             temp = DoArrayType(array, typ, arrType, 0);
 
             ret.setType(temp);
+            //System.err.println("temp type: "+temp.getName());
+            //System.err.println("temp type base: "+temp.getBaseType().getName());
+
             ret.markModLVal();
             ret.setStatic(stat);
 //            if(m_symtab.isGlobalScope()){
@@ -396,7 +399,7 @@ class MyParser extends parser {
 //                System.err.println(ret.getName()+ret.isGlobal());
 //            }
             m_symtab.insert(ret);
-            ag.writeVariable(sto, init);
+            ag.writeArrayDeclGlobal(ret, array, temp);
             return;
         } else {
 //            if(m_symtab.isGlobalScope()){
@@ -867,6 +870,7 @@ class MyParser extends parser {
         }
         //error3b_Assign ="Value of type %T not assignable to variable of type %T.";
         ////////
+        //System.err.println("temp type: "+stoDes.getType().getName());
         ag.writeAssignExprVariable(stoDes, expr);
         return stoDes;
     }
@@ -1229,6 +1233,7 @@ class MyParser extends parser {
 
         VarSTO ret = new VarSTO(sto.getName(), sto.getType().getNextType());
         ret.setValue(expr.getValue());
+        ag.writeArrayDeclLocal(ret, expr, sto);
         return ret;
     }
 
