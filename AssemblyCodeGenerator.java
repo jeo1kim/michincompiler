@@ -266,10 +266,12 @@ public class AssemblyCodeGenerator {
         funcIndent();
         writeAssembly("! "+ newex.getName()+"(...)\n");
         String param = paramtypelist(oldfunc);
-        //decreaseOffset();
-        //newex.setSparcOffset(offset);
-        //setaddst(O0, iString(offset));
         call(newex.getName() + param);
+        if(!((FuncSTO)oldfunc).getReturnType().isVoid()){
+            decreaseOffset();
+            newex.setSparcOffset(offset);
+            setaddst(O0, iString(offset));
+        }
         funcDedent();
     }
 
