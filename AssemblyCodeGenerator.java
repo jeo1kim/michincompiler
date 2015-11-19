@@ -273,7 +273,11 @@ public class AssemblyCodeGenerator {
         if(!((FuncSTO)oldfunc).getReturnType().isVoid()){
             decreaseOffset();
             newex.setSparcOffset(offset);
-            setaddst(O0, iString(offset));
+            if(newex.getType().isFloat()){
+                setaddst(f0, iString(offset));
+            }else{
+                setaddst(O0, iString(offset));
+            }
         }
         funcDedent();
     }
