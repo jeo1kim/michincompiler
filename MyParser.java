@@ -1233,6 +1233,7 @@ class MyParser extends parser {
 
         VarSTO ret = new VarSTO(sto.getName(), sto.getType().getNextType());
         ret.setValue(expr.getValue());
+        ret.setisArray();
         ag.writeArrayDeclLocal(ret, expr, sto);
         return ret;
     }

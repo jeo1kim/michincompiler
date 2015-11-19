@@ -358,6 +358,7 @@ public class AssemblyCodeGenerator {
                     writeAssembly(TWO_PARAM, ST_OP, "%i"+iString(count), "["+FP+"+"+iString(valplace)+"]");
 
                 }
+                i.setSparcOffset(valplace);
                 count++;
                 valplace += 4;
             }
@@ -399,7 +400,7 @@ public class AssemblyCodeGenerator {
         //writeAssembly("current offset in Assign: %s\n", iString(getOffset()));
 
         writeAssembly("! %s\n", iName);
-        if (expr.isConst()) {
+        if (expr.isConst() && !(stoDes.getisArray())) {
             writeAssigntmentSto(stoDes);
 
             if (expr.getType().isFloat()) {  // if its not auto and float
@@ -413,8 +414,12 @@ public class AssemblyCodeGenerator {
         } else if ((desoffset = stoDes.getSparcOffset()) != 0) {
 
             val = stoValue(expr); // stoVal gets teh value of sto.
+           
             writeAssembly(TWO_PARAM, SET_OP, iString(desoffset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+            if(stoDes.getisArray()){
+                writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);
+            }
             writeInit(stoDes, expr);
 
         } else {
@@ -948,7 +953,7 @@ public class AssemblyCodeGenerator {
     }
 
 
-
+    //used in cout
     public void setAddLoad(STO init) {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
@@ -1029,7 +1034,13 @@ public class AssemblyCodeGenerator {
             } else {
                 writeAssembly(TWO_PARAM, SET_OP, val, register);
             }
-        } else {
+        }else if(init.getisArray()){
+            writeAssembly(TWO_PARAM, SET_OP, global, L7);
+            writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", L7);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+        } 
+        else {
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
@@ -1208,12 +1219,13 @@ public class AssemblyCodeGenerator {
         funcDedent();
         newline();
     }
+
     public void writeArrayDeclLocal(STO stoDes, STO expr, STO sto){
 
         int size = sto.getType().getSize();
         int tempsize = size*4;
         funcIndent();
-        writeAssembly("! %s[%s]\n", stoDes.getName(), iString(0));
+        writeAssembly("! %s[%s]\n", stoDes.getName(), expr.getName());
         if(expr.isConst()){
             //System.out.print("int inside val: "+iString(expr.getIntValue()));
             writeAssembly(TWO_PARAM, SET_OP, iString(expr.getIntValue()), O0);
@@ -1476,7 +1488,11 @@ public class AssemblyCodeGenerator {
                 callCout(sto);
                 return;
             }
-            setAddLoad(sto);
+            if(sto.getisArray()){
+                writeCallStored(sto, 0);
+            }else{
+                setAddLoad(sto);
+            }
         } else if (sto.getType() == null) {
             writeConstFloat(sto);
             String mod = checkmod(sto.getName());
