@@ -829,6 +829,9 @@ class MyParser extends parser {
                 m_errors.print(ErrorMsg.error12_Continue);
                 return;
             }
+        } else {           
+            ag.writeBreakOrCon(borc, size);
+
         }
     }
 

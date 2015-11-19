@@ -1352,7 +1352,12 @@ public class AssemblyCodeGenerator {
         //}
         funcDedent();
     }
-
+    public void writeBreakOrCon(String loopname, int size){
+        funcIndent();
+        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopEnd", iString(size)));
+        writeAssembly(NOP_OP);
+        funcDedent();
+    }
     public String paramtypelist(STO sto){
         String param = "";
         //void if there is no parameter
