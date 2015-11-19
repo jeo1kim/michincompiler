@@ -1429,7 +1429,11 @@ public class AssemblyCodeGenerator {
     }
     public void writeBreakOrCon(String loopname, int size){
         funcIndent();
-        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopEnd", iString(size)));
+        if(loopname.equals("break")){
+            writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopEnd", iString(size)));
+        }else{
+            writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopCheck", iString(size)));
+        }
         writeAssembly(NOP_OP);
         funcDedent();
     }
