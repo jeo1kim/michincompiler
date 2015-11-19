@@ -229,6 +229,7 @@ public class AssemblyCodeGenerator {
     private boolean func = false;
     private boolean arithmetic = false;
 
+    private int ploopcounter = 0; //for break and continue;
 
     public AssemblyCodeGenerator(String fileToWrite) {
         try {
@@ -859,7 +860,7 @@ public class AssemblyCodeGenerator {
 
     public void writeWhileCase(STO sto){
         sto.loopcounter = loopcounter;
-
+        ploopcounter = sto.loopcounter;
         funcIndent();
         writeAssembly("! Check Loop Condition\n");
         if(sto.getType().isBool()){
@@ -895,7 +896,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(BASIC_FIN_NL, "loopEnd", iString(sto.loopcounter));
         newline();
 
-        
+        ploopcounter--;
         decreaseIndent();
         newline();
     }
@@ -1430,11 +1431,12 @@ public class AssemblyCodeGenerator {
     public void writeBreakOrCon(String loopname, int size){
         funcIndent();
         if(loopname.equals("break")){
-            writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopEnd", iString(size)));
+            writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopEnd", iString(ploopcounter)));
         }else{
-            writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopCheck", iString(size)));
+            writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopCheck", iString(ploopcounter)));
         }
         writeAssembly(NOP_OP);
+        //loopcounter--;
         funcDedent();
     }
     public String paramtypelist(STO sto){
