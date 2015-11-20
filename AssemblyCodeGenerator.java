@@ -1500,7 +1500,6 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeCout(STO sto) {
-
         Vector<String> st = prepSTO(sto);
 
         funcIndent();
@@ -1511,6 +1510,8 @@ public class AssemblyCodeGenerator {
             if (sto.isConst()) {
                 if(sto.getType().isFloat()){
                     writeConstFloat(sto);
+                }else if(sto.getType().isBool()){
+                    writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O0);
                 }else {
                     writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O1);
                 }
@@ -1525,7 +1526,7 @@ public class AssemblyCodeGenerator {
         } else if (sto.getType() == null) {
             writeConstFloat(sto);
             String mod = checkmod(sto.getName());
-            writeAssembly("! cout << "+mod);
+            writeAssembly("! cout << "+ mod);
             newline();
             writeAssembly(TWO_PARAM, SET_OP, strFmt, O0);
             writeAssembly(TWO_PARAM, SET_OP, ".$$.str." + iString(strFmtCnt), O1);
