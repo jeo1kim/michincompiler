@@ -633,14 +633,7 @@ public class AssemblyCodeGenerator {
             decreaseOffset();
             result.setSparcOffset(getOffset());
         } 
-            /*setaddst(O0, iString(result.getSparcOffset()));
-            newline();
 
-            setaddld(O0, iString(result.getSparcOffset()));*/
-
-        /*writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
-        writeAssembly(ONE_PARAM, BE_OP, String.format(BASIC_FIN, "else", iString(andorskipcnt)));
-        writeAssembly(NOP_OP);*/
     }
 
     //for incdecrxpr
@@ -1241,6 +1234,8 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeArrayDeclLocal(STO stoDes, STO expr, STO sto){
+        String global = sto.isGlobal() ? stoDes.getName() : iString(sto.getSparcOffset());
+        String globalreg = sto.isGlobal() ? G0 : FP;
 
         int size = sto.getType().getSize();
         int tempsize = size*4;
@@ -1259,8 +1254,8 @@ public class AssemblyCodeGenerator {
         call(MUL_OP);
         writeAssembly(TWO_PARAM, MOV_OP, O0, O1);
 
-        writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()), O0);
-        writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
+        writeAssembly(TWO_PARAM, SET_OP, global, O0);
+        writeAssembly(THREE_PARAM, ADD_OP, globalreg, O0, O0);
         call(ptrCheckCall);
         writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O0);
         decreaseOffset();
