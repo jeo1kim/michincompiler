@@ -420,12 +420,12 @@ public class AssemblyCodeGenerator {
         } else if ((desoffset = stoDes.getSparcOffset()) != 0) {
 
             val = stoValue(expr); // stoVal gets teh value of sto.
-           
             writeAssembly(TWO_PARAM, SET_OP, iString(desoffset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             if(stoDes.getisArray()){
                 writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);
             }
+            //xwriteAssembly("////////////////////\n");
             writeInit(stoDes, expr);
 
         } else {
@@ -1064,13 +1064,24 @@ public class AssemblyCodeGenerator {
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
 
         if (init.isConst()) {
-            writeAssembly(TWO_PARAM, SET_OP, val, O0);
-            if (sto.getType().isFloat()) {
+            if (sto.getType().isFloat() && !(sto.getisArray())) {
+                writeAssembly(TWO_PARAM, SET_OP, val, O0);
                 convertToFloat(sto, init, O0);
                 writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
                 //decreaseIndent();
                 writeAssembly(NL);
                 return;
+            }
+            if(sto.getisArray() && init.getType().isFloat()){
+                writeConstFloat(init);
+                //writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
+                //writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
+            }else if(sto.getisArray() && init.getType().isInt() && sto.getType().isFloat()){
+                convertToFloat(sto, init, O0);
+                register = f0;
+            }else{
+                //its here because it is not needed for array 
+                writeAssembly(TWO_PARAM, SET_OP, val, O0);
             }
         } else {
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
