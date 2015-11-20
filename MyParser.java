@@ -1402,7 +1402,11 @@ class MyParser extends parser {
         ConstSTO con;
         if(!a.isConst()){
             ExprSTO exp = new ExprSTO(a.getName(), a.getType());
-            exp.setValue(a.getValue().negate());
+            if(unary == "-"){
+                exp.setValue(a.getValue().negate());
+            }else {
+                exp.setValue(a.getValue());
+            }
             ag.writeMarkUnary(unary, a, exp);
             return exp;
         }

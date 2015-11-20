@@ -63,6 +63,7 @@ public class AssemblyCodeGenerator {
     private static final String INC_OP = "inc   \t";
     private static final String DEC_OP = "dec   \t";
     private static final String MOV_OP = "mov   \t";
+    private static final String FMOV_OP = "fmovs\t";
 
     private static final String BA_OP = "ba    \t";
     private static final String BE_OP = "be    \t";
@@ -96,9 +97,9 @@ public class AssemblyCodeGenerator {
     private static final String XOR_OP = "xor    \t";
 
     private static final String FADD_OP = "fadds  \t";
-    private static final String FSUB_OP = "fsubs   \t";
-    private static final String FMUL_OP = "fmuls   \t";
-    private static final String FDIV_OP = "fdivs   \t";
+    private static final String FSUB_OP = "fsubs  \t";
+    private static final String FMUL_OP = "fmuls  \t";
+    private static final String FDIV_OP = "fdivs  \t";
 
 
     //section
@@ -785,11 +786,14 @@ public class AssemblyCodeGenerator {
                 case "*":
                     writeArithmetic(FMUL_OP, register, resoffset, f0, F1, f0);
                     break;
+                case "/":
+                    writeArithmetic(FDIV_OP, register, resoffset, f0, F1, f0);
+                    break;
                 case "++":
-                    writeArithmetic(FADD_OP, resoffset, resoffset, f0, F1, F2);
+                    writeArithmetic(FADD_OP, register, resoffset, f0, F1, F2);
                     break;
                 case "--":
-                    writeArithmetic(FSUB_OP, resoffset, resoffset, f0, F1, F2);
+                    writeArithmetic(FSUB_OP, register, resoffset, f0, F1, F2);
                     break;
                 case ">":
                     writeComparison(FBLE_OP, register, resoffset, f0, F1);
@@ -1408,23 +1412,32 @@ public class AssemblyCodeGenerator {
     public void writeMarkUnary(String unary, STO init, STO des){
         funcIndent();
         //if(!a.isConst()){
-        writeAssembly(var_comment, init.getName(), unary+des.getName());
+        //writeAssembly(var_comment, init.getName(), unary+des.getName());
+        writeAssembly("! unary %s \n", unary+init.getName());
         decreaseOffset();
         des.setSparcOffset(getOffset());
-            writeCallStored(init, 0);
-            if(unary == "-"){
-                if(des.getType().isFloat()){
-                    writeAssembly(TWO_PARAM, "fnegs\t", f0, f0);
-                    setaddst(f0, iString(des.getSparcOffset()));
+        writeCallStored(init, 0);
+        //writeAssembly("! unary type %s \n", init.getType().getName());
+        if(unary == "-"){
+            if(des.getType().isFloat()){
+                writeAssembly(TWO_PARAM, "fnegs\t", f0, f0);
+                setaddst(f0, iString(des.getSparcOffset()));
 
-                }else {
-                    writeAssembly(TWO_PARAM, NEG_OP, O0, O0);
-                    setaddst(O0, iString(des.getSparcOffset()));
-                }
-            } else{
+            }else {
+                writeAssembly(TWO_PARAM, NEG_OP, O0, O0);
+                setaddst(O0, iString(des.getSparcOffset()));
+            }
+        } else{
+            if(des.getType().isFloat()){
+                writeAssembly(TWO_PARAM, FMOV_OP, f0, f0);
+                setaddst(f0, iString(des.getSparcOffset()));
+            }
+            else{
                 writeAssembly(TWO_PARAM, MOV_OP, O0, O0);
                 setaddst(O0, iString(des.getSparcOffset()));
             }
+
+        }
         //}
         funcDedent();
     }
