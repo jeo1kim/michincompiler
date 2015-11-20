@@ -31,6 +31,9 @@ abstract class STO
 
 	private int sparcOffset=0;
 	private String sparcBase= "";
+
+	private boolean m_isArray = false;
+
 	private STO m_array;
 
 	public void setSparcBase(String base){
@@ -84,6 +87,11 @@ abstract class STO
 	public boolean isitStructFuck(){
 		return structFuck;
 	}
+
+	public void setisArray(){
+		m_isArray = true;
+	}
+	public boolean getisArray(){ return m_isArray; }
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
