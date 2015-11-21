@@ -48,8 +48,9 @@ public abstract class ArithmeticOp extends BinaryOp {
                 }
             }
             // do the calculation
-            BigDecimal result = calculate(a.getValue(), b.getValue(), opName);
+            BigDecimal result = calculate(a.getValue(), b.getValue(), opName, 5);
             if (aType.isInt() && bType.isInt()) {
+                result = calculate(a.getValue(), b.getValue(), opName, 1);
                 ConstSTO ret = new ConstSTO( Integer.toString(result.intValue()), aType, result.intValue());
                 ret.markRVal();
                 return ret;
@@ -78,7 +79,7 @@ public abstract class ArithmeticOp extends BinaryOp {
         }
     }
 
-    public BigDecimal calculate (BigDecimal a, BigDecimal b, String opname){
+    public BigDecimal calculate (BigDecimal a, BigDecimal b, String opname, int floatval){
 
         BigDecimal result = null;
 
@@ -89,9 +90,8 @@ public abstract class ArithmeticOp extends BinaryOp {
                     break;
             case "*": result = a.multiply(b);
                     break;
-            case "/": result = a.divide(b, 1, RoundingMode.CEILING);
-
-
+            case "/": 
+                result = a.divide(b, floatval, RoundingMode.CEILING);
                 break;
         }
 
