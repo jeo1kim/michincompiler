@@ -288,8 +288,11 @@ public class AssemblyCodeGenerator {
         newline();
         funcIndent();
         writeAssembly("! "+ sto.getName()+"\n");
-        if(sto.isRef()){
+        if(sto.getisArray() || sto.isRef()){
             setadd(sto, count);
+            writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
+            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
+                
         }
         else if(sto.isConst()){
             if(sto.getType().isFloat()){
@@ -297,10 +300,10 @@ public class AssemblyCodeGenerator {
                 //i think this was for global?? can't remember
                 //not needed when sto is float and origin is float both local
                 //this line is needed to handle if sto is a reference value 
-                if(sto.isRef()){
+                /*if(sto.isRef()){
                     writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
                     writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
-                }  
+                } */ 
             
             }
             else if(sto.getType().isInt() && originalparam.getType().isFloat()){
@@ -319,7 +322,12 @@ public class AssemblyCodeGenerator {
                     convertToFloat(originalparam, sto, iString(count));
                 }
                 else {
-                    setadd(sto, count);
+                    //why????? when it is a int that is not a const?
+                    if(originalparam.isRef()){
+                        setadd(sto, count);
+                    }else{
+                        setaddld("%o"+iString(count), iString(sto.getSparcOffset()));
+                    }
                 }
             }
         }
@@ -384,7 +392,6 @@ public class AssemblyCodeGenerator {
                 }
                 else{
                     writeAssembly(TWO_PARAM, ST_OP, "%i"+iString(count), "["+FP+"+"+iString(valplace)+"]");
-
                 }
                 i.setSparcOffset(valplace);
                 count++;
