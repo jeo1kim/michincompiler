@@ -359,16 +359,19 @@ public class AssemblyCodeGenerator {
 
     //simple function decl
     //TODO: does not take care of parameters yet
-    public void writeFunctionDecl_1(STO sto) {
+    public void writeFunctionDecl_1(STO sto, boolean check) {
         offset = 0;
         func = true;
         infunc = sto.getName();
         String name = sto.getName();
         increaseIndent();
         //writeAssembly(SECTION, TEXT_SEC);
-        writeAssembly(GLOBAL, name);
-        decreaseIndent();
-        writeAssembly(VARCOLON, name);
+        //only when the function is not overloaded
+        if(!check){
+            writeAssembly(GLOBAL, name);
+            decreaseIndent();
+            writeAssembly(VARCOLON, name);
+        }
 
         //void if there is no parameter 
         String param = paramtypelist(sto);

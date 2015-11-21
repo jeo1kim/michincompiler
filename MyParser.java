@@ -657,6 +657,7 @@ class MyParser extends parser {
             } else { // function exist throw error
                 exist.addOverload(key, sto);
             }
+            isThereOverloadedFunction = true;
         }
         sto.addOverload(key, sto);
 
@@ -668,12 +669,12 @@ class MyParser extends parser {
         //m_symtab.insertOverloadedFunc(hKey, sto); //all funcSTO goes into HashMap
         m_symtab.openScope();
         m_symtab.setFunc(sto);
-        ag.writeFunctionDecl_1(sto);  // funciont def
+        ag.writeFunctionDecl_1(sto, isThereOverloadedFunction);  // funciont def
     }
 
     // funcdef
     void DoFuncDecl_1_param(String id, Type ret, boolean ref, Vector<STO> params) {
-
+        boolean isThereOverloadedFunction = false;
         STO a = m_symtab.accessLocal(id);
 
         if (a != null && !a.isFunc()) //if found STO is not function
@@ -699,6 +700,7 @@ class MyParser extends parser {
                 m_errors.print(Formatter.toString(ErrorMsg.error9_Decl, id));
             } else { // function exist throw error
                 exist.addOverload(key, sto);
+                isThereOverloadedFunction = true;
             }
         }
 
@@ -710,7 +712,8 @@ class MyParser extends parser {
         }
         m_symtab.openScope();
         m_symtab.setFunc(sto);
-        ag.writeFunctionDecl_1(sto);     // function decl
+
+        ag.writeFunctionDecl_1(sto, isThereOverloadedFunction);     // function decl
     }
 
     //----------------------------------------------------------------
@@ -1022,10 +1025,12 @@ class MyParser extends parser {
         if (func.isRef()) {
             ret.markModVal();
             ret.setRef(true);
+            sto.setParamVec(argTyp); //did it because it only gets the first func for overloaded functions
             ag.writeFuncCall(ret, sto);
             return ret;
         } else if (!func.isRef()) {
             ret.markRVal();
+            sto.setParamVec(argTyp);
             ag.writeFuncCall(ret, sto);
             return ret;
 
