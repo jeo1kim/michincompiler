@@ -48,7 +48,7 @@ public abstract class ArithmeticOp extends BinaryOp {
                 }
             }
             // do the calculation
-            BigDecimal result = calculate(a.getValue(), b.getValue(), opName, 5);
+            BigDecimal result = calculate(a.getValue(), b.getValue(), opName, 10);
             if (aType.isInt() && bType.isInt()) {
                 result = calculate(a.getValue(), b.getValue(), opName, 1);
                 ConstSTO ret = new ConstSTO( Integer.toString(result.intValue()), aType, result.intValue());
