@@ -293,20 +293,28 @@ public class AssemblyCodeGenerator {
         }
         else if(sto.isConst()){
             if(sto.getType().isFloat()){
-                writeConstFloat(sto);
-                writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
-                writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
+                writeConstFloatFuncCall(sto, count);
+                //i think this was for global?? can't remember
+                //not needed when sto is float and origin is float both local
+                if(sto.isGlobal()){
+                    writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
+                    writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
+                }  
             
             }
             else if(sto.getType().isInt() && originalparam.getType().isFloat()){
                 writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
-                convertToFloat(sto, originalparam, O0);
+                convertToFloat(sto, originalparam, f0);
             }else{
                 writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
             }
         }
         else {
-            setaddld("%o"+iString(count), iString(sto.getSparcOffset()));
+            if(sto.getType().isFloat()){
+                setaddld("%f"+iString(count), iString(sto.getSparcOffset()));
+            }else {
+                setaddld("%o"+iString(count), iString(sto.getSparcOffset()));
+            }
         }
         funcDedent();
     }
@@ -1181,6 +1189,37 @@ public class AssemblyCodeGenerator {
         sectionAlign(TEXT_SEC, size);
         writeAssembly(TWO_PARAM, SET_OP, ".$$.float." + iString(floatcounter), L7);
         writefloatreg(floatreg++);
+    }
+
+    public void writeConstFloatFuncCall(STO init, int counter) {
+        String name = FLOAT_COUNTER;
+        int fcount = ++floatcounter;
+        boolean str = false;
+        String size = init.getType() == null ? "4" : iString(init.getType().getSize());
+        if (init.getType() == null) {
+            funcIndent();
+            name = ".$$.str." + iString(++strFmtCnt) + ":\n";
+            counter = strFmtCnt;
+            str = true;
+        }
+
+        sectionAlign(RODATA_SEC, size);
+
+        indent_level = 1;
+        writeAssembly(name, iString(fcount));
+        indent_level = 2;
+
+        if (str) {
+            writeAssembly(ONE_PARAM, ASCIZ, "\"" + init.getName() + "\"");
+            writeAssembly(NL);
+            sectionAlign(TEXT_SEC, "4");
+            writeAssembly(NL);
+            return;
+        }
+        writeAssembly(FLOAT, stoValue(init));
+        sectionAlign(TEXT_SEC, size);
+        writeAssembly(TWO_PARAM, SET_OP, ".$$.float." + iString(fcount), L7);
+        writefloatreg(counter);
     }
 
     public void writefloatreg(int regnum) {
