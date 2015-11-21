@@ -1012,8 +1012,10 @@ class MyParser extends parser {
 
         ExprSTO ret = new ExprSTO(sto.getName(), func.getType());
         int count = 0;
-        for(STO i : argTyp){
-            ag.writeFuncCallParam(i, count);
+        for (it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext(); ) { 
+            STO arg = it1.next();
+            STO param = it2.next();
+            ag.writeFuncCallParam(arg, param, count);
             count++;
         }
         // check if func sto was called by ref and assign R val or mod l val

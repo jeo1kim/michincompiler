@@ -284,7 +284,7 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
-    public void writeFuncCallParam(STO sto, int count){
+    public void writeFuncCallParam(STO sto, STO originalparam, int count){
         newline();
         funcIndent();
         writeAssembly("! "+ sto.getName()+"\n");
@@ -295,8 +295,15 @@ public class AssemblyCodeGenerator {
             if(sto.getType().isFloat()){
                 writeConstFloat(sto);
                 writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
+                writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
+            
             }
-            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
+            else if(sto.getType().isInt() && originalparam.getType().isFloat()){
+                writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
+                convertToFloat(sto, originalparam, O0);
+            }else{
+                writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
+            }
         }
         else {
             setaddld("%o"+iString(count), iString(sto.getSparcOffset()));
@@ -822,7 +829,7 @@ public class AssemblyCodeGenerator {
         funcIndent();
         newline();
         cmpcounter++;
-        andorskipcnt++;
+        //andorskipcnt++; //commented out because not needed when if(comparison) maybe used somewhere else
         if (reg1 == f0) {
             writeAssembly(TWO_PARAM, FCMP_OP, reg1, reg2);
             writeAssembly(NOP_OP);
