@@ -1573,7 +1573,7 @@ public class AssemblyCodeGenerator {
 
     public void writeCin(STO sto){
         Type stype = sto.getType();
-        String register = sto.getType().isFloat() ? f0 : O1; // check for float f0 or o0
+        String register = sto.getType().isFloat() ? f0 : O0; // check for float f0 or o0
 
 
         newline();
