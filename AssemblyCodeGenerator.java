@@ -409,7 +409,7 @@ public class AssemblyCodeGenerator {
             int count = 0;
             int valplace = 68;
             for(STO i : paramlist){
-                if(i.getType().isFloat()){
+                if(i.getType().isFloat() && !i.isRef()){
                     writeAssembly(TWO_PARAM, ST_OP, "%f"+iString(count), "["+FP+"+"+iString(valplace)+"]");
                 }
                 else{
