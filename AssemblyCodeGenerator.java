@@ -1113,7 +1113,7 @@ public class AssemblyCodeGenerator {
         if (init.isConst()) {
             if (sto.getType().isFloat() && !(sto.getisArray())) {
                 writeAssembly(TWO_PARAM, SET_OP, val, O0);
-                convertToFloat(sto, init, O0);
+                convertToFloat(sto, init, iString(0));
                 writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
                 //decreaseIndent();
                 writeAssembly(NL);
@@ -1186,7 +1186,7 @@ public class AssemblyCodeGenerator {
     public void convertToFloat(STO sto, STO init, String storeval) {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
-        String register = init.getType().isFloat() ? "%f" : "%O"; // check for float f0 or o0
+        String register = init.getType().isFloat() ? "%f" : "%o"; // check for float f0 or o0
         String regval = "";
 
         if(storeval == I0){
@@ -1299,29 +1299,44 @@ public class AssemblyCodeGenerator {
 
         funcIndent();
         writeAssembly(NL);
-        writeAssembly("! return " + val + ";\n");
+
         if (init.isConst()) {
+            writeAssembly("! return " + val + ";\n");
             if (init.getType().isFloat()) {
-                writeConstFloat(init);
+                writeConstFloatFuncCall(init, 0);
             } else {
                 writeAssembly(TWO_PARAM, SET_OP, val, register);
             }
+            //its used when init is constant int and return type is float 
+            if(((FuncSTO)func).getReturnType().isFloat() && !init.getType().isFloat()){
+                convertToFloat(func, init, I0);
+            }
         } else if(!init.getType().isVoid()){ //dont print this line if init type is void e.g return; 
+            writeAssembly("! return " + init.getName() + ";\n");
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
             if(init.isExpr()){ //if the value was modified e.g went to binary 
+            //shouldnt go in when it return x + y and x an y is from parameter
+            //isfunc test 209a
+            //if(init.isRef() || init.getisArray()){
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
             }
+            if(init.getType().isFloat()){
+                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
+            }else{
+                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
+            }
+
         }
         //its used when init is constant int and return type is float 
-        if(((FuncSTO)func).getReturnType().isFloat()){
-            if(init.isConst()){
+        /*if(((FuncSTO)func).getReturnType().isFloat()){
+            if(init.isConst() && !init.getType().isFloat()){
                 convertToFloat(func, init, I0);
             }else{
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
             }
+        }*/
 
-        }
         String param = paramtypelist(func);
         call(String.format(FINI_FUNC, func.getName(), param));
         retRest();
