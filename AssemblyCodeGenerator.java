@@ -284,11 +284,12 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
-    public void writeFuncCallParam(STO sto, STO originalparam, int count){
+    public void writeFuncCallParam(STO sto, STO originalparam, int count, boolean recursive){
         newline();
         funcIndent();
         writeAssembly("! "+ sto.getName()+"\n");
-        if(sto.getisArray() || sto.isRef()){
+        //if(sto.getisArray() || sto.isRef()){
+        if(sto.getisArray()){
             setadd(sto, count);
             writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
             writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
@@ -313,8 +314,17 @@ public class AssemblyCodeGenerator {
                 writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
             }
         }
-        else {
-            if(sto.getType().isFloat()){
+        /*else if(sto.isVar()){
+            setadd(sto, count);
+        }*/
+        else {   
+            if(originalparam.isRef()){
+                setadd(sto, count);
+                if(recursive){
+                    writeAssembly(TWO_PARAM, LD_OP, "["+O0+"]", "%o"+iString(count));
+                }
+            }         
+            else if(sto.getType().isFloat() && originalparam.getType().isFloat()){
                 setaddld("%f"+iString(count), iString(sto.getSparcOffset()));
             }else {
                 if(originalparam.getType().isFloat()){
@@ -323,11 +333,20 @@ public class AssemblyCodeGenerator {
                 }
                 else {
                     //why????? when it is a int that is not a const?
-                    if(originalparam.isRef()){
+                    //if(originalparam.isRef()){
+                    //if(!recursive){
+                    //    setadd(sto, count);
+                    //}else{
+                        //if it is int
+                    /*if(originalparam.isRef()){
                         setadd(sto, count);
-                    }else{
+                        if(recursive){
+                            writeAssembly(TWO_PARAM, LD_OP, "["+O0+"]", "%o"+iString(count));
+                        }
+                    }else{*/
                         setaddld("%o"+iString(count), iString(sto.getSparcOffset()));
-                    }
+                    //}
+                    //}
                 }
             }
         }
@@ -390,12 +409,12 @@ public class AssemblyCodeGenerator {
             int count = 0;
             int valplace = 68;
             for(STO i : paramlist){
-                if(i.getType().isFloat()){
+                /*if(i.getType().isFloat()){
                     writeAssembly(TWO_PARAM, ST_OP, "%f"+iString(count), "["+FP+"+"+iString(valplace)+"]");
                 }
-                else{
+                else{*/
                     writeAssembly(TWO_PARAM, ST_OP, "%i"+iString(count), "["+FP+"+"+iString(valplace)+"]");
-                }
+                //}
                 i.setSparcOffset(valplace);
                 count++;
                 valplace += 4;
@@ -1287,7 +1306,7 @@ public class AssemblyCodeGenerator {
             } else {
                 writeAssembly(TWO_PARAM, SET_OP, val, register);
             }
-        } else {
+        } else if(!init.getType().isVoid()){ //dont print this line if init type is void e.g return; 
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);

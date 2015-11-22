@@ -1012,25 +1012,30 @@ class MyParser extends parser {
         if (flag) {
             return new ErrorSTO(sto.getName());
         }
+        boolean recursive = false;
+        //check if function is called inside itself
+        if(sto.getName() == m_symtab.getFunc().getName()){
+            recursive = true;
+        }
 
         ExprSTO ret = new ExprSTO(sto.getName(), func.getType());
         int count = 0;
         for (it1 = argTyp.iterator(), it2 = paramList.iterator(); it1.hasNext() && it2.hasNext(); ) { 
             STO arg = it1.next();
             STO param = it2.next();
-            ag.writeFuncCallParam(arg, param, count);
+            ag.writeFuncCallParam(arg, param, count, recursive);
             count++;
         }
         // check if func sto was called by ref and assign R val or mod l val
         if (func.isRef()) {
             ret.markModVal();
             ret.setRef(true);
-            sto.setParamVec(argTyp); //did it because it only gets the first func for overloaded functions
+            sto.setParamVec(paramList); //did it because it only gets the first func for overloaded functions
             ag.writeFuncCall(ret, sto);
             return ret;
         } else if (!func.isRef()) {
             ret.markRVal();
-            sto.setParamVec(argTyp);
+            sto.setParamVec(paramList);
             ag.writeFuncCall(ret, sto);
             return ret;
 
@@ -1460,7 +1465,10 @@ class MyParser extends parser {
             return new ErrorSTO(result.getName());
         } else {
             //m_symtab.setFunc(null);
-            return new ExprSTO(result.getName()); //
+            ExprSTO sto = new ExprSTO(result.getName());
+            sto.setType(new VoidType("void", 1));
+            ag.writeReturn(sto, m_symtab.getFunc());
+            return sto; //
         }
     }
 
@@ -1526,6 +1534,7 @@ class MyParser extends parser {
                 //m_symtab.setFunc(null);
                 ExprSTO ret = new ExprSTO("result of " + result.getName());
                 ret.setRef(true);
+                ag.writeReturn(a, m_symtab.getFunc());
                 return ret;
             }
 
