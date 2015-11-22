@@ -320,8 +320,8 @@ public class AssemblyCodeGenerator {
         else {   
             if(originalparam.isRef()){
                 setadd(sto, count);
-                if(recursive){
-                    writeAssembly(TWO_PARAM, LD_OP, "["+O0+"]", "%o"+iString(count));
+                if(recursive || !sto.getParamCalled()){
+                    writeAssembly(TWO_PARAM, LD_OP, "["+"%o"+iString(count)+"]", "%o"+iString(count));
                 }
             }         
             else if(sto.getType().isFloat() && originalparam.getType().isFloat()){

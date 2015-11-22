@@ -33,6 +33,7 @@ abstract class STO
 	private String sparcBase= "";
 
 	private boolean m_isArray = false;
+	private boolean m_paramCalled = false;
 
 	private STO m_array;
 
@@ -92,6 +93,11 @@ abstract class STO
 		m_isArray = true;
 	}
 	public boolean getisArray(){ return m_isArray; }
+
+	public void setParamCalled(){
+		m_paramCalled = true;
+	}
+	public boolean getParamCalled(){ return m_paramCalled; }
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------

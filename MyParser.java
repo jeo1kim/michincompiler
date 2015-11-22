@@ -343,6 +343,7 @@ class MyParser extends parser {
 
         VarSTO sto = new VarSTO(id, typ);
         sto.setStatic(stat); // set Variable static
+        sto.setParamCalled();
 
         if (array.size() == 0 && (init != null)) { // indicates that this var is not an array and init exp exist
             // do the type check with init if it exist
@@ -399,6 +400,7 @@ class MyParser extends parser {
 //                System.err.println(ret.getName()+ret.isGlobal());
 //            }
             m_symtab.insert(ret);
+            ret.setParamCalled();
             ag.writeArrayDeclGlobal(ret, array, temp);
             return;
         } else {
