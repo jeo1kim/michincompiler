@@ -376,8 +376,8 @@ public class AssemblyCodeGenerator {
         func = false;
     }
 
+
     //simple function decl
-    //TODO: does not take care of parameters yet
     public void writeFunctionDecl_1(STO sto, boolean check) {
         offset = 0;
         func = true;
@@ -1329,6 +1329,7 @@ public class AssemblyCodeGenerator {
         newline();
     }
 
+    //when array is called 
     public void writeArrayDeclLocal(STO stoDes, STO expr, STO sto){
         String global = sto.isGlobal() ? stoDes.getName() : iString(sto.getSparcOffset());
         String globalreg = sto.isGlobal() ? G0 : FP;
@@ -1352,6 +1353,9 @@ public class AssemblyCodeGenerator {
 
         writeAssembly(TWO_PARAM, SET_OP, global, O0);
         writeAssembly(THREE_PARAM, ADD_OP, globalreg, O0, O0);
+        if(sto.isRef()){ //if it is called from paramter and the paramter is a ref
+            writeAssembly(TWO_PARAM, LD_OP, "[" + O0 + "]", O0);
+        }
         call(ptrCheckCall);
         writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O0);
         decreaseOffset();
@@ -1554,14 +1558,24 @@ public class AssemblyCodeGenerator {
         //loopcounter--;
         funcDedent();
     }
+
     public String paramtypelist(STO sto){
         String param = "";
         //void if there is no parameter
         if(sto.getParamVec().size() != 0){
             Vector<STO> paramlist = sto.getParamVec();
+            String temp;
             for(STO i : paramlist){
                 param += ".";
-                param += i.getType().getName();
+                temp = i.getType().getName();
+                //if parameter is array change [ or ] to $
+                char[] charArray = temp.toCharArray();
+                for(int j = 0; j < temp.length(); j++){
+                    if((temp.charAt(j) == '[') || (temp.charAt(j) == ']')){
+                        charArray[j] = '$';
+                    }
+                }
+                param += String.valueOf(charArray);
             }       
         }
         else{
@@ -1569,6 +1583,7 @@ public class AssemblyCodeGenerator {
         }
         return param;
     }
+
     public void call(String name) {
         writeAssembly(ONE_PARAM, CALL_OP, name);
         writeAssembly(NOP_OP);
@@ -1615,7 +1630,7 @@ public class AssemblyCodeGenerator {
                 return;
             }
             if(sto.getisArray()){
-                writeCallStored(sto, 0);
+                writeCallStored(sto, 1); //is it 0 or 1 ? 1 when called as parameter 
             }else if(sto.isRef()){
                 writeCallStored(sto, 1);
             }
