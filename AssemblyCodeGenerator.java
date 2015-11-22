@@ -1293,7 +1293,7 @@ public class AssemblyCodeGenerator {
 
     public void writeReturn(STO init, STO func) {
         String val = stoValue(init); // stoVal gets teh value of sto.
-        String register = init.getType().isFloat() ? L7 : I0; // check for float f0 or o0
+        String register = init.getType().isFloat() ? L7 : I0; 
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
 
@@ -1309,7 +1309,9 @@ public class AssemblyCodeGenerator {
         } else if(!init.getType().isVoid()){ //dont print this line if init type is void e.g return; 
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
-            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+            if(init.isExpr()){ //if the value was modified e.g went to binary 
+                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+            }
         }
         //its used when init is constant int and return type is float 
         if(((FuncSTO)func).getReturnType().isFloat()){
