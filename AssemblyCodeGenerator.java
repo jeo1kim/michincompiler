@@ -409,12 +409,12 @@ public class AssemblyCodeGenerator {
             int count = 0;
             int valplace = 68;
             for(STO i : paramlist){
-                /*if(i.getType().isFloat()){
+                if(i.getType().isFloat()){
                     writeAssembly(TWO_PARAM, ST_OP, "%f"+iString(count), "["+FP+"+"+iString(valplace)+"]");
                 }
-                else{*/
+                else{
                     writeAssembly(TWO_PARAM, ST_OP, "%i"+iString(count), "["+FP+"+"+iString(valplace)+"]");
-                //}
+                }
                 i.setSparcOffset(valplace);
                 count++;
                 valplace += 4;
