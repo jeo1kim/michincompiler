@@ -405,6 +405,17 @@ public class AssemblyCodeGenerator {
             writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
                 
         }
+        else if(sto.isGlobal()){
+            writeAssembly(TWO_PARAM, SET_OP, sto.getName(), L7);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+
+            if(sto.getType().isFloat()){
+                writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
+            }
+            else{
+                writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%o"+iString(count));
+            }
+        }
         else if(sto.isConst()){
             if(sto.getType().isFloat()){
                 writeConstFloatFuncCall(sto, count);
@@ -572,7 +583,10 @@ public class AssemblyCodeGenerator {
             writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]" ,O1);
         }
         else {
-            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()+offset), O1);
+            //fixed to become +offset when creating isStructVar but this generated error for most e.g 101b
+            //writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()+offset), O1);
+            //TODO: switching back to original for this reason need to come back to fix it 11/23/2015
+            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             if(sto.isRef()){
                 writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);
@@ -1146,7 +1160,7 @@ public class AssemblyCodeGenerator {
 
     }
 
-
+    ////////////////////////calling functions
     //used in cout
     public void setAddLoad(STO init) {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
@@ -1553,6 +1567,7 @@ public class AssemblyCodeGenerator {
         decreaseOffset();
         sto.setSparcOffset(getOffset());
 
+        //writeAssembly("! offset: %s \n", sto.getSparcOffset());
 
         if (func) {
             indent_level = 2;
@@ -1606,7 +1621,6 @@ public class AssemblyCodeGenerator {
         if(sto.isStructdef()){
 
         }
-
 
         if ((init == null) || (auto = sto.getAuto())) {
             sectioncheck = BSS_SEC;
