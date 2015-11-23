@@ -1635,7 +1635,7 @@ public class AssemblyCodeGenerator {
             writeAssembly("! cout << " + sto.getName() + "\n");
             if (sto.isConst()) {
                 if(sto.getType().isFloat()){
-                    writeConstFloat(sto);
+                    writeConstFloatFuncCall(sto, 0);
                 }else if(sto.getType().isBool()){
                     writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O0);
                 }else {
