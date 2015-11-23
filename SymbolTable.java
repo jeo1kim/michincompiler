@@ -38,6 +38,7 @@ class SymbolTable {
             if(scope == m_scopeGlobal)
             {
                 sto.setGlobal();
+                sto.setSparcBase("%g0");
 
             }
             m_scopeGlobal.InsertLocal(sto);

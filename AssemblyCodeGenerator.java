@@ -269,13 +269,15 @@ public class AssemblyCodeGenerator {
 
     public void writeDot(STO stru, STO sto){
         int off = -sto.getSparcOffset()-4;
+        String offset = stru.isGlobal() ? stru.getName() :iString(stru.getSparcOffset());
+
         indent_level =2;
         writeAssembly("! "+stru.getName()+"."+sto.getName()+"\n");
-        writeAssembly(TWO_PARAM, SET_OP, iString(stru.getSparcOffset()), O0);
-        writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
+        writeAssembly(TWO_PARAM, SET_OP, offset, O0);
+        writeAssembly(THREE_PARAM, ADD_OP, stru.getSparcBase(), O0, O0);
         writeAssembly(TWO_PARAM, SET_OP, iString(off), O1);
         writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
-        writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O0);
+        writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O0);
         decreaseOffset();
         writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), O1);
         writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
@@ -291,7 +293,7 @@ public class AssemblyCodeGenerator {
             decreaseIndent();
             writeAssembly(struc.getName()+":\n");
             increaseIndent();
-            writeAssembly(SKIP, iString(struc.getType().getSize()));
+            writeAssembly(SKIP, iString(4));
             sectionAlign(TEXT_SEC, iString(4));
 
             writeGlobalAuto(struc, struc);
@@ -317,7 +319,7 @@ public class AssemblyCodeGenerator {
 
         writeAssembly(TWO_PARAM,SET_OP, ctor, O0);
         writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
-        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+        writeAssembly(THREE_PARAM, ADD_OP, struc.getSparcBase(), O1, O1);
         writeAssembly(TWO_PARAM, ST_OP, O1, "["+O0+"]");
         newline();
     }
