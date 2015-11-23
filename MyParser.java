@@ -1026,7 +1026,6 @@ class MyParser extends parser {
             ret.markRVal();
             ag.writeFuncCall(ret, sto);
             return ret;
-
         }
         System.out.println("here");
         return temp;
@@ -1076,7 +1075,6 @@ class MyParser extends parser {
             base = sto.getType().getBaseType().getSize();
             tot = sto.getType().getTot();
             size =  base*tot;
-
         }
 
         ret = new ConstSTO(sto.getName(), new intType("int", 4), size);
