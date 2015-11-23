@@ -309,6 +309,7 @@ public class AssemblyCodeGenerator {
         int size = -struc.getType().getSize();
         String name = struc.getType().getName();
         String base = struc.isGlobal() ?  "%g0": "%fp";
+        String off = struc.isGlobal() ? struc.getName() : iString(offset);
 
         funcIndent();
         struc.setSparcOffset(size + getOffset());
@@ -321,7 +322,7 @@ public class AssemblyCodeGenerator {
         writeStructCtor();
 
         writeAssembly(TWO_PARAM,SET_OP, ctor, O0);
-        writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
+        writeAssembly(TWO_PARAM, SET_OP, off, O1);
         writeAssembly(THREE_PARAM, ADD_OP, base, O1, O1);
         writeAssembly(TWO_PARAM, ST_OP, O1, "["+O0+"]");
         newline();
@@ -1100,6 +1101,7 @@ public class AssemblyCodeGenerator {
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
         String register = init.getType().isFloat() ? f0 : O1; // check for float f0 or o0
 
+
         String load = init.isStructdef() ? O1 : L7;
         if (init.getType().isBool()) {
             register = O0;
@@ -1108,6 +1110,10 @@ public class AssemblyCodeGenerator {
 
         writeAssembly(TWO_PARAM, SET_OP, off, load);
         writeAssembly(THREE_PARAM, ADD_OP, globalreg, load, load);
+        if(init.isStructVar()){
+            writeAssembly(TWO_PARAM, LD_OP, "[" + load + "]", load);
+
+        }
         writeAssembly(TWO_PARAM, LD_OP, "[" + load + "]", register);
     }
 
