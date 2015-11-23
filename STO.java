@@ -36,6 +36,14 @@ abstract class STO
 	private boolean m_paramCalled = false;
 
 	private STO m_array;
+	private boolean inStruct = false;
+
+	public boolean isStructVar(){
+		return inStruct;
+	}
+	public void setStructVar(){
+		inStruct = true;
+	}
 
 	public void setSparcBase(String base){
 		sparcBase = base;

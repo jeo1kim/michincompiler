@@ -267,6 +267,116 @@ public class AssemblyCodeGenerator {
         }
     }
 
+    public void writeDot(STO stru, STO sto){
+        int off = -sto.getSparcOffset()-4;
+        String offset = stru.isGlobal() ? stru.getName() :iString(stru.getSparcOffset());
+        String base = stru.isGlobal() ? "%g0" : "%fp";
+
+        indent_level =2;
+        writeAssembly("! "+stru.getName()+"."+sto.getName()+"\n");
+        writeAssembly(TWO_PARAM, SET_OP, offset, O0);
+        writeAssembly(THREE_PARAM, ADD_OP, base, O0, O0);
+        writeAssembly(TWO_PARAM, SET_OP, iString(off), O1);
+        writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
+        writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O0);
+        decreaseOffset();
+        writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), O1);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+        writeAssembly(TWO_PARAM, ST_OP, O0,"["+O1+"]" );
+        newline();
+
+        //sto.setSparcOffset(getOffset());
+    }
+
+    public void writeStructDecl(STO struc){
+        if(struc.isGlobal()){
+            indent_level=1;
+            sectionAlign(BSS_SEC, iString(4));
+            writeAssembly(GLOBAL, struc.getName());
+            decreaseIndent();
+            writeAssembly(struc.getName()+":\n");
+            increaseIndent();
+            writeAssembly(SKIP, iString(struc.getType().getSize()));
+            sectionAlign(TEXT_SEC, iString(4));
+
+            writeGlobalAuto(struc, struc);
+            sectionAlign(TEXT_SEC, iString(4));
+            return;
+        }
+
+        writeBasicStruct(struc);
+    }
+
+    public void writeBasicStruct(STO struc){
+        int size = -struc.getType().getSize();
+        String name = struc.getType().getName();
+        String base = struc.isGlobal() ?  "%g0": "%fp";
+        String off = struc.isGlobal() ? struc.getName() : iString(offset);
+
+        funcIndent();
+        struc.setSparcOffset(size + getOffset());
+        offset = offset + size;
+        writeAssembly("! STRUCTS\n");
+        setadd(struc, 0);
+        name = name+"."+name+".void";
+        writeAssembly(ONE_PARAM, CALL_OP, name);
+        writeAssembly(NOP_OP);
+        writeStructCtor();
+
+        writeAssembly(TWO_PARAM,SET_OP, ctor, O0);
+        writeAssembly(TWO_PARAM, SET_OP, off, O1);
+        writeAssembly(THREE_PARAM, ADD_OP, base, O1, O1);
+        writeAssembly(TWO_PARAM, ST_OP, O1, "["+O0+"]");
+        newline();
+    }
+
+    public int ctorcounter = 1;
+    String ctor = "";
+    public void writeStructCtor(){
+        sectionAlign(BSS_SEC, iString(4));
+        decreaseIndent();
+        ctor = ".$$.ctorDtor." + iString(ctorcounter++);
+        writeAssembly(ctor+":\n");
+        increaseIndent();
+        writeAssembly(SKIP, iString(4));
+
+        sectionAlign(TEXT_SEC, iString(4));
+        newline();
+    }
+
+    public void writeDtor(STO sto){
+
+    }
+
+    public boolean structCtor = false;
+    public boolean struct = false;
+    public void writeStruct(STO sto){
+        String name = sto.getName();
+        String param = paramtypelist(sto);
+        String funcvoid = name+"."+name;
+        struct = true;
+
+        if(structCtor == true){
+            funcvoid = name+".$"+name;
+        }
+        structCtor = !structCtor;
+        indent_level = 0;
+
+        writeAssembly(VARCOLON, funcvoid+param);
+
+        increaseIndent();
+        writeAssembly(TWO_PARAM, SET_OP, String.format(SAVE_FUNC, funcvoid, param), "%g1");
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, "%g1", SP);
+        writeAssembly(NL);
+
+        increaseIndent();
+
+        writeAssembly(TWO_PARAM, ST_OP, I0, "["+FP +"+68"+"]");
+        newline();
+        decreaseIndent();
+        indent_level = 0;
+    }
+
     public void writeFuncCall(STO newex, STO oldfunc){
         funcIndent();
         writeAssembly("! "+ newex.getName()+"(...)\n");
@@ -353,20 +463,40 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
+    public String makeStructName(STO sto){
+        String name = sto.getName();
+        return name + "." + name;
+    }
 
     public void writeCloseFunc(STO sto) {
         increaseIndent();
         String param = paramtypelist(sto);
-        call(String.format(FINI_FUNC, sto.getName(), param));
+        String name = sto.getName();
+        int posoffset = Math.abs(getOffset());
+
+        if(struct == true){
+            if(structCtor == false) {
+                name = name + ".$" + name;
+            }
+            else{
+                name = name + "." + name;
+            }
+            posoffset = 0;
+            struct = false;
+        }
+
+
+        call(String.format(FINI_FUNC, name, param));
         retRest();
 
-        int posoffset = Math.abs(getOffset());
-        writeAssembly("%s %s\n", String.format(SAVE_FUNC, sto.getName(), param), String.format(OFFSET_TOTAL, iString(posoffset)));
+
+
+        writeAssembly("%s %s\n", String.format(SAVE_FUNC, name, param), String.format(OFFSET_TOTAL, iString(posoffset)));
 
         decreaseIndent();
         indent_level = 0;
         writeAssembly(NL);
-        writeAssembly(FINI_FUNC, sto.getName(), param);
+        writeAssembly(FINI_FUNC, name, param);
         writeAssembly(":\n");
         increaseIndent();
         int add = -92 + getOffset();
@@ -374,11 +504,13 @@ public class AssemblyCodeGenerator {
         retRest();
 
         func = false;
+        newline();
     }
 
 
     //simple function decl
     public void writeFunctionDecl_1(STO sto, boolean check) {
+        indent_level=0;
         offset = 0;
         func = true;
         infunc = sto.getName();
@@ -433,8 +565,14 @@ public class AssemblyCodeGenerator {
         if (sto.isGlobal() || sto.isStatic()) {
             writeAssembly(TWO_PARAM, SET_OP, sto.getName(), O1);
             writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
-        } else {
-            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()), O1);
+        }
+        else if(sto.isStructVar()){
+            writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), O1);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+            writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]" ,O1);
+        }
+        else {
+            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()+offset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             if(sto.isRef()){
                 writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);
@@ -1014,14 +1152,24 @@ public class AssemblyCodeGenerator {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
         String register = init.getType().isFloat() ? f0 : O1; // check for float f0 or o0
+        String off = init.isGlobal() ? init.getName() : iString(init.getSparcOffset());
+
+
+        String load = init.isStructdef() ? O1 : L7;
         if (init.getType().isBool()) {
             register = O0;
         }
-        String off = init.isGlobal() ? init.getName() : iString(init.getSparcOffset());
+        if (init.isStructVar()){
+            off = iString(getOffset());
+        }
 
-        writeAssembly(TWO_PARAM, SET_OP, off, L7);
-        writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
-        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+        writeAssembly(TWO_PARAM, SET_OP, off, load);
+        writeAssembly(THREE_PARAM, ADD_OP, globalreg, load, load);
+        if(init.isStructVar()){
+            writeAssembly(TWO_PARAM, LD_OP, "[" + load + "]", load);
+
+        }
+        writeAssembly(TWO_PARAM, LD_OP, "[" + load + "]", register);
     }
 
     public void setaddld(String register, String resoffset) {
@@ -1055,6 +1203,7 @@ public class AssemblyCodeGenerator {
         String off = sto.isGlobal() ? sto.getName() : iString(sto.getSparcOffset());
         String globalreg = sto.getSparcBase() == "%g0" ? G0 : FP;
         String valplace =  "%o"+iString(count);
+
 
         writeAssembly(TWO_PARAM, SET_OP, off, valplace);
         writeAssembly(THREE_PARAM, ADD_OP, globalreg, valplace, valplace);
@@ -1165,19 +1314,12 @@ public class AssemblyCodeGenerator {
             order = O1;
         }
 
-        //int newoffset =  sto.isGlobal() ? -4:offset;
         decreaseOffset();
-        //int newoffset = getOffset() - 8; 
-        //sto.setSparcOffset(newoffset);
-        //offset = newoffset;
         writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), L7);
         writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
         writeAssembly(TWO_PARAM, ST_OP, order, "[" + L7 + "]");
-        //writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
         writefloatreg(floatreg++);
         writeAssembly(TWO_PARAM, FITOS, register, register);
-
-        //writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
 
     }
 
@@ -1461,6 +1603,10 @@ public class AssemblyCodeGenerator {
         sto.setSparcBase("%g0");
 
         String name = sto.getName();
+        if(sto.isStructdef()){
+
+        }
+
 
         if ((init == null) || (auto = sto.getAuto())) {
             sectioncheck = BSS_SEC;
@@ -1577,7 +1723,10 @@ public class AssemblyCodeGenerator {
     public String paramtypelist(STO sto){
         String param = "";
         //void if there is no parameter
-        if(sto.getParamVec().size() != 0){
+        if(sto.getParamVec() == null){
+            param = ".void";
+        }
+        else if(sto.getParamVec().size() != 0){
             Vector<STO> paramlist = sto.getParamVec();
             String temp;
             for(STO i : paramlist){
@@ -1781,12 +1930,17 @@ public class AssemblyCodeGenerator {
 
         writeAssembly(NL);
         increaseIndent();
-        writeAssembly(String.format(var_comment, sName, iName));
-        writeAssembly(TWO_PARAM, SET_OP, sName, O1);
-        writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
-        writeInit(sto, init); // do the init registers
-        writeAssembly(NL);
-
+        if(sto.isStructdef()){
+            writeBasicStruct(sto);
+            decreaseIndent();
+        }
+        else{
+            writeAssembly(String.format(var_comment, sName, iName));
+            writeAssembly(TWO_PARAM, SET_OP, sName, O1);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
+            writeInit(sto, init); // do the init registers
+            writeAssembly(NL);
+        }
         writeAssembly(String.format(endFunc_cmt, sName));
         call(String.format(GL_AUTO_INIT, sName + ".fini"));
         retRest();
@@ -1802,9 +1956,14 @@ public class AssemblyCodeGenerator {
         writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP); // might need to change offset
         retRest();
 
-        sectionAlign(INIT_SEC, iString(sto.getType().getSize()));
+        sectionAlign(INIT_SEC, iString(4));
         call(String.format(GL_AUTO_INIT, sName));
     }
+
+    public void writeAuto(){
+
+    }
+
     public void funcIndent() {
         if (func) {
             indent_level = 2;

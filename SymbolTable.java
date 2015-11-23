@@ -34,8 +34,16 @@ class SymbolTable {
     //----------------------------------------------------------------
     public void insert(STO sto) {
         if (sto.getType().isStruct()) {
+            Scope scope = m_stkScopes.peek();
+            if(scope == m_scopeGlobal)
+            {
+                sto.setGlobal();
+                sto.setSparcBase("%g0");
+
+            }
             m_scopeGlobal.InsertLocal(sto);
-        } else {
+        }
+        else {
             Scope scope = m_stkScopes.peek();
             if(scope == m_scopeGlobal)
             {
