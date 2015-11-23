@@ -284,6 +284,8 @@ public class AssemblyCodeGenerator {
         writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
         writeAssembly(TWO_PARAM, ST_OP, O0,"["+O1+"]" );
         newline();
+
+        //sto.setSparcOffset(getOffset());
     }
 
     public void writeStructDecl(STO struc){
@@ -328,7 +330,7 @@ public class AssemblyCodeGenerator {
         newline();
     }
 
-    int ctorcounter = 1;
+    public int ctorcounter = 1;
     String ctor = "";
     public void writeStructCtor(){
         sectionAlign(BSS_SEC, iString(4));
@@ -342,6 +344,9 @@ public class AssemblyCodeGenerator {
         newline();
     }
 
+    public void writeDtor(STO sto,){
+
+    }
 
     public boolean structCtor = false;
     public boolean struct = false;
@@ -1100,13 +1105,16 @@ public class AssemblyCodeGenerator {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
         String globalreg = init.getSparcBase() == "%g0" ? G0 : FP;
         String register = init.getType().isFloat() ? f0 : O1; // check for float f0 or o0
+        String off = init.isGlobal() ? init.getName() : iString(init.getSparcOffset());
 
 
         String load = init.isStructdef() ? O1 : L7;
         if (init.getType().isBool()) {
             register = O0;
         }
-        String off = init.isGlobal() ? init.getName() : iString(init.getSparcOffset());
+        if (init.isStructVar()){
+            off = iString(getOffset());
+        }
 
         writeAssembly(TWO_PARAM, SET_OP, off, load);
         writeAssembly(THREE_PARAM, ADD_OP, globalreg, load, load);
