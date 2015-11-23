@@ -270,11 +270,12 @@ public class AssemblyCodeGenerator {
     public void writeDot(STO stru, STO sto){
         int off = -sto.getSparcOffset()-4;
         String offset = stru.isGlobal() ? stru.getName() :iString(stru.getSparcOffset());
+        String base = stru.isGlobal() ? "%g0" : "%fp";
 
         indent_level =2;
         writeAssembly("! "+stru.getName()+"."+sto.getName()+"\n");
         writeAssembly(TWO_PARAM, SET_OP, offset, O0);
-        writeAssembly(THREE_PARAM, ADD_OP, stru.getSparcBase(), O0, O0);
+        writeAssembly(THREE_PARAM, ADD_OP, base, O0, O0);
         writeAssembly(TWO_PARAM, SET_OP, iString(off), O1);
         writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
         writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O0);
