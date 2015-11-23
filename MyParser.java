@@ -324,6 +324,7 @@ class MyParser extends parser {
 
         sto.markModVal();
         m_symtab.insert(sto);
+        ag.writeStructDecl(sto);
 
     }
 

@@ -268,11 +268,10 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeStructDecl(STO struc){
-        increaseIndent();
+        funcIndent();
 
-        writeAssembly(TWO_PARAM, ST_OP, I0, "["+FP +"]");
+        writeAssembly(TWO_PARAM, ST_OP, I0, "["+FP +"+68"+"]");
         newline();
-        decreaseIndent();
     }
 
     public boolean structCtor = false;
@@ -296,7 +295,11 @@ public class AssemblyCodeGenerator {
         writeAssembly(THREE_PARAM, SAVE_OP, SP, "%g1", SP);
         writeAssembly(NL);
 
-        writeStructDecl(sto);
+        increaseIndent();
+
+        writeAssembly(TWO_PARAM, ST_OP, I0, "["+FP +"+68"+"]");
+        newline();
+        decreaseIndent();
         indent_level = 0;
     }
 
@@ -342,6 +345,8 @@ public class AssemblyCodeGenerator {
         increaseIndent();
         String param = paramtypelist(sto);
         String name = sto.getName();
+        int posoffset = Math.abs(getOffset());
+
         if(struct == true){
             if(structCtor == false) {
                 name = name + ".$" + name;
@@ -349,6 +354,7 @@ public class AssemblyCodeGenerator {
             else{
                 name = name + "." + name;
             }
+            posoffset = 0;
             struct = false;
         }
 
@@ -358,7 +364,6 @@ public class AssemblyCodeGenerator {
 
 
 
-        int posoffset = Math.abs(getOffset());
         writeAssembly("%s %s\n", String.format(SAVE_FUNC, name, param), String.format(OFFSET_TOTAL, iString(posoffset)));
 
         decreaseIndent();
@@ -378,6 +383,7 @@ public class AssemblyCodeGenerator {
     //simple function decl
     //TODO: does not take care of parameters yet
     public void writeFunctionDecl_1(STO sto) {
+        indent_level=0;
         offset = 0;
         func = true;
         infunc = sto.getName();
