@@ -293,7 +293,7 @@ public class AssemblyCodeGenerator {
             decreaseIndent();
             writeAssembly(struc.getName()+":\n");
             increaseIndent();
-            writeAssembly(SKIP, iString(4));
+            writeAssembly(SKIP, iString(struc.getType().getSize()));
             sectionAlign(TEXT_SEC, iString(4));
 
             writeGlobalAuto(struc, struc);
@@ -307,6 +307,8 @@ public class AssemblyCodeGenerator {
     public void writeBasicStruct(STO struc){
         int size = -struc.getType().getSize();
         String name = struc.getType().getName();
+        String base = struc.isGlobal() ?  "%g0": "%fp";
+
         funcIndent();
         struc.setSparcOffset(size + getOffset());
         offset = offset + size;
@@ -319,7 +321,7 @@ public class AssemblyCodeGenerator {
 
         writeAssembly(TWO_PARAM,SET_OP, ctor, O0);
         writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
-        writeAssembly(THREE_PARAM, ADD_OP, struc.getSparcBase(), O1, O1);
+        writeAssembly(THREE_PARAM, ADD_OP, base, O1, O1);
         writeAssembly(TWO_PARAM, ST_OP, O1, "["+O0+"]");
         newline();
     }
