@@ -281,7 +281,9 @@ public class AssemblyCodeGenerator {
         writeStructCtor();
 
         writeAssembly(TWO_PARAM,SET_OP, ctor, O0);
-        setaddst(O1, iString(size));
+        writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+        writeAssembly(TWO_PARAM, ST_OP, O1, "["+O0+"]");
         newline();
     }
 
