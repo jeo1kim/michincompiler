@@ -1194,7 +1194,8 @@ class MyParser extends parser {
 
         ret.setStructFunc(true);
         ret.setMyStruct(sto.getType().getScope());
-
+        ret.setStructVar();
+        ag.writeDot(sto, ret);
         return ret;
     }
 

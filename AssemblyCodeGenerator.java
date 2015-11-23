@@ -267,6 +267,22 @@ public class AssemblyCodeGenerator {
         }
     }
 
+    public void writeDot(STO stru, STO sto){
+        int off = -sto.getSparcOffset()-4;
+        indent_level =2;
+        writeAssembly("! "+stru.getName()+"."+sto.getName()+"\n");
+        writeAssembly(TWO_PARAM, SET_OP, iString(stru.getSparcOffset()), O0);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
+        writeAssembly(TWO_PARAM, SET_OP, iString(off), O1);
+        writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
+        writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O0);
+        decreaseOffset();
+        writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), O1);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+        writeAssembly(TWO_PARAM, ST_OP, O0,"["+O1+"]" );
+        newline();
+    }
+
     public void writeStructDecl(STO struc){
         int size = -struc.getType().getSize();
         String name = struc.getType().getName();
@@ -468,7 +484,13 @@ public class AssemblyCodeGenerator {
         if (sto.isGlobal() || sto.isStatic()) {
             writeAssembly(TWO_PARAM, SET_OP, sto.getName(), O1);
             writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
-        } else {
+        }
+        else if(sto.isStructVar()){
+            writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), O1);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+            writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]" ,O1);
+        }
+        else {
             writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()+offset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
         }
