@@ -284,6 +284,25 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeStructDecl(STO struc){
+        if(struc.isGlobal()){
+            indent_level=1;
+            sectionAlign(BSS_SEC, iString(4));
+            writeAssembly(GLOBAL, struc.getName());
+            decreaseIndent();
+            writeAssembly(struc.getName()+":\n");
+            increaseIndent();
+            writeAssembly(SKIP, iString(struc.getType().getSize()));
+            sectionAlign(TEXT_SEC, iString(4));
+
+            writeGlobalAuto(struc, struc);
+            sectionAlign(TEXT_SEC, iString(4));
+            return;
+        }
+
+        writeBasicStruct(struc);
+    }
+
+    public void writeBasicStruct(STO struc){
         int size = -struc.getType().getSize();
         String name = struc.getType().getName();
         funcIndent();
@@ -323,11 +342,11 @@ public class AssemblyCodeGenerator {
     public void writeStruct(STO sto){
         String name = sto.getName();
         String param = paramtypelist(sto);
-        String funcvoid = name+"."+name + param;
+        String funcvoid = name+"."+name;
         struct = true;
 
         if(structCtor == true){
-            funcvoid = name+".$"+name + param;
+            funcvoid = name+".$"+name;
         }
         structCtor = !structCtor;
         indent_level = 0;
@@ -1455,6 +1474,10 @@ public class AssemblyCodeGenerator {
         sto.setSparcBase("%g0");
 
         String name = sto.getName();
+        if(sto.isStructdef()){
+
+        }
+
 
         if ((init == null) || (auto = sto.getAuto())) {
             sectioncheck = BSS_SEC;
@@ -1763,12 +1786,17 @@ public class AssemblyCodeGenerator {
 
         writeAssembly(NL);
         increaseIndent();
-        writeAssembly(String.format(var_comment, sName, iName));
-        writeAssembly(TWO_PARAM, SET_OP, sName, O1);
-        writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
-        writeInit(sto, init); // do the init registers
-        writeAssembly(NL);
-
+        if(sto.isStructdef()){
+            writeBasicStruct(sto);
+            decreaseIndent();
+        }
+        else{
+            writeAssembly(String.format(var_comment, sName, iName));
+            writeAssembly(TWO_PARAM, SET_OP, sName, O1);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
+            writeInit(sto, init); // do the init registers
+            writeAssembly(NL);
+        }
         writeAssembly(String.format(endFunc_cmt, sName));
         call(String.format(GL_AUTO_INIT, sName + ".fini"));
         retRest();
@@ -1784,9 +1812,14 @@ public class AssemblyCodeGenerator {
         writeAssembly(THREE_PARAM, SAVE_OP, SP, "-96", SP); // might need to change offset
         retRest();
 
-        sectionAlign(INIT_SEC, iString(sto.getType().getSize()));
+        sectionAlign(INIT_SEC, iString(4));
         call(String.format(GL_AUTO_INIT, sName));
     }
+
+    public void writeAuto(){
+
+    }
+
     public void funcIndent() {
         if (func) {
             indent_level = 2;
