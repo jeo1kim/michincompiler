@@ -351,7 +351,7 @@ public class AssemblyCodeGenerator {
         structCtor = !structCtor;
         indent_level = 0;
 
-        writeAssembly(VARCOLON, funcvoid);
+        writeAssembly(VARCOLON, funcvoid+param);
 
         increaseIndent();
         writeAssembly(TWO_PARAM, SET_OP, String.format(SAVE_FUNC, funcvoid, param), "%g1");
