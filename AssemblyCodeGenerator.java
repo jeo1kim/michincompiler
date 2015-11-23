@@ -344,7 +344,7 @@ public class AssemblyCodeGenerator {
         newline();
     }
 
-    public void writeDtor(STO sto,){
+    public void writeDtor(STO sto){
 
     }
 
