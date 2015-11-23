@@ -267,6 +267,39 @@ public class AssemblyCodeGenerator {
         }
     }
 
+    public void writeStructDecl(STO struc){
+        increaseIndent();
+
+        writeAssembly(TWO_PARAM, ST_OP, I0, "["+FP +"]");
+        newline();
+        decreaseIndent();
+    }
+
+    public boolean structCtor = false;
+    public boolean struct = false;
+    public void writeStruct(STO sto){
+        String name = sto.getName();
+        String param = paramtypelist(sto);
+        String funcvoid = name+"."+name + param;
+        struct = true;
+
+        if(structCtor == true){
+            funcvoid = name+".$"+name + param;
+        }
+        structCtor = !structCtor;
+        indent_level = 0;
+
+        writeAssembly(VARCOLON, funcvoid);
+
+        increaseIndent();
+        writeAssembly(TWO_PARAM, SET_OP, String.format(SAVE_FUNC, funcvoid, param), "%g1");
+        writeAssembly(THREE_PARAM, SAVE_OP, SP, "%g1", SP);
+        writeAssembly(NL);
+
+        writeStructDecl(sto);
+        indent_level = 0;
+    }
+
     public void writeFuncCall(STO newex, STO oldfunc){
         funcIndent();
         writeAssembly("! "+ newex.getName()+"(...)\n");
@@ -308,16 +341,30 @@ public class AssemblyCodeGenerator {
     public void writeCloseFunc(STO sto) {
         increaseIndent();
         String param = paramtypelist(sto);
-        call(String.format(FINI_FUNC, sto.getName(), param));
+        String name = sto.getName();
+        if(struct == true){
+            if(structCtor == false) {
+                name = name + ".$" + name;
+            }
+            else{
+                name = name + "." + name;
+            }
+            struct = false;
+        }
+
+
+        call(String.format(FINI_FUNC, name, param));
         retRest();
 
+
+
         int posoffset = Math.abs(getOffset());
-        writeAssembly("%s %s\n", String.format(SAVE_FUNC, sto.getName(), param), String.format(OFFSET_TOTAL, iString(posoffset)));
+        writeAssembly("%s %s\n", String.format(SAVE_FUNC, name, param), String.format(OFFSET_TOTAL, iString(posoffset)));
 
         decreaseIndent();
         indent_level = 0;
         writeAssembly(NL);
-        writeAssembly(FINI_FUNC, sto.getName(), param);
+        writeAssembly(FINI_FUNC, name, param);
         writeAssembly(":\n");
         increaseIndent();
         int add = -92 + getOffset();
@@ -325,6 +372,7 @@ public class AssemblyCodeGenerator {
         retRest();
 
         func = false;
+        newline();
     }
 
     //simple function decl
@@ -1459,7 +1507,10 @@ public class AssemblyCodeGenerator {
     public String paramtypelist(STO sto){
         String param = "";
         //void if there is no parameter
-        if(sto.getParamVec().size() != 0){
+        if(sto.getParamVec() == null){
+            param = ".void";
+        }
+        else if(sto.getParamVec().size() != 0){
             Vector<STO> paramlist = sto.getParamVec();
             for(STO i : paramlist){
                 param += ".";

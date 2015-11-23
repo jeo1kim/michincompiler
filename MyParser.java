@@ -207,8 +207,8 @@ class MyParser extends parser {
             DoFuncDecl_1_Ctor(id, params);
         } else {
             m_symtab.openScope();
-            return;
         }
+
     }
 
     void DoFuncDecl_1_Ctor(String id, Vector<STO> params) {
@@ -263,6 +263,7 @@ class MyParser extends parser {
     void DoStructdefDecl() {
         StructdefSTO sto = m_symtab.getStruct();
         sto.getType().setScope(m_symtab.getScope());           // set the struct type scope to current scope.
+
     }
 
     void SetStructSize(){
@@ -323,6 +324,7 @@ class MyParser extends parser {
 
         sto.markModVal();
         m_symtab.insert(sto);
+
     }
 
     void DoVarDeclwType(String id, Type typ, boolean stat, Vector<STO> array, STO init) {
@@ -766,9 +768,12 @@ class MyParser extends parser {
         m_symtab.insert(sto); // should go in the global
         m_symtab.openScope();
         m_symtab.setStruct(sto);
+        ag.writeStruct(sto);
     }
 
     void DoStructBlockClose() {
+        ag.writeStruct(m_symtab.getStruct());
+        ag.writeCloseFunc(m_symtab.getStruct());
         m_symtab.closeScope();
         m_symtab.setStruct(null);  //close the current struct;
     }
@@ -1024,6 +1029,9 @@ class MyParser extends parser {
             return ret;
         } else if (!func.isRef()) {
             ret.markRVal();
+            if(sto.isStructdef()){
+                return ret;
+            }
             ag.writeFuncCall(ret, sto);
             return ret;
         }
