@@ -308,8 +308,8 @@ public class AssemblyCodeGenerator {
     public void writeStructCtor(){
         sectionAlign(BSS_SEC, iString(4));
         decreaseIndent();
-        ctor = ".$$.ctorDtor." + iString(ctorcounter++)+":";
-        writeAssembly(ctor+"\n");
+        ctor = ".$$.ctorDtor." + iString(ctorcounter++);
+        writeAssembly(ctor+":\n");
         increaseIndent();
         writeAssembly(SKIP, iString(4));
 
