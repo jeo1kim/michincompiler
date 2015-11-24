@@ -586,7 +586,7 @@ public class AssemblyCodeGenerator {
             //fixed to become +offset when creating isStructVar but this generated error for most e.g 101b
             //writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()+offset), O1);
             //TODO: switching back to original for this reason need to come back to fix it 11/23/2015
-            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()), O1);
+            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()+offset), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             if(sto.isRef()){
                 writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);

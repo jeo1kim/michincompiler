@@ -1022,7 +1022,7 @@ class MyParser extends parser {
         }
         boolean recursive = false;
         //check if function is called inside itself
-        if(sto.getName() == m_symtab.getFunc().getName()){
+        if(m_symtab.getFunc() != null && sto.getName() == m_symtab.getFunc().getName()){
             recursive = true;
         }
 
