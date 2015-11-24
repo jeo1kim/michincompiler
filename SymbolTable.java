@@ -41,12 +41,14 @@ class SymbolTable {
                 sto.setSparcBase("%g0");
 
             }
+            else{
+                sto.setSparcBase("%fp");
+            }
             m_scopeGlobal.InsertLocal(sto);
         }
         else {
             Scope scope = m_stkScopes.peek();
-            if(scope == m_scopeGlobal)
-            {
+            if(scope == m_scopeGlobal) {
                 sto.setGlobal();
 
             }
