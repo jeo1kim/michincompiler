@@ -1469,7 +1469,7 @@ public class AssemblyCodeGenerator {
         funcIndent();
         writeAssembly(NL);
 
-        if(init.isRef()){
+        if(init.isRef() || init.getisArray()){
             writeAssembly("! &" + init.getName() + "\n");
             setadd(init, 0);
             decreaseOffset();
@@ -1504,12 +1504,12 @@ public class AssemblyCodeGenerator {
             writeAssembly("! return " + init.getName() + ";\n");
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
-            if(init.isExpr()){ //if the value was modified e.g went to binary 
+            //if(init.isExpr()){ //if the value was modified e.g went to binary 
             //shouldnt go in when it return x + y and x an y is from parameter
             //isfunc test 209a
             //if(init.isRef() || init.getisArray()){
-                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
-            }
+            //    writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+            //}
             if(init.getType().isFloat()){
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
             }else{
