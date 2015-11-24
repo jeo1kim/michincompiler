@@ -344,7 +344,7 @@ class MyParser extends parser {
             }
         }
 
-
+        //System.err.println("var type: "+ typ.getName());
         VarSTO sto = new VarSTO(id, typ);
         sto.setStatic(stat); // set Variable static
         sto.setParamCalled();
@@ -1545,7 +1545,9 @@ class MyParser extends parser {
                 //m_symtab.setFunc(null);
                 ExprSTO ret = new ExprSTO("result of " + result.getName());
                 ret.setRef(true);
-                ag.writeReturn(a, m_symtab.getFunc());
+                ret.setSparcOffset(a.getSparcOffset());
+                ret.setType(a.getType());
+                ag.writeReturn(ret, m_symtab.getFunc());
                 return ret;
             }
 
@@ -1569,8 +1571,9 @@ class MyParser extends parser {
         }
 
         ExprSTO ret = new ExprSTO(sto.getName(), sto.getType().getNextType());
+        ret.setSparcOffset(sto.getSparcOffset());
         ret.markModVal();
-
+        ret.setisPointer();
         return ret;
     }
 
@@ -1738,6 +1741,7 @@ class MyParser extends parser {
         ptr.setNextType(expr.getType());
 
         ExprSTO ret = new ExprSTO(expr.getName(), ptr);
+        ret.setSparcOffset(expr.getSparcOffset());
         ret.markRVal();
         ret.setRef(true);
 

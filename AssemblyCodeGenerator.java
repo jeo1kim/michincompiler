@@ -652,7 +652,7 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeAssigntmentSto(STO sto) {
-
+        writeAssembly("! %s\n", sto.getName());
         if (sto.isGlobal() || sto.isStatic()) {
             writeAssembly(TWO_PARAM, SET_OP, sto.getName(), O1);
             writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
@@ -691,7 +691,19 @@ public class AssemblyCodeGenerator {
         writeAssembly(String.format(var_comment, "writeAssignExpr "+sName, iName));
         //writeAssembly("current offset in Assign: %s\n", iString(getOffset()));
 
-        writeAssembly("! %s\n", iName);
+        //writeAssembly("! %s\n", iName);
+        if(expr.isRef()){
+            writeAssembly("! &%s\n", iName);
+            writeAssembly(TWO_PARAM, SET_OP, iString(expr.getSparcOffset()), O0);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
+            decreaseOffset();
+            expr.setSparcOffset(getOffset());
+            writeAssembly(TWO_PARAM, SET_OP, iString(expr.getSparcOffset()), O1);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+            writeAssembly(TWO_PARAM, ST_OP, O0, "[" + O1 + "]");
+
+        }
+        writeAssembly("! %s = %s \n ", stoDes.getName(), expr.getName());
         if (expr.isConst() && !(stoDes.getisArray())) {
             writeAssigntmentSto(stoDes);
 
@@ -1240,7 +1252,7 @@ public class AssemblyCodeGenerator {
 
     }
 
-    ////////////////////////calling functions
+    ////////////////////////functions call
     //used in cout
     public void setAddLoad(STO init) {
         String global = init.getSparcBase() == "%g0" ? init.getName() : iString(init.getSparcOffset());
@@ -1335,7 +1347,7 @@ public class AssemblyCodeGenerator {
             } else {
                 writeAssembly(TWO_PARAM, SET_OP, val, register);
             }
-        }else if(init.getisArray() || init.isRef()){
+        }else if(init.getisArray() || init.isRef() || init.getisPointer()){
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", L7);
@@ -1349,6 +1361,7 @@ public class AssemblyCodeGenerator {
     }
 
     //used when initializing values e.g x = 2
+    //////////////writeInit
     public void writeInit(STO sto, STO init) {
         String val = stoValue(init); // stoVal gets teh value of sto.
         String register = init.getType().isFloat() ? f0 : O0; // check for float f0 or o0
@@ -1538,7 +1551,27 @@ public class AssemblyCodeGenerator {
         funcIndent();
         writeAssembly(NL);
 
-        if (init.isConst()) {
+        if(init.isRef() || init.getisArray()){
+            writeAssembly("! &" + init.getName() + "\n");
+            setadd(init, 0);
+            decreaseOffset();
+            init.setSparcOffset(getOffset());
+            setadd(init, 1);
+            writeAssembly(TWO_PARAM, ST_OP, O0, "[" + O1 + "]");
+            newline();
+
+            writeAssembly("! return " + init.getName() + ";\n");
+
+            writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+            if(init.getType().isFloat()){
+                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
+            }else{
+                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
+            }
+
+        }
+        else if (init.isConst()) {
             writeAssembly("! return " + val + ";\n");
             if (init.getType().isFloat()) {
                 writeConstFloatFuncCall(init, 0);
@@ -1553,12 +1586,12 @@ public class AssemblyCodeGenerator {
             writeAssembly("! return " + init.getName() + ";\n");
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
-            if(init.isExpr()){ //if the value was modified e.g went to binary 
+            //if(init.isExpr()){ //if the value was modified e.g went to binary 
             //shouldnt go in when it return x + y and x an y is from parameter
             //isfunc test 209a
             //if(init.isRef() || init.getisArray()){
-                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
-            }
+            //    writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
+            //}
             if(init.getType().isFloat()){
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
             }else{
@@ -1642,7 +1675,7 @@ public class AssemblyCodeGenerator {
         sto.setSparcOffset(getOffset());
     }
 
-    //TODO: take care of when init not there too
+    //////////////writeLocalVariable
     public void writeLocalVariable(STO sto, STO init) {
         funcIndent();
         String sectioncheck;
@@ -1659,7 +1692,6 @@ public class AssemblyCodeGenerator {
         }
 
         if ((init != null)) {     //check if init is not null store the value
-
             val = stoValue(init); // stoVal gets tehq value of sto.
             String sName = sto.getName();
             String iName = init.getName();
@@ -1674,7 +1706,6 @@ public class AssemblyCodeGenerator {
                     floatreg = 0;
                     writeConstFloat(init);
                     writeAssembly(TWO_PARAM, ST_OP, f0, "[" + O1 + "]");
-                    decreaseIndent();
                     writeAssembly(NL);
                 } else {
                     writeInit(sto, init);
@@ -1682,6 +1713,17 @@ public class AssemblyCodeGenerator {
             } else {
                 //set value
                 writeInit(sto, init);
+            }
+
+            if(sto.getType().isPointer()){
+                increaseIndent();
+                setaddld(O0, iString(sto.getSparcOffset()));
+                call(ptrCheckCall);
+                decreaseOffset();
+                sto.setSparcOffset(getOffset());
+                setaddst(O0, iString(sto.getSparcOffset()));
+                newline();
+                decreaseIndent();
             }
         }
         funcDedent();
@@ -1892,10 +1934,17 @@ public class AssemblyCodeGenerator {
                 callCout(sto);
                 return;
             }
-            if(sto.getisArray()){
-                writeCallStored(sto, 1); //is it 0 or 1 ? 1 when called as parameter 
-            }else if(sto.isRef()){
+           if(sto.isRef() || sto.getisPointer()){
                 writeCallStored(sto, 1);
+            }
+             //203g 0 209q 1
+            else if(sto.getisArray()){
+                //is it 0 or 1 ? 1 when called as parameter 
+                if(sto.getType().isFloat()){
+                    writeCallStored(sto, 0);
+                }else{
+                    writeCallStored(sto, 1); 
+                }
             }
             else{
                 setAddLoad(sto);
