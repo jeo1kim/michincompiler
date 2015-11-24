@@ -1441,6 +1441,7 @@ public class AssemblyCodeGenerator {
         String regval = "";
 
         if(storeval == I0){
+            regval = "%f0";
             register = I0;
         }
         else{
