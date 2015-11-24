@@ -319,6 +319,7 @@ class MyParser extends parser {
             ret.setType(temp);
             ret.markModVal();
             m_symtab.insert(ret);
+            ag.writeStructArray(ret, array, temp);
             return;
         }
 

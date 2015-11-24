@@ -323,12 +323,29 @@ public class AssemblyCodeGenerator {
         writeAssembly(ONE_PARAM, CALL_OP, name);
         writeAssembly(NOP_OP);
         writeStructCtor();
-
         writeAssembly(TWO_PARAM,SET_OP, ctor, O0);
+
         writeAssembly(TWO_PARAM, SET_OP, off, O1);
         writeAssembly(THREE_PARAM, ADD_OP, base, O1, O1);
         writeAssembly(TWO_PARAM, ST_OP, O1, "["+O0+"]");
         newline();
+    }
+
+
+
+    public void writeStructArray(STO stru, Vector<STO> arr, Type temp){
+        if(stru.isGlobal()) {
+            writeArrayDeclGlobal(stru, arr, temp);
+            writeGlobalAuto(stru, stru);
+        }
+        else{
+            while(arraycount < stru.getType().getSize()) {
+                writeArrayStruct(stru);
+            }
+        }
+
+
+        arraycount = 0;
     }
 
     public int ctorcounter = 1;
@@ -346,6 +363,68 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeDtor(STO sto){
+
+    }
+
+    public void arrayStruct(STO struc){
+        int size = struc.getType().getBaseType().getSize();
+        String global = struc.isGlobal() ? struc.getName() : iString(struc.getSparcOffset());
+        String globalreg = struc.isGlobal() ? G0 : FP;
+        if(!struc.isGlobal()){
+            global = iString(struTot = -size*struc.getType().getSize());
+        }
+
+        writeAssembly(TWO_PARAM, SET_OP, iString(arraycount++), O0);
+        //    writeCallStored(expr, 0);
+        writeAssembly(TWO_PARAM, SET_OP, iString(struc.getType().getSize()), O1);
+        call(arrCheckCall);
+        writeAssembly(TWO_PARAM, SET_OP, iString(size), O1);
+        call(MUL_OP);
+        writeAssembly(TWO_PARAM, MOV_OP, O0, O1);
+
+        writeAssembly(TWO_PARAM, SET_OP, global, O0);
+        writeAssembly(THREE_PARAM, ADD_OP, globalreg, O0, O0);
+//        if(sto.isRef()){ //if it is called from paramter and the paramter is a ref
+//            writeAssembly(TWO_PARAM, LD_OP, "[" + O0 + "]", O0);
+//        }
+        call(ptrCheckCall);
+        writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O0);
+//        decreaseOffset();
+//        stoDes.setSparcOffset(getOffset());
+        setaddst(O0, iString(struTot+(arraycount*-4)));
+        newline();
+    }
+    int arraycount = 0;
+    int struTot = 0;
+    public void writeArrayStruct(STO struc){
+
+        String name = struc.getType().getBaseType().getName();
+
+        funcIndent();
+        writeAssembly("! writeArrayStruct\n");
+
+        arrayStruct(struc);
+        String size = struc.isGlobal() ? iString(arraycount * -4) :iString(struTot+(arraycount*-4));
+
+
+        writeAssembly(TWO_PARAM, SET_OP, size, O0);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
+        writeAssembly(TWO_PARAM, LD_OP, "["+O0+"]", O0);
+        name = name+"."+name+".void";
+        writeAssembly(ONE_PARAM, CALL_OP, name);
+        writeAssembly(NOP_OP);
+        newline();
+
+        writeStructCtor();
+        if(struc.getType().isArray()){
+            writeAssembly(TWO_PARAM, SET_OP, ".$$.ctorDtor." + iString(ctorcounter-1), O0);
+            writeAssembly(TWO_PARAM, SET_OP, size, O1);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+            writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);
+            writeAssembly(TWO_PARAM, ST_OP, O1, "["+O0+"]");
+            newline();
+            return;
+        }
 
     }
 
@@ -1543,6 +1622,9 @@ public class AssemblyCodeGenerator {
     public void writeArrayDeclGlobal(STO sto, Vector<STO> array, Type temp){
         int size = temp.getSize();
         int tempsize = size*4;
+        if (sto.isStructdef()){
+            tempsize = size*temp.getBaseType().getSize();
+        }
         if (sto.isStatic() || sto.isGlobal()) {
             increaseIndent();
             sectionAlign(BSS_SEC, "4");
@@ -1926,6 +2008,7 @@ public class AssemblyCodeGenerator {
     }
 
 
+
     private static final String endFunc_cmt = "! End of function .$.init.%s\n";
 
     public void writeGlobalAuto(STO sto, STO init) {
@@ -1948,7 +2031,14 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
         increaseIndent();
         if(sto.isStructdef()){
-            writeBasicStruct(sto);
+            if(sto.getType().isArray()){
+                while(arraycount < sto.getType().getSize()) {
+                    writeArrayStruct(sto);
+                }
+            }
+            else {
+                writeBasicStruct(sto);
+            }
             decreaseIndent();
         }
         else{
