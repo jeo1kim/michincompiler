@@ -43,8 +43,10 @@ class SymbolTable {
             }
             else{
                 sto.setSparcBase("%fp");
+
             }
-            m_scopeGlobal.InsertLocal(sto);
+            scope.InsertLocal(sto);
+
         }
         else {
             Scope scope = m_stkScopes.peek();
