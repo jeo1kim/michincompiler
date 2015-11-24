@@ -38,6 +38,8 @@ abstract class STO
 	private STO m_array;
 	private boolean inStruct = false;
 
+	private boolean m_pointer = false;
+
 	public boolean isStructVar(){
 		return inStruct;
 	}
@@ -106,6 +108,14 @@ abstract class STO
 		m_paramCalled = true;
 	}
 	public boolean getParamCalled(){ return m_paramCalled; }
+
+	public void setisPointer(){
+		m_pointer = true;
+	}
+
+	public boolean getisPointer(){ return m_pointer; }
+	
+
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
