@@ -1858,7 +1858,15 @@ public class AssemblyCodeGenerator {
         writeAssembly(TWO_PARAM, ST_OP, O0, "[" + O1 + "]");
         funcDedent();
     }
-
+    public void convertToFloatTypeCast(String store, String fitvar){
+        decreaseOffset();
+        writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), L7);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+        writeAssembly(TWO_PARAM, ST_OP, store, "[" + L7 + "]");
+        //f0 when (float)b
+        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", fitvar);
+        writeAssembly(TWO_PARAM, FITOS, fitvar, fitvar);
+    }
 
     public void writeTypeCast(STO before, STO after){
         funcIndent();
@@ -1886,10 +1894,12 @@ public class AssemblyCodeGenerator {
                 after.setSparcOffset(getOffset());
 
                 if(afT.isInt()){
-                    setaddst(f0, iString(after.getSparcOffset()));
+                    setaddst(O0, iString(after.getSparcOffset()));
                 }
                 else if(afT.isFloat()){
-                    convertToFloatBinary(after, 0);
+                    //f0 when (float)b
+                    convertToFloatTypeCast(O0, f0);
+
                     setaddst(f0, iString(after.getSparcOffset()));
                 }
 
@@ -1900,12 +1910,8 @@ public class AssemblyCodeGenerator {
                 after.setSparcOffset(getOffset());
                 if(beT.isFloat()){
                     //not sure why but cant user convertToFloatBinary b/c use G0;
-                    decreaseOffset();
-                    writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), L7);
-                    writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
-                    writeAssembly(TWO_PARAM, ST_OP, G0, "[" + L7 + "]");
-                    writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", F1);
-                    writeAssembly(TWO_PARAM, FITOS, F1, F1);
+                    //(bool)f
+                    convertToFloatTypeCast(G0, F1);
                     
                     writeAssembly(TWO_PARAM, FCMP_OP, f0, F1);
                     writeAssembly(NOP_OP);
@@ -1939,19 +1945,21 @@ public class AssemblyCodeGenerator {
                 writeCallStored(before, 0);
                 decreaseOffset();
                 after.setSparcOffset(getOffset());
-                //convertToFloatBinary(after, 0); //cant use because need to load to f0
-                writeAssembly(TWO_PARAM, SET_OP, iString(after.getSparcOffset()), L7);
-                writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
-                writeAssembly(TWO_PARAM, ST_OP, O0, "[" + L7 + "]");
-                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
-                writeAssembly(TWO_PARAM, FITOS, f0, f0);
+                convertToFloatTypeCast(O0, f0);
+       
 
                 setaddst(f0, iString(after.getSparcOffset()));
             }else { //when the type cast is done with the same type
-                setAddLoad(before);
-                if(!beT.isPointer() && !beT.isFloat()){
-                    writeAssembly(TWO_PARAM, FSTOI_OP, f0, f0);
+                if(beT.isPointer() || before.isRef()){
+                    //check 310d *(int*)&f
+                    setAddLoad(before);
+                }else {
+                    //for common int to int float to float
+                    writeCallStored(before, 0);
                 }
+                /*if(!beT.isPointer() && !beT.isFloat()){
+                    writeAssembly(TWO_PARAM, FSTOI_OP, f0, f0);
+                }*/
                 decreaseOffset();
                 after.setSparcOffset(getOffset());
                 if(before.isRef() || before.getType().isInt() || before.getType().isBool()){
@@ -1961,12 +1969,7 @@ public class AssemblyCodeGenerator {
                 }
             }
         }
-        else {
-            //if const
-            if(beT.isInt() && afT.isFloat()){
-                writeConstFloat(before); //check to make sure it is not writeconstfloatfunccall
-            }
-        }
+
         newline();
         funcDedent();
     }
