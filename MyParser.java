@@ -1039,17 +1039,17 @@ class MyParser extends parser {
         if (func.isRef()) {
             ret.markModVal();
             ret.setRef(true);
-            //sto.setParamVec(paramList); //did it because it only gets the first func for overloaded functions
-            sto.setParamVec(argTyp);
+            sto.setParamVec(paramList); //did it because it only gets the first func for overloaded functions
+            //sto.setParamVec(argTyp);
             ag.writeFuncCall(ret, sto);
             return ret;
         } else if (!func.isRef()) {
             ret.markRVal();
-            //sto.setParamVec(paramList);
+            sto.setParamVec(paramList);
             if(sto.isStructdef()){
                 return ret;
             }
-            sto.setParamVec(argTyp);
+            //sto.setParamVec(argTyp);
             ag.writeFuncCall(ret, sto);
             return ret;
         }
