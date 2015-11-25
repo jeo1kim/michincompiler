@@ -1859,6 +1859,7 @@ public class AssemblyCodeGenerator {
         funcDedent();
     }
 
+
     public void writeTypeCast(STO before, STO after){
         funcIndent();
         Type beT = before.getType();
@@ -1934,10 +1935,21 @@ public class AssemblyCodeGenerator {
                 setaddst(f0, iString(after.getSparcOffset()));
             }
             else if(beT.isInt() && afT.isFloat()){
-                writeConstFloat(before); //check to make sure it is not writeconstfloatfunccall
+                //writeConstFloat(before); //check to make sure it is not writeconstfloatfunccall
+                writeCallStored(before, 0);
+                decreaseOffset();
+                after.setSparcOffset(getOffset());
+                //convertToFloatBinary(after, 0); //cant use because need to load to f0
+                writeAssembly(TWO_PARAM, SET_OP, iString(after.getSparcOffset()), L7);
+                writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+                writeAssembly(TWO_PARAM, ST_OP, O0, "[" + L7 + "]");
+                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
+                writeAssembly(TWO_PARAM, FITOS, f0, f0);
+
+                setaddst(f0, iString(after.getSparcOffset()));
             }else { //when the type cast is done with the same type
                 setAddLoad(before);
-                if(!beT.isPointer()){
+                if(!beT.isPointer() && !beT.isFloat()){
                     writeAssembly(TWO_PARAM, FSTOI_OP, f0, f0);
                 }
                 decreaseOffset();
@@ -1947,6 +1959,12 @@ public class AssemblyCodeGenerator {
                 }else {
                     setaddst(f0, iString(after.getSparcOffset()));
                 }
+            }
+        }
+        else {
+            //if const
+            if(beT.isInt() && afT.isFloat()){
+                writeConstFloat(before); //check to make sure it is not writeconstfloatfunccall
             }
         }
         newline();
