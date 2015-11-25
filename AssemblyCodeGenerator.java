@@ -1868,9 +1868,9 @@ public class AssemblyCodeGenerator {
         if(afT.isPointer()){
             afT = after.getType().getNextType();
         }
-        //TODO: should take care of it in markampersand, fix it later 
+        
         if(!before.isConst()){
-            if(beT.isBool()){
+            if(beT.isBool() && !afT.isBool()){
                 cmpcounter++;
                 writeCallStored(before, 0);
                 writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
@@ -1891,6 +1891,37 @@ public class AssemblyCodeGenerator {
                     convertToFloatBinary(after, 0);
                     setaddst(f0, iString(after.getSparcOffset()));
                 }
+
+            }else if(afT.isBool()){
+                cmpcounter++;
+                writeCallStored(before, 0);
+                decreaseOffset();
+                after.setSparcOffset(getOffset());
+                if(beT.isFloat()){
+                    //not sure why but cant user convertToFloatBinary b/c use G0;
+                    decreaseOffset();
+                    writeAssembly(TWO_PARAM, SET_OP, iString(getOffset()), L7);
+                    writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+                    writeAssembly(TWO_PARAM, ST_OP, G0, "[" + L7 + "]");
+                    writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", F1);
+                    writeAssembly(TWO_PARAM, FITOS, F1, F1);
+                    
+                    writeAssembly(TWO_PARAM, FCMP_OP, f0, F1);
+                    writeAssembly(NOP_OP);
+                    writeAssembly(ONE_PARAM, FBE_OP, String.format(CMP_COUNTER, cmpcounter));
+                }else {
+                    writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
+                    writeAssembly(ONE_PARAM, BE_OP, String.format(CMP_COUNTER, cmpcounter));
+         
+                }
+                writeAssembly(TWO_PARAM, MOV_OP, G0, O0);
+                writeAssembly(TWO_PARAM, MOV_OP, iString(1), O0);
+
+                decreaseIndent();
+                writeAssembly(VARCOLON, String.format(CMP_COUNTER, iString(cmpcounter)));
+                increaseIndent();
+                
+                setaddst(O0, iString(after.getSparcOffset()));
 
             }
             else if(beT.isFloat() && afT.isInt()){
@@ -1923,7 +1954,7 @@ public class AssemblyCodeGenerator {
     }
     public void writeDoPointer(STO before, STO after){
         funcIndent();
-        //tested for *(int*)&f
+        //tested for*(int*)&f
         writeAssembly("! *(%s)\n", before.getName());
         writeCallStored(before, 0);
         call(ptrCheckCall);
