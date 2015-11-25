@@ -1159,12 +1159,15 @@ class MyParser extends parser {
                 con.markRVal();
             }
             if(!cast.isPointer()){
+                ag.writeTypeCast(sto, con);
                 return con;
             }
+            ag.writeTypeCast(sto, ret);
             return ret;
         }
         else {
             ret.markRVal();
+            ag.writeTypeCast(sto, ret);
             return ret;
         }
     }
@@ -1746,7 +1749,7 @@ class MyParser extends parser {
         ret.setSparcOffset(expr.getSparcOffset());
         ret.markRVal();
         ret.setRef(true);
-
+        ag.writeMarkAmpersand(expr, ret);
         return ret;
     }
 

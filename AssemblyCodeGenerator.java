@@ -101,6 +101,7 @@ public class AssemblyCodeGenerator {
     private static final String FMUL_OP = "fmuls  \t";
     private static final String FDIV_OP = "fdivs  \t";
 
+    private static final String FSTOI_OP = "fstoi  \t";
 
     //section
     private static final String SECTION = ".section" + SEPARATOR + "\"%s\"\n";
@@ -692,17 +693,7 @@ public class AssemblyCodeGenerator {
         //writeAssembly("current offset in Assign: %s\n", iString(getOffset()));
 
         //writeAssembly("! %s\n", iName);
-        if(expr.isRef()){
-            writeAssembly("! &%s\n", iName);
-            writeAssembly(TWO_PARAM, SET_OP, iString(expr.getSparcOffset()), O0);
-            writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
-            decreaseOffset();
-            expr.setSparcOffset(getOffset());
-            writeAssembly(TWO_PARAM, SET_OP, iString(expr.getSparcOffset()), O1);
-            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-            writeAssembly(TWO_PARAM, ST_OP, O0, "[" + O1 + "]");
 
-        }
         writeAssembly("! %s = %s \n ", stoDes.getName(), expr.getName());
         if (expr.isConst() && !(stoDes.getisArray())) {
             writeAssigntmentSto(stoDes);
@@ -938,11 +929,11 @@ public class AssemblyCodeGenerator {
     public void writeIncDecExpr(STO a, Operator o, STO result) {
         boolean iffloat = false;
         //arithmetic = true;
-        writeAssembly(var_comment_op, o.getName(), a.getName());
 
         increaseIndent();
         writeAssembly(NL);
         funcIndent();
+        writeAssembly(var_comment_op, o.getName(), a.getName());
 
         writeCallStored(a, 0);
         decreaseOffset();
@@ -1265,6 +1256,9 @@ public class AssemblyCodeGenerator {
         if (init.getType().isBool()) {
             register = O0;
         }
+        if (init.isRef()) {
+            register = O0;
+        }
         if (init.isStructVar()){
             off = iString(getOffset());
         }
@@ -1552,7 +1546,8 @@ public class AssemblyCodeGenerator {
         funcIndent();
         writeAssembly(NL);
 
-        if(init.isRef() || init.getisArray()){
+        //if(init.isRef() || init.getisArray()){
+        if(init.getisArray()){
             writeAssembly("! &" + init.getName() + "\n");
             setadd(init, 0);
             decreaseOffset();
@@ -1850,6 +1845,83 @@ public class AssemblyCodeGenerator {
         //}
         funcDedent();
     }
+
+    public void writeMarkAmpersand(STO before, STO after){
+        funcIndent();
+        writeAssembly("! &%s\n", before.getName());
+        writeAssembly(TWO_PARAM, SET_OP, iString(before.getSparcOffset()), O0);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
+        decreaseOffset();
+        after.setSparcOffset(getOffset());
+        writeAssembly(TWO_PARAM, SET_OP, iString(after.getSparcOffset()), O1);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+        writeAssembly(TWO_PARAM, ST_OP, O0, "[" + O1 + "]");
+        funcDedent();
+    }
+
+    public void writeTypeCast(STO before, STO after){
+        funcIndent();
+        Type beT = before.getType();
+        Type afT = after.getType();
+
+        writeAssembly("! (%s)%s\n", afT.getName(), before.getName());
+        if(afT.isPointer()){
+            afT = after.getType().getNextType();
+        }
+        //TODO: should take care of it in markampersand, fix it later 
+        if(!before.isConst()){
+            if(beT.isBool()){
+                cmpcounter++;
+                writeCallStored(before, 0);
+                writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
+                writeAssembly(ONE_PARAM, BE_OP, String.format(CMP_COUNTER, cmpcounter));
+                writeAssembly(TWO_PARAM, MOV_OP, G0, O0);
+                writeAssembly(TWO_PARAM, MOV_OP, iString(before.getIntValue()), O0);
+
+                decreaseIndent();
+                writeAssembly(VARCOLON, String.format(CMP_COUNTER, iString(cmpcounter)));
+                increaseIndent();
+                decreaseOffset();
+                after.setSparcOffset(getOffset());
+
+                if(afT.isInt()){
+                    setaddst(f0, iString(after.getSparcOffset()));
+                }
+                else if(afT.isFloat()){
+                    convertToFloatBinary(after, 0);
+                    setaddst(f0, iString(after.getSparcOffset()));
+                }
+
+            }
+            else if(beT.isFloat() && afT.isInt()){
+                writeCallStored(before, 0);
+                if(!beT.isPointer()){
+                    writeAssembly(TWO_PARAM, FSTOI_OP, f0, f0);
+                }
+                decreaseOffset();
+                after.setSparcOffset(getOffset());
+                setaddst(f0, iString(after.getSparcOffset()));
+            }
+            else if(beT.isInt() && afT.isFloat()){
+                writeConstFloat(before); //check to make sure it is not writeconstfloatfunccall
+            }else { //when the type cast is done with the same type
+                setAddLoad(before);
+                if(!beT.isPointer()){
+                    writeAssembly(TWO_PARAM, FSTOI_OP, f0, f0);
+                }
+                decreaseOffset();
+                after.setSparcOffset(getOffset());
+                if(before.isRef() || before.getType().isInt() || before.getType().isBool()){
+                    setaddst(O0, iString(after.getSparcOffset()));
+                }else {
+                    setaddst(f0, iString(after.getSparcOffset()));
+                }
+            }
+        }
+        newline();
+        funcDedent();
+    }
+
     public void writeBreakOrCon(String loopname, int size){
         funcIndent();
         if(loopname.equals("break")){
