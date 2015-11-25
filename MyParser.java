@@ -1579,6 +1579,7 @@ class MyParser extends parser {
         ret.setSparcOffset(sto.getSparcOffset());
         ret.markModVal();
         ret.setisPointer();
+        ag.writeDoPointer(sto, ret);
         return ret;
     }
 

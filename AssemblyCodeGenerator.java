@@ -1921,6 +1921,17 @@ public class AssemblyCodeGenerator {
         newline();
         funcDedent();
     }
+    public void writeDoPointer(STO before, STO after){
+        funcIndent();
+        //tested for *(int*)&f
+        writeAssembly("! *(%s)\n", before.getName());
+        writeCallStored(before, 0);
+        call(ptrCheckCall);
+        decreaseOffset();
+        after.setSparcOffset(getOffset());
+        setaddst(O0, iString(after.getSparcOffset()));
+        funcDedent();
+    }
 
     public void writeBreakOrCon(String loopname, int size){
         funcIndent();
