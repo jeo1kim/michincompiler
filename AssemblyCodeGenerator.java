@@ -714,6 +714,10 @@ public class AssemblyCodeGenerator {
             if(stoDes.getisArray() || stoDes.isRef()){
                 writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);
             }
+            //check if it is only expr.isCondt fibo7
+            if(stoDes.getisArray() && expr.isConst()){
+                writeAssembly(TWO_PARAM, SET_OP, expr.getName(), O0);
+            }
             //xwriteAssembly("////////////////////\n");
             writeInit(stoDes, expr);
 
@@ -1548,18 +1552,19 @@ public class AssemblyCodeGenerator {
 
         //if(init.isRef() || init.getisArray()){
         if(init.getisArray()){
-            writeAssembly("! &" + init.getName() + "\n");
+            /*writeAssembly("! &" + init.getName() + "\n");
             setadd(init, 0);
             decreaseOffset();
             init.setSparcOffset(getOffset());
             setadd(init, 1);
             writeAssembly(TWO_PARAM, ST_OP, O0, "[" + O1 + "]");
-            newline();
+            newline();*/
 
             writeAssembly("! return " + init.getName() + ";\n");
 
             writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", L7);
             if(init.getType().isFloat()){
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
             }else{
