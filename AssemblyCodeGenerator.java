@@ -33,6 +33,7 @@ public class AssemblyCodeGenerator {
 
     private int offset = 0; //to check what offset of that value is
     private String infunc = null; //used as a flag to check if it is inside function or not i belive there will be a better way tho
+    private String staticfuncname = ".void."; //used to get the function.paramter.name for static value
     // 6
     //parameters
     private static final String ONE_PARAM = "%s" + SEPARATOR + "%s\n";
@@ -516,9 +517,12 @@ public class AssemblyCodeGenerator {
                 writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
             }
         }
-        /*else if(sto.isVar()){
-            setadd(sto, count);
-        }*/
+        //static int x;
+        else if(sto.isStatic() && (sto.getSparcOffset() == 0)){
+            String name = infunc + staticfuncname + sto.getName();
+            writeAssembly(TWO_PARAM, SET_OP, name, O0);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, O0, O0);
+        }
         else {   
             if(originalparam.isRef()){
                 setadd(sto, count);
@@ -533,22 +537,9 @@ public class AssemblyCodeGenerator {
                     setaddld("%o"+iString(count), iString(sto.getSparcOffset()));
                     convertToFloat(originalparam, sto, iString(count));
                 }
-                else {
-                    //why????? when it is a int that is not a const?
-                    //if(originalparam.isRef()){
-                    //if(!recursive){
-                    //    setadd(sto, count);
-                    //}else{
-                        //if it is int
-                    /*if(originalparam.isRef()){
-                        setadd(sto, count);
-                        if(recursive){
-                            writeAssembly(TWO_PARAM, LD_OP, "["+O0+"]", "%o"+iString(count));
-                        }
-                    }else{*/
-                        setaddld("%o"+iString(count), iString(sto.getSparcOffset()));
-                    //}
-                    //}
+                else {       
+                    setaddld("%o"+iString(count), iString(sto.getSparcOffset()));
+
                 }
             }
         }
@@ -654,8 +645,13 @@ public class AssemblyCodeGenerator {
 
     public void writeAssigntmentSto(STO sto) {
         writeAssembly("! %s\n", sto.getName());
-        if (sto.isGlobal() || sto.isStatic()) {
+        if (sto.isGlobal()) {
             writeAssembly(TWO_PARAM, SET_OP, sto.getName(), O1);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
+        }
+        else if ((sto.isStatic()) && (infunc != null)){
+            String name = infunc + staticfuncname + sto.getName();
+            writeAssembly(TWO_PARAM, SET_OP, name, O1);
             writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
         }
         else if(sto.isStructVar()){
@@ -1778,7 +1774,7 @@ public class AssemblyCodeGenerator {
         //take care of the name change if static is inside function
         if (sto.isStatic()) {
             if (infunc != null) {
-                name = infunc + ".void." + sto.getName();
+                name = infunc + staticfuncname + sto.getName();
             }
             //if sto is static and is not global get the size of the type and write as word even tho it is bss
             if (!sto.isGlobal()) {
@@ -1857,16 +1853,26 @@ public class AssemblyCodeGenerator {
     public void writeMarkAmpersand(STO before, STO after){
         funcIndent();
         writeAssembly("! &%s\n", before.getName());
-        writeAssembly(TWO_PARAM, SET_OP, iString(before.getSparcOffset()), O0);
-        writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
+        //static int x; (int)&x;
+        if((before.isGlobal() || before.isStatic()) && (infunc != null)){
+            String name = infunc + staticfuncname + before.getName();
+            writeAssembly(TWO_PARAM, SET_OP, name, O0);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, O0, O0);
+        }else {
+            writeAssembly(TWO_PARAM, SET_OP, iString(before.getSparcOffset()), O0);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
+        }
+        
         if(before.getisParam()){
             writeAssembly(TWO_PARAM, LD_OP, "[" + O0 + "]", O0);
         }
+
         decreaseOffset();
         after.setSparcOffset(getOffset());
         writeAssembly(TWO_PARAM, SET_OP, iString(after.getSparcOffset()), O1);
         writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
         writeAssembly(TWO_PARAM, ST_OP, O0, "[" + O1 + "]");
+        newline();
         funcDedent();
     }
     public void convertToFloatTypeCast(String store, String fitvar){
@@ -2038,6 +2044,7 @@ public class AssemblyCodeGenerator {
         else{
             param = ".void";
         }
+        staticfuncname = param+".";
         return param;
     }
 
