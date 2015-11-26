@@ -39,6 +39,7 @@ abstract class STO
 	private boolean inStruct = false;
 
 	private boolean m_pointer = false;
+	private boolean m_isparam = false;
 
 	public boolean isStructVar(){
 		return inStruct;
@@ -115,6 +116,10 @@ abstract class STO
 
 	public boolean getisPointer(){ return m_pointer; }
 	
+	public void setisParam(){
+		m_isparam = true;
+	}
+	public boolean getisParam(){ return m_isparam; }
 
 	//----------------------------------------------------------------
 	//

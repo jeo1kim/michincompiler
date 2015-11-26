@@ -746,6 +746,7 @@ class MyParser extends parser {
         }
         for (STO param : params) {
             m_symtab.insert(param);
+            param.setisParam();
         }
         func.setParamVec(params);
         func.setParamCount(params.size()); // set the

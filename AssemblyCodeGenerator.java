@@ -664,7 +664,6 @@ public class AssemblyCodeGenerator {
             writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]" ,O1);
         }
         else {
-            
             writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             if(sto.isRef() || sto.getisPointer()){
@@ -1860,6 +1859,9 @@ public class AssemblyCodeGenerator {
         writeAssembly("! &%s\n", before.getName());
         writeAssembly(TWO_PARAM, SET_OP, iString(before.getSparcOffset()), O0);
         writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
+        if(before.getisParam()){
+            writeAssembly(TWO_PARAM, LD_OP, "[" + O0 + "]", O0);
+        }
         decreaseOffset();
         after.setSparcOffset(getOffset());
         writeAssembly(TWO_PARAM, SET_OP, iString(after.getSparcOffset()), O1);
