@@ -667,7 +667,7 @@ public class AssemblyCodeGenerator {
             
             writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-            if(sto.isRef()){
+            if(sto.isRef() || sto.getisPointer()){
                 writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);
             }
         }
