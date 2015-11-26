@@ -1260,7 +1260,7 @@ public class AssemblyCodeGenerator {
         if (init.getType().isBool()) {
             register = O0;
         }
-        if (init.isRef()) {
+        if (init.isRef() || init.getType().isPointer()) {
             register = O0;
         }
         if (init.isStructVar()){
@@ -1716,7 +1716,9 @@ public class AssemblyCodeGenerator {
                 writeInit(sto, init);
             }
 
-            if(sto.getType().isPointer()){
+            //was needed when writepointer was not there
+            // make int *rawr go wrong typecast_test7.rc
+            /*if(sto.getType().isPointer()){
                 increaseIndent();
                 setaddld(O0, iString(sto.getSparcOffset()));
                 call(ptrCheckCall);
@@ -1725,7 +1727,7 @@ public class AssemblyCodeGenerator {
                 setaddst(O0, iString(sto.getSparcOffset()));
                 newline();
                 decreaseIndent();
-            }
+            }*/
         }
         funcDedent();
     }
@@ -1952,25 +1954,30 @@ public class AssemblyCodeGenerator {
                 after.setSparcOffset(getOffset());
                 convertToFloatTypeCast(O0, f0);
        
-
                 setaddst(f0, iString(after.getSparcOffset()));
             }else { //when the type cast is done with the same type
-                if(beT.isPointer() || before.isRef()){
-                    //check 310d *(int*)&f
-                    setAddLoad(before);
-                }else {
+                if(!beT.isPointer() && !before.isRef()){
                     //for common int to int float to float
                     writeCallStored(before, 0);
+                }else {
+                    //check 310d *(int*)&f
+                    setAddLoad(before);
                 }
                 /*if(!beT.isPointer() && !beT.isFloat()){
                     writeAssembly(TWO_PARAM, FSTOI_OP, f0, f0);
                 }*/
                 decreaseOffset();
                 after.setSparcOffset(getOffset());
-                if(before.isRef() || before.getType().isInt() || before.getType().isBool()){
+                /*if(before.isRef() || before.getType().isInt() || before.getType().isBool()){
                     setaddst(O0, iString(after.getSparcOffset()));
                 }else {
                     setaddst(f0, iString(after.getSparcOffset()));
+                }*/
+                if(before.getType().isFloat()){
+                    setaddst(f0, iString(after.getSparcOffset()));
+                }
+                else{
+                    setaddst(O0, iString(after.getSparcOffset()));
                 }
             }
         }
