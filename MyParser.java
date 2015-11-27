@@ -808,8 +808,8 @@ class MyParser extends parser {
             return;
         }
         for (STO param : params) {
-            m_symtab.insert(param);
             param.setisParam();
+            m_symtab.insert(param);
         }
         func.setParamVec(params);
         func.setParamCount(params.size()); // set the
@@ -1325,6 +1325,9 @@ class MyParser extends parser {
         VarSTO ret = new VarSTO(sto.getName(), sto.getType().getNextType());
         ret.setValue(expr.getValue());
         ret.setisArray();
+        if(sto.getisParam()){
+            ret.setisParam();
+        }
         if(expr.isConst()){
             ret.setisArrayConst();
         }

@@ -715,9 +715,9 @@ public class AssemblyCodeGenerator {
             //check if it is only expr.isCondt fibo7
             //check if expr type is not float 305e   b[0] = 1.1;
             //also check if expr type is not bool bool name will print out true/false 305e
-            if(stoDes.getisArray() && expr.isConst() && !expr.getType().isFloat() && !expr.getType().isBool()){
+            /*if(stoDes.getisArray() && expr.isConst() && !expr.getType().isFloat() && !expr.getType().isBool()){
                 writeAssembly(TWO_PARAM, SET_OP, expr.getName(), O0);
-            }
+            }*/
             //xwriteAssembly("////////////////////\n");
             writeInit(stoDes, expr);
 
@@ -1390,6 +1390,11 @@ public class AssemblyCodeGenerator {
                 writeAssembly(NL);
                 return;
             }
+            //moved to here because it is needed for array value
+            if(!init.getType().isFloat()){
+                 writeAssembly(TWO_PARAM, SET_OP, val, O0);
+            }
+
             if(sto.getisArray() && init.getType().isFloat()){
                 writeConstFloat(init);
                 //writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
@@ -1399,13 +1404,13 @@ public class AssemblyCodeGenerator {
                 register = f0;
             }else{
                 //its here because it is not needed for array 
-                writeAssembly(TWO_PARAM, SET_OP, val, O0);
+                //writeAssembly(TWO_PARAM, SET_OP, val, O0);
             }
         } else {
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
             //int b = *p;
-            if(init.getisPointer()){
+            if(init.getisPointer() || init.getisArray()){
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", L7);
             }
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
@@ -2183,8 +2188,12 @@ public class AssemblyCodeGenerator {
             }
              //203g 0 209q 1
             else if(sto.getisArray()){
-                //is it 0 or 1 ? 1 when called as parameter 
-                if(sto.getisArrayConst()){
+                //is it 0 or 1 ? 1 when called as parameter 305e
+                //if ap[i] then 0 
+                if(sto.getisParam() && !sto.getType().isFloat()){
+                    writeCallStored(sto, 1); 
+                }
+                else if(sto.getisArrayConst()){
                     writeCallStored(sto, 0);
                 }else{
                     writeCallStored(sto, 1); 
