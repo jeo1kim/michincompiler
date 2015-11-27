@@ -328,7 +328,68 @@ class MyParser extends parser {
         ag.writeStructDecl(sto);
 
     }
+    void DoForeachVarDecl(String id, Type typ, boolean stat, Vector<STO> array, STO init){
+        if (init != null && init.isError()) {
+            m_nNumErrors++;
+            return;    // might wanan change with !init.isError()
+        }
+        if (m_symtab.accessLocal(id) != null) {
+            if (m_symtab.getStruct() == null) {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.redeclared_id, id));
+            } else {
+                m_nNumErrors++;
+                m_errors.print(Formatter.toString(ErrorMsg.error13a_Struct, id));
+            }
+        }
+        VarSTO sto = new VarSTO(id, typ);
+        sto.setStatic(stat); // set Variable static
+        sto.setParamCalled();
 
+        if (array.size() > 0) {
+            VarSTO ret = new VarSTO(id, new ArrayType("", array.size()));
+            Type arrType = new ArrayType("", 0);
+            Type temp;
+            for (STO arr : array) {
+                if (arr.isError()) {
+                    m_nNumErrors++;
+                    return;
+                }
+                if (!(arr.getType().isInt())) {
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error10i_Array, getTypeName(arr)));
+                    return;
+                } else if (!arr.isConst()) {
+                    m_nNumErrors++;
+                    m_errors.print(ErrorMsg.error10c_Array);
+                    return;
+                } else if (arr.getIntValue() <= 0) {
+                    m_nNumErrors++;
+                    m_errors.print(Formatter.toString(ErrorMsg.error10z_Array, arr.getIntValue()));
+                    return;
+                }
+            }
+
+            temp = DoArrayType(array, typ, arrType, 0);
+
+            ret.setType(temp);
+
+            ret.markModLVal();
+            ret.setStatic(stat);
+            //ret.setisArray();
+            m_symtab.insert(ret);
+            ret.setParamCalled();
+            //ag.writeArrayDeclGlobal(ret, array, temp);
+            ag.writeForEachVarDecl(ret, init);
+        }else {
+            //sto.setisArray();
+            m_symtab.insert(sto);
+            ag.writeForEachVarDecl(sto, init);
+        }
+        
+        return;
+
+    }
     void DoVarDeclwType(String id, Type typ, boolean stat, Vector<STO> array, STO init) {
         if (init != null && init.isError()) {
             m_nNumErrors++;
@@ -406,6 +467,7 @@ class MyParser extends parser {
 //            }
             m_symtab.insert(ret);
             ret.setParamCalled();
+            //System.err.println(temp.getSize());
             ag.writeArrayDeclGlobal(ret, array, temp);
             return;
         } else {
@@ -1338,6 +1400,9 @@ class MyParser extends parser {
         ag.writeIfClose(sto);
 
     }
+    void DoForeachClose(STO sto){
+        ag.writeForeachClose(sto);
+    }
 
     void DoWhileClose(STO sto){
         ag.writeWhileClose(sto);
@@ -1553,10 +1618,11 @@ class MyParser extends parser {
             } else {
                 //System.out.println("clearing func2");
                 //m_symtab.setFunc(null);
-                ExprSTO ret = new ExprSTO("result of " + result.getName());
+                ExprSTO ret = new ExprSTO(a.getName());
                 ret.setRef(true);
                 ret.setSparcOffset(a.getSparcOffset());
                 ret.setType(a.getType());
+                ret.setStatic(a.isStatic());
                 ag.writeReturn(ret, m_symtab.getFunc());
                 return ret;
             }
@@ -1705,12 +1771,17 @@ class MyParser extends parser {
 
         //if assignable to int then return expr
         // double check what to return when you exit
-        ExprSTO sto = new ExprSTO(a.getName());
-        sto.setSparcOffset(a.getSparcOffset());
-
-        ag.writeExitExpr(sto);
-        
-        return sto;
+        if(a.isConst()){
+            ConstSTO sto = new ConstSTO(a.getName(), a.getType());
+            sto.setValue(a.getValue());
+            ag.writeExitExpr(a);
+            return sto;
+        }else {
+            ExprSTO sto = new ExprSTO(a.getName());
+            sto.setSparcOffset(a.getSparcOffset());
+            ag.writeExitExpr(sto);
+            return sto;
+        }
     }
 
     // Helper Function

@@ -1155,6 +1155,7 @@ public class AssemblyCodeGenerator {
     public void writeLoopStart(String loopname){
         loopcounter++;
         funcIndent();
+        writeAssembly("! %s (...) \n", loopname);
         decreaseIndent();
         writeAssembly(BASIC_FIN_NL, "loopCheck", iString(loopcounter));
 
@@ -1187,7 +1188,6 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeWhileClose(STO sto){
-        newline();
         funcIndent();
         increaseIndent();
         writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopCheck", iString(sto.loopcounter)));
@@ -1197,7 +1197,6 @@ public class AssemblyCodeGenerator {
         increaseIndent();
         writeAssembly("\t! else\n");
         writeAssembly(BASIC_FIN_NL, "loopEnd", iString(sto.loopcounter));
-        newline();
 
         ploopcounter--;
         decreaseIndent();
@@ -1232,7 +1231,6 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeBeforeElse(STO sto){
-        newline();
         funcIndent();
         increaseIndent();
         writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(sto.ifcounter)));
@@ -1249,7 +1247,6 @@ public class AssemblyCodeGenerator {
         newline();
     }
     public void writeIfClose(STO sto) {
-        newline();
         funcIndent();
         decreaseIndent();
         writeAssembly("\t! endif\n");
@@ -1330,7 +1327,6 @@ public class AssemblyCodeGenerator {
 
         writeAssembly(TWO_PARAM, SET_OP, off, valplace);
         writeAssembly(THREE_PARAM, ADD_OP, globalreg, valplace, valplace);
-        newline();
     }
 
     //setaddload
@@ -1573,14 +1569,6 @@ public class AssemblyCodeGenerator {
 
         //if(init.isRef() || init.getisArray()){
         if(init.getisArray()){
-            /*writeAssembly("! &" + init.getName() + "\n");
-            setadd(init, 0);
-            decreaseOffset();
-            init.setSparcOffset(getOffset());
-            setadd(init, 1);
-            writeAssembly(TWO_PARAM, ST_OP, O0, "[" + O1 + "]");
-            newline();*/
-
             writeAssembly("! return " + init.getName() + ";\n");
 
             writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
@@ -1591,7 +1579,6 @@ public class AssemblyCodeGenerator {
             }else{
                  writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
             }
-
         }
         else if (init.isConst()) {
             writeAssembly("! return " + val + ";\n");
@@ -1604,7 +1591,13 @@ public class AssemblyCodeGenerator {
             if(((FuncSTO)func).getReturnType().isFloat() && !init.getType().isFloat()){
                 convertToFloat(func, init, I0);
             }
-        } else if(!init.getType().isVoid()){ //dont print this line if init type is void e.g return; 
+        }else if(init.isStatic() || init.isGlobal()){
+            writeAssembly("! return " + init.getName() + ";\n");
+            String name = infunc + staticfuncname + init.getName();
+            writeAssembly(TWO_PARAM, SET_OP, name, I0);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, I0, I0);
+        } 
+        else if(!init.getType().isVoid()){ //dont print this line if init type is void e.g return; 
             writeAssembly("! return " + init.getName() + ";\n");
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
@@ -1621,14 +1614,6 @@ public class AssemblyCodeGenerator {
             }
 
         }
-        //its used when init is constant int and return type is float 
-        /*if(((FuncSTO)func).getReturnType().isFloat()){
-            if(init.isConst() && !init.getType().isFloat()){
-                convertToFloat(func, init, I0);
-            }else{
-                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
-            }
-        }*/
 
         String param = paramtypelist(func);
         call(String.format(FINI_FUNC, func.getName(), param));
@@ -1673,6 +1658,75 @@ public class AssemblyCodeGenerator {
         funcDedent();
     
         
+    }
+    public void writeForEachVarDecl(STO init, STO des){
+        funcIndent();
+
+        writeAssembly("! foreach loop \n");
+        setadd(des, 0);
+        writeAssembly(TWO_PARAM, SET_OP, iString(4), O1);
+        writeAssembly(THREE_PARAM, SUB_OP, O0, O1, O0);
+        decreaseOffset();
+        decreaseOffset();
+        init.setSparcOffset(getOffset());
+        setaddst(O0, iString(init.getSparcOffset()));
+        writeLoopStart("foreach");
+        funcIndent();
+        des.loopcounter = loopcounter;
+        ploopcounter = loopcounter;
+
+        writeAssembly("! ++ traversal ptr \n");
+        setadd(init, 1);
+        writeAssembly(TWO_PARAM, LD_OP, "[" + O1 + "]", O0);
+        writeAssembly(TWO_PARAM, SET_OP, iString(4), O2);
+        writeAssembly(THREE_PARAM, ADD_OP, O0, O2, O0);
+        writeAssembly(TWO_PARAM, ST_OP, O0, "[" + O1 + "]");
+
+        writeAssembly("! traversal ptr < array end addr?\n");
+        setadd(des, 0);
+        writeAssembly(TWO_PARAM, SET_OP, iString(des.getType().getSize()*4), O1);
+        writeAssembly(THREE_PARAM, ADD_OP, O0, O1, O1);
+
+        
+        newline();
+        //setaddld(O0, iString(init.getSparcOffset()));
+        //writeCallStored(init, 0);
+        setadd(init, 0);
+        writeAssembly(TWO_PARAM, LD_OP, "[" + O0 + "]", O0);
+            
+
+        writeAssembly(TWO_PARAM, CMP_OP, O0, O1);  // might need to fix
+        writeAssembly(ONE_PARAM, "bge  \t", String.format(BASIC_FIN, "loopEnd", iString(des.loopcounter)));
+        writeAssembly(NOP_OP);
+        newline();
+
+        writeAssembly("! iterVar = currentElem\n");
+        init.setSparcOffset(getOffset()+4);
+        //writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), O1);
+        //writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+        setadd(init, 1);
+        writeAssembly(TWO_PARAM, LD_OP, "[" + O0 + "]", O0);
+        writeAssembly(TWO_PARAM, ST_OP, O0, "[" + O1 + "]");
+        newline();
+
+        funcDedent();
+    }
+
+       public void writeForeachClose(STO sto) {
+        funcIndent();
+        increaseIndent();
+        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "loopCheck", iString(sto.loopcounter)));
+        writeAssembly(NOP_OP);
+        newline();
+        funcDedent();
+        increaseIndent();
+        writeAssembly("\t! else\n");
+        writeAssembly(BASIC_FIN_NL, "loopEnd", iString(sto.loopcounter));
+
+        ploopcounter--;
+        decreaseIndent();
+        newline();
+
     }
     public void writeArrayDeclGlobal(STO sto, Vector<STO> array, Type temp){
         int size = temp.getSize();
@@ -1749,6 +1803,9 @@ public class AssemblyCodeGenerator {
                 newline();
                 decreaseIndent();
             }*/
+        }else {
+            //this is for foreach loop
+
         }
         funcDedent();
     }
@@ -2186,8 +2243,6 @@ public class AssemblyCodeGenerator {
         Type stype = sto.getType();
         String register = sto.getType().isFloat() ? f0 : O0; // check for float f0 or o0
 
-
-        newline();
         writeAssembly("! cin >> "+sto.getName()+"\n");
         if(stype.isInt()){
             call("inputInt");
@@ -2196,6 +2251,7 @@ public class AssemblyCodeGenerator {
             call("inputFloat");
         }
         setaddst(register, iString(sto.getSparcOffset()));
+        newline();
 
     }
 
@@ -2208,13 +2264,13 @@ public class AssemblyCodeGenerator {
         writeAssembly("! cout << endl\n");
         writeAssembly(TWO_PARAM, SET_OP, strEndl, O0);
         call("printf");
+        newline();
         funcDedent();
     }
 
 
     public void writeExitExpr(STO init) {
         funcIndent();
-
         //it needs to go to set if const and if not to else but somehow isConst not work here
         //need to fix later 
         if(init.isConst()){
