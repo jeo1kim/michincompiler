@@ -1263,6 +1263,9 @@ class MyParser extends parser {
         VarSTO ret = new VarSTO(sto.getName(), sto.getType().getNextType());
         ret.setValue(expr.getValue());
         ret.setisArray();
+        if(expr.isConst()){
+            ret.setisArrayConst();
+        }
         ag.writeArrayDeclLocal(ret, expr, sto);
         return ret;
     }
@@ -1630,7 +1633,6 @@ class MyParser extends parser {
                 StructdefSTO str = new StructdefSTO(sto.getType().getbaseName(), sto.getType().getBaseType());
                 DoFuncCall(str, ctor);
                 return;
-
             }
         } else if (ctor.size() > 0) {
             if (!sto.getType().getBaseType().isStruct()) {

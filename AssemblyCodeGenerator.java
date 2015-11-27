@@ -479,7 +479,7 @@ public class AssemblyCodeGenerator {
     public void writeFuncCallParam(STO sto, STO originalparam, int count, boolean recursive){
         newline();
         funcIndent();
-        writeAssembly("! "+ sto.getName()+"\n");
+        writeAssembly("! %s <- %s\n", originalparam.getName(), sto.getName());
         //if(sto.getisArray() || sto.isRef()){
         if(sto.getisArray()){
             setadd(sto, count);
@@ -526,9 +526,14 @@ public class AssemblyCodeGenerator {
         else {   
             if(originalparam.isRef()){
                 setadd(sto, count);
-                if(recursive || !sto.getParamCalled()){
+                //should not go in when non ref var go into ref paramter funccall 305d
+                if(recursive || !(sto.getSparcOffset() != 0)){
                     writeAssembly(TWO_PARAM, LD_OP, "["+"%o"+iString(count)+"]", "%o"+iString(count));
                 }
+            }
+            //case of 305c when reference going into non ref paramter
+            else if(sto.isRef()){
+                writeCallStored(sto, 0);
             }         
             else if(sto.getType().isFloat() && originalparam.getType().isFloat()){
                 setaddld("%f"+iString(count), iString(sto.getSparcOffset()));
@@ -539,7 +544,6 @@ public class AssemblyCodeGenerator {
                 }
                 else {       
                     setaddld("%o"+iString(count), iString(sto.getSparcOffset()));
-
                 }
             }
         }
@@ -552,7 +556,8 @@ public class AssemblyCodeGenerator {
     }
 
     public void writeCloseFunc(STO sto) {
-        increaseIndent();
+        funcIndent();
+        decreaseIndent();
         String param = paramtypelist(sto);
         String name = sto.getName();
         int posoffset = Math.abs(getOffset());
@@ -708,7 +713,9 @@ public class AssemblyCodeGenerator {
                 writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);
             }
             //check if it is only expr.isCondt fibo7
-            if(stoDes.getisArray() && expr.isConst()){
+            //check if expr type is not float 305e   b[0] = 1.1;
+            //also check if expr type is not bool bool name will print out true/false 305e
+            if(stoDes.getisArray() && expr.isConst() && !expr.getType().isFloat() && !expr.getType().isBool()){
                 writeAssembly(TWO_PARAM, SET_OP, expr.getName(), O0);
             }
             //xwriteAssembly("////////////////////\n");
@@ -930,7 +937,12 @@ public class AssemblyCodeGenerator {
         increaseIndent();
         writeAssembly(NL);
         funcIndent();
-        writeAssembly(var_comment_op, o.getName(), a.getName());
+        if(a.getPrePost() == "pre"){
+            writeAssembly("! %s%s \n", o.getName(), a.getName());
+        }else {
+            writeAssembly("! %s%s \n", a.getName(), o.getName());
+        }
+
 
         writeCallStored(a, 0);
         decreaseOffset();
@@ -967,6 +979,7 @@ public class AssemblyCodeGenerator {
         funcDedent();
 
         funcDedent();
+        newline();
         decreaseIndent();
     }
 
@@ -1295,6 +1308,10 @@ public class AssemblyCodeGenerator {
 
     writeAssembly(TWO_PARAM, SET_OP, off, O1);
     writeAssembly(THREE_PARAM, ADD_OP, globalreg, O1, O1);
+    //cast when function : void f2(int &a){ a--; } 305b incdec
+    if(init.isRef()){
+        writeAssembly(TWO_PARAM, LD_OP, "[" + O1 + "]", O1);
+    }
     writeAssembly(TWO_PARAM, ST_OP, register, "[" + O1 + "]");
     }
 
@@ -2108,7 +2125,7 @@ public class AssemblyCodeGenerator {
              //203g 0 209q 1
             else if(sto.getisArray()){
                 //is it 0 or 1 ? 1 when called as parameter 
-                if(sto.getType().isFloat()){
+                if(sto.getisArrayConst()){
                     writeCallStored(sto, 0);
                 }else{
                     writeCallStored(sto, 1); 

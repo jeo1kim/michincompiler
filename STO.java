@@ -40,6 +40,7 @@ abstract class STO
 
 	private boolean m_pointer = false;
 	private boolean m_isparam = false;
+	private boolean m_arraycon = false;
 
 	public boolean isStructVar(){
 		return inStruct;
@@ -120,6 +121,14 @@ abstract class STO
 		m_isparam = true;
 	}
 	public boolean getisParam(){ return m_isparam; }
+
+	//check if val inside[]is const or not for assembly purpose
+	public boolean getisArrayConst(){
+		return m_arraycon;
+	}
+	public void setisArrayConst(){
+		m_arraycon = true;
+	}
 
 	//----------------------------------------------------------------
 	//
