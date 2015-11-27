@@ -940,7 +940,14 @@ public class AssemblyCodeGenerator {
             writeIncDecFloat(1);
             iffloat = true;
         } else {
-            writeAssembly(TWO_PARAM, SET_OP, iString(1), O1);
+            //*p++
+            //writeAssembly("! ////// %s\n", a.getType().getName());
+            if(a.getType().isPointer()){
+                writeAssembly(TWO_PARAM, SET_OP, iString(4), O1);
+            }else {
+                writeAssembly(TWO_PARAM, SET_OP, iString(1), O1);
+            }
+            
         }
         String register = iffloat ? f0 : O0;
         if(a.getPrePost() == "pre"){
@@ -1331,7 +1338,7 @@ public class AssemblyCodeGenerator {
             }
         }
         if (init.isConst()) {
-            if (init.isGlobal() || init.isStatic()) {
+            if (init.isGlobal() || init.isStatic() || (init.getSparcOffset() != 0)) {
                 writeAssembly(TWO_PARAM, SET_OP, global, L7);
                 writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
@@ -1694,7 +1701,7 @@ public class AssemblyCodeGenerator {
             String sName = sto.getName();
             String iName = init.getName();
             //create space
-            writeAssembly(String.format(var_comment, sName, iName));
+            writeAssembly("! %s %s = %s \n", sto.getType().getName(), sName, iName);
 //            writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
 //            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             writeAssigntmentSto(sto);
@@ -1863,7 +1870,9 @@ public class AssemblyCodeGenerator {
             writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
         }
         
-        if(before.getisParam()){
+        //when &a is from param 
+        //int *p = &a[0]; 303a
+        if(before.getisParam() || before.getisArray()){
             writeAssembly(TWO_PARAM, LD_OP, "[" + O0 + "]", O0);
         }
 

@@ -349,6 +349,7 @@ class MyParser extends parser {
         sto.setStatic(stat); // set Variable static
         sto.setParamCalled();
 
+
         if (array.size() == 0 && (init != null)) { // indicates that this var is not an array and init exp exist
             // do the type check with init if it exist
             Type initType = init.getType();
