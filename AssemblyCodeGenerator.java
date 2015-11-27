@@ -1351,7 +1351,9 @@ public class AssemblyCodeGenerator {
             }
         }
         if (init.isConst()) {
-            if (init.isGlobal() || init.isStatic() || (init.getSparcOffset() != 0)) {
+            //becomes weired when doing binaryexpr 103g
+            //if (init.isGlobal() || init.isStatic() || (init.getSparcOffset() != 0)) {
+            if (init.isGlobal() || init.isStatic() || init.getisParam()) {
                 writeAssembly(TWO_PARAM, SET_OP, global, L7);
                 writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
@@ -2273,7 +2275,7 @@ public class AssemblyCodeGenerator {
         funcIndent();
         //it needs to go to set if const and if not to else but somehow isConst not work here
         //need to fix later 
-        if(init.isConst()){
+        if(init.isConst() && !(init.getSparcOffset() != 0)){
             writeAssembly(TWO_PARAM, SET_OP, init.getName(), O0);
         }else {
             setaddld(O0, iString(init.getSparcOffset()));
