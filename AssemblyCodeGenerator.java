@@ -975,7 +975,19 @@ public class AssemblyCodeGenerator {
         writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
 
         funcIndent();
-        setAddStore(a);
+        if(a.getisArray()){
+            writeAssembly(TWO_PARAM, SET_OP, iString(a.getSparcOffset()), O1);
+            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + O1 + "]", O1);
+            if(a.getType().isFloat()){
+                writeAssembly(TWO_PARAM, ST_OP, F2, "[" + O1 + "]");
+            }else {
+                writeAssembly(TWO_PARAM, ST_OP, O2, "[" + O1 + "]");
+            }
+            
+        }else {
+            setAddStore(a);
+        }
         funcDedent();
 
         funcDedent();
@@ -1653,7 +1665,9 @@ public class AssemblyCodeGenerator {
 
         writeAssembly(TWO_PARAM, SET_OP, global, O0);
         writeAssembly(THREE_PARAM, ADD_OP, globalreg, O0, O0);
-        if(sto.isRef()){ //if it is called from paramter and the paramter is a ref
+        //if(sto.isRef() || !sto.isGlobal()){ //if it is called from paramter and the paramter is a ref
+        //isGlobal make things crazy 210a
+        if(sto.isRef()){
             writeAssembly(TWO_PARAM, LD_OP, "[" + O0 + "]", O0);
         }
         call(ptrCheckCall);
@@ -1942,7 +1956,8 @@ public class AssemblyCodeGenerator {
         funcIndent();
         writeAssembly("! &%s\n", before.getName());
         //static int x; (int)&x;
-        if((before.isGlobal() || before.isStatic()) && (infunc != null)){
+        //210b arr[1][3]
+        if(((before.isGlobal() && before.getSparcOffset() == 0) || before.isStatic()) && (infunc != null)){
             String name = infunc + staticfuncname + before.getName();
             writeAssembly(TWO_PARAM, SET_OP, name, O0);
             writeAssembly(THREE_PARAM, ADD_OP, G0, O0, O0);
@@ -2189,13 +2204,22 @@ public class AssemblyCodeGenerator {
              //203g 0 209q 1
             else if(sto.getisArray()){
                 //is it 0 or 1 ? 1 when called as parameter 305e
-                //if ap[i] then 0 
-                if(sto.getisParam() && !sto.getType().isFloat()){
+                //if ap[i] then 0 but if local then 1? 210a
+                //1 when [const] 210d
+                /*if(sto.getisParam() && !sto.getType().isFloat()){
                     writeCallStored(sto, 1); 
                 }
-                else if(sto.getisArrayConst()){
+                else if(sto.isGlobal()){
+                    writeCallStored(sto, 1); 
+                }
+                else if(!sto.getisArrayConst()){
                     writeCallStored(sto, 0);
-                }else{
+                }*/
+                //210c
+                if(sto.getType().isBool() || sto.getType().isFloat()){
+                     writeCallStored(sto, 0); 
+                }
+                else{
                     writeCallStored(sto, 1); 
                 }
             }

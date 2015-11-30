@@ -1331,6 +1331,9 @@ class MyParser extends parser {
         if(expr.isConst()){
             ret.setisArrayConst();
         }
+        /*if(sto.isGlobal() && (sto.getSparcOffset() == 0)){
+            ret.setGlobal();
+        }*/
         ag.writeArrayDeclLocal(ret, expr, sto);
         return ret;
     }
