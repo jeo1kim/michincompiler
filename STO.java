@@ -123,10 +123,10 @@ abstract class STO
 	public boolean getisParam(){ return m_isparam; }
 
 	//check if val inside[]is const or not for assembly purpose
-	public boolean getisArrayConst(){
+	public boolean getisMultiArray(){
 		return m_arraycon;
 	}
-	public void setisArrayConst(){
+	public void setisMultiArray(){
 		m_arraycon = true;
 	}
 

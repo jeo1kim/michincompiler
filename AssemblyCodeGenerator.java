@@ -1649,7 +1649,7 @@ public class AssemblyCodeGenerator {
         int size = sto.getType().getSize();
         int tempsize = size*4;
         funcIndent();
-        writeAssembly("! %s[%s]\n", stoDes.getName(), expr.getName());
+        writeAssembly("! %s[%s]\n", sto.getName(), expr.getName());
         if(expr.isConst()){
             //System.out.print("int inside val: "+iString(expr.getIntValue()));
             writeAssembly(TWO_PARAM, SET_OP, iString(expr.getIntValue()), O0);
@@ -1659,7 +1659,12 @@ public class AssemblyCodeGenerator {
         }
         writeAssembly(TWO_PARAM, SET_OP, iString(size), O1);
         call(arrCheckCall);
-        writeAssembly(TWO_PARAM, SET_OP, "4", O1);
+        if(sto.isGlobal()){
+            writeAssembly(TWO_PARAM, SET_OP, iString(sto.getType().getSize()*4), O1);
+        }else {
+            writeAssembly(TWO_PARAM, SET_OP, "4", O1);
+        }
+        
         call(MUL_OP);
         writeAssembly(TWO_PARAM, MOV_OP, O0, O1);
 
@@ -1667,7 +1672,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(THREE_PARAM, ADD_OP, globalreg, O0, O0);
         //if(sto.isRef() || !sto.isGlobal()){ //if it is called from paramter and the paramter is a ref
         //isGlobal make things crazy 210a
-        if(sto.isRef()){
+        if(sto.isRef() || (sto.getisMultiArray())){
             writeAssembly(TWO_PARAM, LD_OP, "[" + O0 + "]", O0);
         }
         call(ptrCheckCall);
@@ -1675,6 +1680,10 @@ public class AssemblyCodeGenerator {
         decreaseOffset();
         stoDes.setSparcOffset(getOffset());
         setaddst(O0, iString(stoDes.getSparcOffset()));
+        //for 2d array
+        if(sto.isGlobal()){
+            stoDes.setisMultiArray();
+        }
         newline();
         funcDedent();
     
@@ -1751,7 +1760,11 @@ public class AssemblyCodeGenerator {
     }
     public void writeArrayDeclGlobal(STO sto, Vector<STO> array, Type temp){
         int size = temp.getSize();
-        int tempsize = size*4;
+        //int tempsize = temp.getType().getSize()*4;
+        int tempsize = 4;
+        for(STO i : array){
+            tempsize = tempsize * i.getIntValue();
+        }
         if (sto.isStructdef()){
             tempsize = size*temp.getBaseType().getSize();
         }

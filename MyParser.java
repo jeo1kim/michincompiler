@@ -1328,9 +1328,9 @@ class MyParser extends parser {
         if(sto.getisParam()){
             ret.setisParam();
         }
-        if(expr.isConst()){
+        /*if(expr.isConst()){
             ret.setisArrayConst();
-        }
+        }*/
         /*if(sto.isGlobal() && (sto.getSparcOffset() == 0)){
             ret.setGlobal();
         }*/
