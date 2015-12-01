@@ -1422,7 +1422,11 @@ public class AssemblyCodeGenerator {
                 //its here because it is not needed for array 
                 //writeAssembly(TWO_PARAM, SET_OP, val, O0);
             }
-        } else {
+        }else if(init.getName().equals("nullptr")){
+            sto.setisNullptr();
+            writeAssembly(TWO_PARAM, SET_OP, iString(0), L7);
+        } 
+        else {
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
             //int b = *p;
@@ -1974,8 +1978,15 @@ public class AssemblyCodeGenerator {
         writeAssembly("! &%s\n", before.getName());
         //static int x; (int)&x;
         //210b arr[1][3]
+        //name = before.getName(); used in typecast &gf
         if(((before.isGlobal() && before.getSparcOffset() == 0) || before.isStatic()) && (infunc != null)){
-            String name = infunc + staticfuncname + before.getName();
+             String name = "";
+            if(before.getSparcOffset() == 0){
+                name = before.getName();
+            }else {
+                name = infunc + staticfuncname + before.getName();
+            }
+            
             writeAssembly(TWO_PARAM, SET_OP, name, O0);
             writeAssembly(THREE_PARAM, ADD_OP, G0, O0, O0);
         }else {
@@ -2011,12 +2022,25 @@ public class AssemblyCodeGenerator {
         funcIndent();
         Type beT = before.getType();
         Type afT = after.getType();
+        boolean crossout = false;
+
+        if(before.isRef() && after.getType().isPointer()){
+            crossout = true;
+        }
 
         writeAssembly("! (%s)%s\n", afT.getName(), before.getName());
         if(afT.isPointer()){
             afT = after.getType().getNextType();
         }
+        if(beT.isPointer()){
+            beT = before.getType().getNextType();
+        }
+        /*if(before.getSparcOffset() == 0){
+            decreaseOffset();
+            after.setSparcOffset(getOffset());
+        }*/
         
+
         if(!before.isConst()){
             if(beT.isBool() && !afT.isBool()){
                 cmpcounter++;
@@ -2024,11 +2048,13 @@ public class AssemblyCodeGenerator {
                 writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
                 writeAssembly(ONE_PARAM, BE_OP, String.format(CMP_COUNTER, cmpcounter));
                 writeAssembly(TWO_PARAM, MOV_OP, G0, O0);
-                writeAssembly(TWO_PARAM, MOV_OP, iString(before.getIntValue()), O0);
-
+                //writeAssembly(TWO_PARAM, MOV_OP, iString(before.getIntValue()), O0);
+                //typecast.rc
+                writeAssembly(TWO_PARAM, MOV_OP, iString(1), O0);
                 decreaseIndent();
                 writeAssembly(VARCOLON, String.format(CMP_COUNTER, iString(cmpcounter)));
                 increaseIndent();
+                
                 decreaseOffset();
                 after.setSparcOffset(getOffset());
 
@@ -2044,10 +2070,19 @@ public class AssemblyCodeGenerator {
 
             }else if(afT.isBool()){
                 cmpcounter++;
-                writeCallStored(before, 0);
+                /*if((!before.getisPointer() && !before.isRef()) || !crossout){
+                     writeAssembly("! heer??????\n");
+                    //for common int to int float to float
+                    writeCallStored(before, 0);
+                }else {*/
+                     //writeAssembly("! heereeee??????\n");
+                    //check 310d *(int*)&f
+                    setAddLoad(before);
+                //}
                 decreaseOffset();
                 after.setSparcOffset(getOffset());
-                if(beT.isFloat()){
+                //check if it is not pointer not sure it works for ref too
+                if(beT.isFloat() && !before.getisPointer()){
                     //not sure why but cant user convertToFloatBinary b/c use G0;
                     //(bool)f
                     convertToFloatTypeCast(G0, F1);
@@ -2071,41 +2106,62 @@ public class AssemblyCodeGenerator {
 
             }
             else if(beT.isFloat() && afT.isInt()){
-                writeCallStored(before, 0);
-                if(!beT.isPointer()){
+                //writeCallStored(before, 0);
+                if((!before.getType().isPointer() && !before.isRef()) || !crossout){
+                    //for common int to int float to float
+                    writeCallStored(before, 0);
+                }else {
+                    //check 310d *(int*)&f
+                    //writeAssembly("! heer??????\n");
+                    setAddLoad(before);
+                }
+                if(!before.getType().isPointer()){
                     writeAssembly(TWO_PARAM, FSTOI_OP, f0, f0);
                 }
                 decreaseOffset();
                 after.setSparcOffset(getOffset());
-                setaddst(f0, iString(after.getSparcOffset()));
+
+                //(int*)&float typecast
+                setaddst(O0, iString(after.getSparcOffset()));
+                //setaddst(f0, iString(after.getSparcOffset()));
             }
             else if(beT.isInt() && afT.isFloat()){
                 //writeConstFloat(before); //check to make sure it is not writeconstfloatfunccall
-                writeCallStored(before, 0);
-                decreaseOffset();
-                after.setSparcOffset(getOffset());
-                convertToFloatTypeCast(O0, f0);
-       
-                setaddst(f0, iString(after.getSparcOffset()));
-            }else { //when the type cast is done with the same type
-                if(!beT.isPointer() && !before.isRef()){
+                //writeAssembly("! heer??????\n");
+                if((!before.getType().isPointer() && !before.isRef()) || crossout){
                     //for common int to int float to float
                     writeCallStored(before, 0);
                 }else {
                     //check 310d *(int*)&f
                     setAddLoad(before);
                 }
-                /*if(!beT.isPointer() && !beT.isFloat()){
-                    writeAssembly(TWO_PARAM, FSTOI_OP, f0, f0);
-                }*/
                 decreaseOffset();
                 after.setSparcOffset(getOffset());
-                /*if(before.isRef() || before.getType().isInt() || before.getType().isBool()){
-                    setaddst(O0, iString(after.getSparcOffset()));
+                convertToFloatTypeCast(O0, f0);
+       
+                setaddst(f0, iString(after.getSparcOffset()));
+            }else { //when the type cast is done with the same type
+                if(!before.getType().isPointer() && !before.isRef()){
+                    //for common int to int float to float
+                    writeCallStored(before, 0);
                 }else {
-                    setaddst(f0, iString(after.getSparcOffset()));
-                }*/
-                if(before.getType().isFloat()){
+                    //check 310d *(int*)&f
+                    setAddLoad(before);
+                }
+
+                decreaseOffset();
+                after.setSparcOffset(getOffset());
+                //typecast.rc && (beT instanceof NullPointerType)
+                //not sure only when fpd is nullptr or all cases
+                //it is before.getType.isFloat for purpose to not let non pointers in
+                if(!before.getType().isFloat()){
+                    //writeAssembly("! heer??????\n");
+                    //writeAssembly("! before type %s: ?\n", beT.getName());
+                    //after.setSparcOffset(getOffset());
+                    convertToFloatTypeCast(O0, f0);
+                }
+                if(beT.isFloat()){
+                    //writeAssembly("! heer??????\n");
                     setaddst(f0, iString(after.getSparcOffset()));
                 }
                 else{

@@ -409,7 +409,9 @@ class MyParser extends parser {
         VarSTO sto = new VarSTO(id, typ);
         sto.setStatic(stat); // set Variable static
         sto.setParamCalled();
-
+        if(typ.isPointer()){
+            sto.setisPointer();
+        }
 
         if (array.size() == 0 && (init != null)) { // indicates that this var is not an array and init exp exist
             // do the type check with init if it exist
@@ -946,6 +948,9 @@ class MyParser extends parser {
         //error3b_Assign ="Value of type %T not assignable to variable of type %T.";
         ////////
         //System.err.println("temp type: "+stoDes.getType().getName());
+        /*if(expr.getName().equals("nullptr")){
+            stoDes.setType()
+        }*/
         ag.writeAssignExprVariable(stoDes, expr);
         return stoDes;
     }
