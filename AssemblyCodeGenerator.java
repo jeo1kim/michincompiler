@@ -975,7 +975,7 @@ public class AssemblyCodeGenerator {
         writeInstructionCase(o, iffloat, register, iString(result.getSparcOffset()));
 
         funcIndent();
-        if(a.getisArray()){
+        if(a.getisArray() || (a.getisPointer() && (a.getPrePost() == "post"))){
             writeAssembly(TWO_PARAM, SET_OP, iString(a.getSparcOffset()), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
             writeAssembly(TWO_PARAM, LD_OP, "[" + O1 + "]", O1);
@@ -988,6 +988,10 @@ public class AssemblyCodeGenerator {
         }else {
             setAddStore(a);
         }
+
+        /*if(a.getisPointer()){
+            result.setisPointer();
+        }*/
         funcDedent();
 
         funcDedent();
