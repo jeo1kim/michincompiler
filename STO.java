@@ -38,9 +38,10 @@ abstract class STO
 	private STO m_array;
 	private boolean inStruct = false;
 
-	private boolean m_pointer = false;
+	private boolean m_ispointer = false;
 	private boolean m_isparam = false;
 	private boolean m_arraycon = false;
+	private boolean m_isNullptr = false;
 
 	public boolean isStructVar(){
 		return inStruct;
@@ -112,10 +113,9 @@ abstract class STO
 	public boolean getParamCalled(){ return m_paramCalled; }
 
 	public void setisPointer(){
-		m_pointer = true;
+		m_ispointer = true;
 	}
-
-	public boolean getisPointer(){ return m_pointer; }
+	public boolean getisPointer(){ return m_ispointer; }
 	
 	public void setisParam(){
 		m_isparam = true;
@@ -129,7 +129,12 @@ abstract class STO
 	public void setisMultiArray(){
 		m_arraycon = true;
 	}
-
+	public boolean getisNullptr(){
+		return m_isNullptr;
+	}
+	public void setisNullptr(){
+		m_isNullptr = true;
+	}
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------

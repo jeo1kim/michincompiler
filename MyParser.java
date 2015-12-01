@@ -1660,7 +1660,9 @@ class MyParser extends parser {
         ExprSTO ret = new ExprSTO(sto.getName(), sto.getType().getNextType());
         ret.setSparcOffset(sto.getSparcOffset());
         ret.markModVal();
-        ret.setisPointer();
+        //if(!sto.getisPointer()){
+            ret.setisPointer();
+        //}
         ag.writeDoPointer(sto, ret);
         return ret;
     }

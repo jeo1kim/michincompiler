@@ -1817,7 +1817,14 @@ public class AssemblyCodeGenerator {
             writeAssembly("! %s %s = %s \n", sto.getType().getName(), sName, iName);
 //            writeAssembly(TWO_PARAM, SET_OP, iString(offset), O1);
 //            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-            writeAssigntmentSto(sto);
+            //int * a = &b; bool* c = bool *a; typecast_test10.rc
+            if(sto.getType().isPointer() && (init.isRef() || init.getType().isPointer())){
+                writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()), O1);
+                writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+            }else{
+                writeAssigntmentSto(sto);
+            }
+           
 
             if (init.isConst()) {
                 if (init.getType().isFloat()) {  // if its not auto and float
@@ -1833,21 +1840,7 @@ public class AssemblyCodeGenerator {
                 writeInit(sto, init);
             }
 
-            //was needed when writepointer was not there
-            // make int *rawr go wrong typecast_test7.rc
-            /*if(sto.getType().isPointer()){
-                increaseIndent();
-                setaddld(O0, iString(sto.getSparcOffset()));
-                call(ptrCheckCall);
-                decreaseOffset();
-                sto.setSparcOffset(getOffset());
-                setaddst(O0, iString(sto.getSparcOffset()));
-                newline();
-                decreaseIndent();
-            }*/
-        }else {
-            //this is for foreach loop
-
+            
         }
         funcDedent();
     }
@@ -2070,38 +2063,42 @@ public class AssemblyCodeGenerator {
 
             }else if(afT.isBool()){
                 cmpcounter++;
-                /*if((!before.getisPointer() && !before.isRef()) || !crossout){
-                     writeAssembly("! heer??????\n");
-                    //for common int to int float to float
+                if(!before.getisPointer() && !before.isRef() && !before.getType().isPointer()){
+                     //writeAssembly("! heer??????\n");
+                    //for common int to int float to float 310a
                     writeCallStored(before, 0);
-                }else {*/
+                }else {
                      //writeAssembly("! heereeee??????\n");
                     //check 310d *(int*)&f
                     setAddLoad(before);
-                //}
+                }
                 decreaseOffset();
                 after.setSparcOffset(getOffset());
+      
                 //check if it is not pointer not sure it works for ref too
-                if(beT.isFloat() && !before.getisPointer()){
-                    //not sure why but cant user convertToFloatBinary b/c use G0;
-                    //(bool)f
-                    convertToFloatTypeCast(G0, F1);
-                    
-                    writeAssembly(TWO_PARAM, FCMP_OP, f0, F1);
-                    writeAssembly(NOP_OP);
-                    writeAssembly(ONE_PARAM, FBE_OP, String.format(CMP_COUNTER, cmpcounter));
-                }else {
-                    writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
-                    writeAssembly(ONE_PARAM, BE_OP, String.format(CMP_COUNTER, cmpcounter));
-         
-                }
-                writeAssembly(TWO_PARAM, MOV_OP, G0, O0);
-                writeAssembly(TWO_PARAM, MOV_OP, iString(1), O0);
+                //typecast_test10
+                if(!(after.getType().isPointer() && before.getisPointer())){ 
 
-                decreaseIndent();
-                writeAssembly(VARCOLON, String.format(CMP_COUNTER, iString(cmpcounter)));
-                increaseIndent();
-                
+                    if(beT.isFloat() && !before.getisPointer()){
+                        //not sure why but cant user convertToFloatBinary b/c use G0;
+                        //(bool)f
+                        convertToFloatTypeCast(G0, F1);
+                        
+                        writeAssembly(TWO_PARAM, FCMP_OP, f0, F1);
+                        writeAssembly(NOP_OP);
+                        writeAssembly(ONE_PARAM, FBE_OP, String.format(CMP_COUNTER, cmpcounter));
+                    }else {
+                        writeAssembly(TWO_PARAM, CMP_OP, O0, G0);
+                        writeAssembly(ONE_PARAM, BE_OP, String.format(CMP_COUNTER, cmpcounter));
+             
+                    }
+                    writeAssembly(TWO_PARAM, MOV_OP, G0, O0);
+                    writeAssembly(TWO_PARAM, MOV_OP, iString(1), O0);
+
+                    decreaseIndent();
+                    writeAssembly(VARCOLON, String.format(CMP_COUNTER, iString(cmpcounter)));
+                    increaseIndent();
+                }
                 setaddst(O0, iString(after.getSparcOffset()));
 
             }
@@ -2121,8 +2118,14 @@ public class AssemblyCodeGenerator {
                 decreaseOffset();
                 after.setSparcOffset(getOffset());
 
-                //(int*)&float typecast
-                setaddst(O0, iString(after.getSparcOffset()));
+                //(int*)&float typecast (int*)&gf is O0 typecast
+                if(beT.isFloat() && !(after.getType().isPointer() && before.isRef())){
+                    //writeAssembly("! heer??????\n");
+                    setaddst(f0, iString(after.getSparcOffset()));
+                }
+                else{
+                    setaddst(O0, iString(after.getSparcOffset()));
+                }
                 //setaddst(f0, iString(after.getSparcOffset()));
             }
             else if(beT.isInt() && afT.isFloat()){
@@ -2177,7 +2180,12 @@ public class AssemblyCodeGenerator {
         funcIndent();
         //tested for*(int*)&f
         writeAssembly("! *(%s)\n", before.getName());
-        writeCallStored(before, 0);
+        //typecast_test10 bool * c, cout *(c); 209u need one more ld
+        if(before.getType().isPointer()){
+            setAddLoad(before);
+        }else {
+            writeCallStored(before, 0);
+        }
         call(ptrCheckCall);
         decreaseOffset();
         after.setSparcOffset(getOffset());
@@ -2271,8 +2279,18 @@ public class AssemblyCodeGenerator {
                 callCout(sto);
                 return;
             }
-           if(sto.isRef() || sto.getisPointer()){
-                writeCallStored(sto, 1);
+            //typecast_test10
+           if(sto.isRef() || sto.getType().isPointer() || sto.getisPointer()){
+                writeAssembly("! chereere \n"); 
+                //typecast_test10
+                //need to check for other tests if all *a pointers are 0??
+                //*(int*)&gf is 1
+                if(sto.getType().isBool()){
+                     writeCallStored(sto, 0); 
+                }
+                else{
+                    writeCallStored(sto, 1); 
+                }
             }
              //203g 0 209q 1
             else if(sto.getisArray()){
