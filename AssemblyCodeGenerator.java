@@ -305,8 +305,9 @@ public class AssemblyCodeGenerator {
             sectionAlign(TEXT_SEC, iString(4));
             return;
         }
-        decreaseOffset();
-        struc.setSparcOffset(offset);
+        //commented it to make 212a.rc to work
+        //decreaseOffset();
+        //struc.setSparcOffset(getOffset());
         writeBasicStruct(struc);
     }
 
@@ -314,28 +315,34 @@ public class AssemblyCodeGenerator {
         int size = -struc.getType().getSize();
         String name = struc.getType().getName();
         String base = struc.isGlobal() ?  "%g0": "%fp";
-        String off = struc.isGlobal() ? struc.getName() : iString(offset);
+        //String off = struc.isGlobal() ? struc.getName() : iString(getOffset());
 
         funcIndent();
-        struc.setSparcOffset(size + getOffset());
-        offset = offset + size;
-        writeAssembly("! STRUCTS\n");
+        offset = getOffset() + size;
+        struc.setSparcOffset(getOffset());
+        
+        String off = struc.isGlobal() ? struc.getName() : iString(getOffset());
+
+        writeAssembly("! %s STRUCTS\n", struc.getName());
         setadd(struc, 0);
         name = name+"."+name+".void";
         writeAssembly(ONE_PARAM, CALL_OP, name);
         writeAssembly(NOP_OP);
         writeStructCtor();
         writeAssembly(TWO_PARAM,SET_OP, ctor, O0);
-
+        //fixed it to make 212a.rc to work
         writeAssembly(TWO_PARAM, SET_OP, off, O1);
+        //writeAssembly(TWO_PARAM, SET_OP, struc.getSparcOffset(), O1);
         writeAssembly(THREE_PARAM, ADD_OP, base, O1, O1);
         writeAssembly(TWO_PARAM, ST_OP, O1, "["+O0+"]");
         newline();
+        funcDedent();
     }
 
 
 
     public void writeStructArray(STO stru, Vector<STO> arr, Type temp){
+        funcIndent();
         if(stru.isGlobal()) {
             writeArrayDeclGlobal(stru, arr, temp);
             writeGlobalAuto(stru, stru);
@@ -348,6 +355,7 @@ public class AssemblyCodeGenerator {
 
 
         arraycount = 0;
+        funcDedent();
     }
 
     public int ctorcounter = 1;
@@ -369,6 +377,7 @@ public class AssemblyCodeGenerator {
     }
 
     public void arrayStruct(STO struc){
+        funcIndent();
         int size = struc.getType().getBaseType().getSize();
         String global = struc.isGlobal() ? struc.getName() : iString(struc.getSparcOffset());
         String globalreg = struc.isGlobal() ? G0 : FP;
@@ -395,6 +404,7 @@ public class AssemblyCodeGenerator {
 //        stoDes.setSparcOffset(getOffset());
         setaddst(O0, iString(struTot+(arraycount*-4)));
         newline();
+        funcDedent();
     }
     int arraycount = 0;
     int struTot = 0;
@@ -557,7 +567,7 @@ public class AssemblyCodeGenerator {
 
     public void writeCloseFunc(STO sto) {
         funcIndent();
-        decreaseIndent();
+        //decreaseIndent();
         String param = paramtypelist(sto);
         String name = sto.getName();
         int posoffset = Math.abs(getOffset());
@@ -581,7 +591,7 @@ public class AssemblyCodeGenerator {
 
         writeAssembly("%s %s\n", String.format(SAVE_FUNC, name, param), String.format(OFFSET_TOTAL, iString(posoffset)));
 
-        decreaseIndent();
+        //decreaseIndent();
         indent_level = 0;
         writeAssembly(NL);
         writeAssembly(FINI_FUNC, name, param);
@@ -705,21 +715,35 @@ public class AssemblyCodeGenerator {
                 writeInit(stoDes, expr);
             }
         } else if ((desoffset = stoDes.getSparcOffset()) != 0) {
+            
+            //if(stoDes.isStructVar() || stoDes.isStructdef()){
+            if(stoDes.isStructdef()){
+                writeAssembly(TWO_PARAM, SET_OP, iString(desoffset), O0);
+                writeAssembly(THREE_PARAM, ADD_OP, FP, O0, O0);
 
-            val = stoValue(expr); // stoVal gets teh value of sto.
-            writeAssembly(TWO_PARAM, SET_OP, iString(desoffset), O1);
-            writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-            if(stoDes.getisArray() || stoDes.isRef()){
-                writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);
+                writeAssembly(TWO_PARAM, SET_OP, iString(expr.getSparcOffset()), O1);
+                writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+                writeAssembly(TWO_PARAM, SET_OP, iString(stoDes.getType().getSize()), O2);
+                call("memmove");
+                newline();
             }
-            //check if it is only expr.isCondt fibo7
-            //check if expr type is not float 305e   b[0] = 1.1;
-            //also check if expr type is not bool bool name will print out true/false 305e
-            /*if(stoDes.getisArray() && expr.isConst() && !expr.getType().isFloat() && !expr.getType().isBool()){
-                writeAssembly(TWO_PARAM, SET_OP, expr.getName(), O0);
-            }*/
-            //xwriteAssembly("////////////////////\n");
-            writeInit(stoDes, expr);
+            else{
+                val = stoValue(expr); // stoVal gets teh value of sto.
+                writeAssembly(TWO_PARAM, SET_OP, iString(desoffset), O1);
+                writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+                
+                if(stoDes.getisArray() || stoDes.isRef()){
+                    writeAssembly(TWO_PARAM, LD_OP, "["+O1+"]", O1);
+                }
+                //check if it is only expr.isCondt fibo7
+                //check if expr type is not float 305e   b[0] = 1.1;
+                //also check if expr type is not bool bool name will print out true/false 305e
+                /*if(stoDes.getisArray() && expr.isConst() && !expr.getType().isFloat() && !expr.getType().isBool()){
+                    writeAssembly(TWO_PARAM, SET_OP, expr.getName(), O0);
+                }*/
+                //xwriteAssembly("////////////////////\n");
+                writeInit(stoDes, expr);
+            }
 
         } else {
             writeAssigntmentSto(stoDes);
