@@ -491,11 +491,15 @@ public class AssemblyCodeGenerator {
         funcIndent();
         writeAssembly("! %s <- %s\n", originalparam.getName(), sto.getName());
         //if(sto.getisArray() || sto.isRef()){
-        if(sto.getisArray()){
+        //nothing prints if sto is normal array 305e
+        //not sure about pointer and ref cases
+        if(sto.getisArray() && (sto.isRef() || originalparam.isRef())){
             setadd(sto, count);
             writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
             writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
-                
+        }
+        if(sto.getType().isArray()){
+            return;
         }
         else if(sto.isGlobal()){
             writeAssembly(TWO_PARAM, SET_OP, sto.getName(), L7);
@@ -535,9 +539,11 @@ public class AssemblyCodeGenerator {
         }
         else {   
             if(originalparam.isRef()){
+                //writeAssembly("! heerrr\n");
                 setadd(sto, count);
                 //should not go in when non ref var go into ref paramter funccall 305d
-                if(recursive || !(sto.getSparcOffset() != 0)){
+                //if(recursive || !(sto.getSparcOffset() == 0)){
+                if(sto.isRef()){
                     writeAssembly(TWO_PARAM, LD_OP, "["+"%o"+iString(count)+"]", "%o"+iString(count));
                 }
             }
@@ -840,7 +846,6 @@ public class AssemblyCodeGenerator {
                 return;
             }else{
                 //for cases such as == and !=
-                writeAssembly("! heereeeee \n");
                 if (a.isConst() && (a.getSparcOffset() == 0)) {
                     writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
                 } else {
@@ -855,12 +860,13 @@ public class AssemblyCodeGenerator {
                 }
             }
         } else {
-            if(a.isConst() && b.isConst()){
+            if(a.isConst() && b.isConst() && (a.getSparcOffset() == 0) && (b.getSparcOffset() == 0)){
                 //increase offset again because it is not stored inside register
                 increaseOffset();
                 result.setSparcOffset(getOffset());
                 return;
             }
+
             if (a.getType().isInt() && b.getType().isFloat()) { //if a is int and b is float
 
                 writeCallStored(a, 0);
@@ -912,8 +918,18 @@ public class AssemblyCodeGenerator {
                 result.setSparcOffset(getOffset());
             }
             else {
-                writeCallStored(a, 0);
-                writeCallStored(b, 1);
+                //writeAssembly("! /////////\n");
+                if(a.isConst() && (a.getSparcOffset() == 0)){
+                    writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
+                }else {
+                    writeCallStored(a, 0);
+                }
+                //writeAssembly("! %s \n", iString(b.getSparcOffset()));
+                if(b.isConst() && (b.getSparcOffset() == 0)){
+                    writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O1);
+                }else {
+                    writeCallStored(b, 1);
+                }
             }
 
 
@@ -1006,7 +1022,12 @@ public class AssemblyCodeGenerator {
         if(a.getisArray() || (a.getisPointer() && (a.getPrePost() == "post"))){
             writeAssembly(TWO_PARAM, SET_OP, iString(a.getSparcOffset()), O1);
             writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
-            writeAssembly(TWO_PARAM, LD_OP, "[" + O1 + "]", O1);
+            //303a p++ dont need 210b need for 210 type int basetype int so need ld
+            //writeAssembly("! type %s basetype %s\n", a.getType().getName(), a.getType().getBaseType().getName());
+            if(!a.getType().isPointer()){
+                writeAssembly(TWO_PARAM, LD_OP, "[" + O1 + "]", O1);
+            }
+            
             if(a.getType().isFloat()){
                 writeAssembly(TWO_PARAM, ST_OP, F2, "[" + O1 + "]");
             }else {
@@ -1397,7 +1418,7 @@ public class AssemblyCodeGenerator {
         if (init.isConst()) {
             //becomes weired when doing binaryexpr 103g
             //if (init.isGlobal() || init.isStatic() || (init.getSparcOffset() != 0)) {
-            if (init.isGlobal() || init.isStatic() || init.getisParam()) {
+            if (init.isGlobal() || init.isStatic() || init.getisParam() || (init.getSparcOffset() != 0)) {
                 writeAssembly(TWO_PARAM, SET_OP, global, L7);
                 writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
@@ -1407,7 +1428,11 @@ public class AssemblyCodeGenerator {
         }else if(init.getisArray() || init.isRef() || init.getisPointer()){
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
-            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", L7);
+            //not sure when to put this for pointer but not needed for 303a
+            if(!init.getType().isPointer()){
+                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", L7);
+            }
+
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
         } 
         else {
@@ -2320,7 +2345,7 @@ public class AssemblyCodeGenerator {
             }
             //typecast_test10
            if(sto.isRef() || sto.getType().isPointer() || sto.getisPointer()){
-                writeAssembly("! chereere \n"); 
+                //writeAssembly("! chereere \n"); 
                 //typecast_test10
                 //need to check for other tests if all *a pointers are 0??
                 //*(int*)&gf is 1
