@@ -1511,15 +1511,16 @@ class MyParser extends parser {
         ConstSTO con;
         if(!a.isConst()){
             ExprSTO exp = new ExprSTO(a.getName(), a.getType());
-            if(unary == "-"){
+            /*if(unary == "-"){
                 exp.setValue(a.getValue().negate());
             }else {
                 exp.setValue(a.getValue());
-            }
+            }*/
             ag.writeMarkUnary(unary, a, exp);
             return exp;
         }
-        if (a.getType().isNumeric() || a.isConst() || a.isExpr() || a.isVar()) {
+        //if (a.getType().isNumeric() || a.isConst() || a.isExpr() || a.isVar()) {
+        if(a.isConst()){
             if (unary == "-") {
                 con = new ConstSTO(a.getName(), a.getType());
                 if (a.getValue() != null) {

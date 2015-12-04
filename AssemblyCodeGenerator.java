@@ -840,14 +840,15 @@ public class AssemblyCodeGenerator {
                 return;
             }else{
                 //for cases such as == and !=
-                if (a.isConst()) {
+                writeAssembly("! heereeeee \n");
+                if (a.isConst() && (a.getSparcOffset() == 0)) {
                     writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
                 } else {
                     writeCallStored(a, 0);
                 }
                 newline();
 
-                if (b.isConst()) {
+                if (b.isConst() && (b.getSparcOffset() == 0)) {
                     writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O1);
                 } else {
                     writeCallStored(b, 1);
@@ -938,10 +939,11 @@ public class AssemblyCodeGenerator {
 
     //for not expr
     public void writeNotExpr(STO a, Operator o, STO result) {
-        writeAssembly(var_comment_op, o.getName(), a.getName());
+       
 
         increaseIndent();
         funcIndent();
+        writeAssembly(var_comment_op, o.getName(), a.getName());
         andorskipcnt++;
         if (!a.isConst()) {
             writeCallStored(a, 0);
@@ -949,7 +951,9 @@ public class AssemblyCodeGenerator {
 
             decreaseOffset();
             result.setSparcOffset(getOffset());
+            setaddst(O0, iString(result.getSparcOffset()));
         } 
+
 
     }
 
@@ -1998,7 +2002,7 @@ public class AssemblyCodeGenerator {
         //name = before.getName(); used in typecast &gf
         if(((before.isGlobal() && before.getSparcOffset() == 0) || before.isStatic()) && (infunc != null)){
              String name = "";
-            if(before.getSparcOffset() == 0){
+            if(before.isGlobal() && (before.getSparcOffset() == 0)){
                 name = before.getName();
             }else {
                 name = infunc + staticfuncname + before.getName();
@@ -2181,12 +2185,12 @@ public class AssemblyCodeGenerator {
                 //typecast.rc && (beT instanceof NullPointerType)
                 //not sure only when fpd is nullptr or all cases
                 //it is before.getType.isFloat for purpose to not let non pointers in
-                if(!before.getType().isFloat()){
+                /*if(!before.getType().isFloat()){
                     //writeAssembly("! heer??????\n");
                     //writeAssembly("! before type %s: ?\n", beT.getName());
                     //after.setSparcOffset(getOffset());
                     convertToFloatTypeCast(O0, f0);
-                }
+                }*/
                 if(beT.isFloat()){
                     //writeAssembly("! heer??????\n");
                     setaddst(f0, iString(after.getSparcOffset()));
@@ -2200,20 +2204,31 @@ public class AssemblyCodeGenerator {
         newline();
         funcDedent();
     }
+    static String pointername = "";
     public void writeDoPointer(STO before, STO after){
         funcIndent();
         //tested for*(int*)&f
         writeAssembly("! *(%s)\n", before.getName());
+        //writeAssembly("! %s = %s? \n", pointername, before.getName());
         //typecast_test10 bool * c, cout *(c); 209u need one more ld
-        if(before.getType().isPointer()){
-            setAddLoad(before);
-        }else {
+        //writeAssembly("! type %s base type %s\n", before.getType().getName(), before.getType().getBaseType().getName());
+        if((pointername == before.getName()) && !before.getType().getBaseType().isPointer()){
             writeCallStored(before, 0);
+            pointername = "";
+        }else{
+            setAddLoad(before);
+            pointername = before.getName();
+            if(!before.getType().getBaseType().isPointer()){
+                pointername = "";
+            }
         }
+        
+      
         call(ptrCheckCall);
         decreaseOffset();
         after.setSparcOffset(getOffset());
         setaddst(O0, iString(after.getSparcOffset()));
+
         funcDedent();
     }
 
