@@ -2234,11 +2234,18 @@ public class AssemblyCodeGenerator {
         funcIndent();
         //tested for*(int*)&f
         writeAssembly("! *(%s)\n", before.getName());
-        //writeAssembly("! %s = %s? \n", pointername, before.getName());
+        writeAssembly("! %s = %s? \n", pointername, before.getName());
         //typecast_test10 bool * c, cout *(c); 209u need one more ld
-        //writeAssembly("! type %s base type %s\n", before.getType().getName(), before.getType().getBaseType().getName());
+        writeAssembly("! type %s base type %s\n", before.getType().getName(), before.getType().getBaseType().getName());
         if((pointername == before.getName()) && !before.getType().getBaseType().isPointer()){
-            writeCallStored(before, 0);
+            String register = before.getType().isFloat() ? f0 : O0; // check for float f0 or o0
+            String global = before.getSparcBase() == "%g0" ? before.getName() : iString(before.getSparcOffset());
+            String globalreg = before.getSparcBase() == "%g0" ? G0 : FP;
+            
+            writeAssembly(TWO_PARAM, SET_OP, global, L7);
+            writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", L7);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
             pointername = "";
         }else{
             setAddLoad(before);
