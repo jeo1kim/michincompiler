@@ -515,14 +515,10 @@ public class AssemblyCodeGenerator {
                     writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", "%o"+iString(count));
                 }
             }else {
-                if(sto.isStatic() && (sto.getSparcOffset() == 0)){
-                    String name = infunc + staticfuncname + sto.getName();
-                    writeAssembly(TWO_PARAM, SET_OP, name, O0);
-                    writeAssembly(THREE_PARAM, ADD_OP, G0, O0, O0);
-                 } else {
-                    writeAssembly(TWO_PARAM, SET_OP, sto.getName(), L7);
-                    writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
-                }
+                //if global static
+                writeAssembly(TWO_PARAM, SET_OP, sto.getName(), L7);
+                writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+                
 
                 if(sto.getType().isFloat()){
                     writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
@@ -530,6 +526,17 @@ public class AssemblyCodeGenerator {
                 else{
                     writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%o"+iString(count));
                 }
+            }
+        }
+        else if(sto.isStatic() && !sto.isGlobal()){
+            String name = infunc + staticfuncname + sto.getName();
+            writeAssembly(TWO_PARAM, SET_OP, name, O0);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, O0, O0);
+            if(sto.getType().isFloat()){
+                writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
+            }
+            else{
+                writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%o"+iString(count));
             }
         }
         else if(sto.isConst() && !sto.getisConstSTO()){
