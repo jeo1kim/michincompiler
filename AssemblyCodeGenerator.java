@@ -1698,7 +1698,11 @@ public class AssemblyCodeGenerator {
             writeAssembly("! return " + init.getName() + ";\n");
             writeAssembly(TWO_PARAM, SET_OP, init.getName(), L7);
             writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
-            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
+            if(init.getType().isFloat()){
+                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
+            }else{
+                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
+            }
         }
         //else if(init.isStatic() || init.isGlobal()){
         //check funcTest2.rc
