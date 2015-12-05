@@ -11,6 +11,7 @@ import java.util.Vector;
 abstract class STO
 {
 	public int ifcounter;
+	public int[] ifarray = new int[100];
 	public int loopcounter;
 	private String m_strName;
 	private Type m_type;

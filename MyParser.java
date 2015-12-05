@@ -35,7 +35,7 @@ class MyParser extends parser {
         m_errors = errors;
         m_debugMode = debugMode;
         m_nNumErrors = 0;
-        ag = new AssemblyCodeGenerator("rc1.s");
+        ag = new AssemblyCodeGenerator("rc.s");
     }
 
     //----------------------------------------------------------------
@@ -1714,8 +1714,12 @@ class MyParser extends parser {
             if (sto.getType().getBaseType().isStruct()) {
                 StructdefSTO str = new StructdefSTO(sto.getType().getbaseName(), sto.getType().getBaseType());
                 DoFuncCall(str, ctor);
+                ag.writechecknew(str);
                 return;
+            }else if(sto.getType().isPointer()){
+                ag.writechecknew(sto);
             }
+
         } else if (ctor.size() > 0) {
             if (!sto.getType().getBaseType().isStruct()) {
                 m_nNumErrors++;
@@ -1724,6 +1728,7 @@ class MyParser extends parser {
             } else {
                 StructdefSTO str = new StructdefSTO(sto.getType().getbaseName(), sto.getType().getBaseType());
                 DoFuncCall(str, ctor);
+                ag.writechecknew(str);
             }
             return;
         }
@@ -1743,6 +1748,7 @@ class MyParser extends parser {
             m_errors.print(Formatter.toString(ErrorMsg.error16_Delete, getTypeName(sto)));
             return;
         }
+        ag.writecheckdelete(sto);
 
     }
 

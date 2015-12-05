@@ -498,7 +498,9 @@ public class AssemblyCodeGenerator {
             writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
             writeAssembly(TWO_PARAM, SET_OP, iString(sto.getIntValue()), "%o"+iString(count));
         }
-        if(sto.getType().isArray()){
+        if(sto.getType().isArray() && sto.isGlobal()){
+            writeAssembly(TWO_PARAM, SET_OP, sto.getName(), "%o"+iString(count));
+            writeAssembly(THREE_PARAM, ADD_OP, G0, "%o"+iString(count), "%o"+iString(count));
             return;
         }
         else if(sto.isGlobal()){
@@ -512,7 +514,12 @@ public class AssemblyCodeGenerator {
                 else {
                     writeAssembly(TWO_PARAM, SET_OP, sto.getName(), L7);
                     writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
-                    writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", "%o"+iString(count));
+                    if(sto.getType().isFloat()){
+                        writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
+                    }
+                    else{
+                        writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%o"+iString(count));
+                    }
                 }
             }else {
                 //if global static
@@ -1074,7 +1081,26 @@ public class AssemblyCodeGenerator {
                 writeAssembly(TWO_PARAM, ST_OP, O2, "[" + O1 + "]");
             }
             
-        }else {
+        }else if(a.isStatic() && !a.isGlobal()){
+            String name = infunc + staticfuncname + a.getName();
+            writeAssembly(TWO_PARAM, SET_OP, name, O1);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
+            if(a.getType().isFloat()){
+                writeAssembly(TWO_PARAM, ST_OP, F2, "[" + O1 + "]");
+            }else {
+                writeAssembly(TWO_PARAM, ST_OP, O2, "[" + O1 + "]");
+            }
+        }
+        else if(a.isStatic() && !a.isGlobal()){
+            writeAssembly(TWO_PARAM, SET_OP, a.getName(), O1);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, O1, O1);
+            if(a.getType().isFloat()){
+                writeAssembly(TWO_PARAM, ST_OP, F2, "[" + O1 + "]");
+            }else {
+                writeAssembly(TWO_PARAM, ST_OP, O2, "[" + O1 + "]");
+            }
+        }
+        else{
             setAddStore(a);
         }
 
@@ -1310,9 +1336,12 @@ public class AssemblyCodeGenerator {
 
     public void writeIfCase(STO sto) {
         ifcounter++;
-        sto.ifcounter = ifcounter;
+        sto.ifcounter++;
+        sto.ifarray[sto.ifcounter] = ifcounter;
         funcIndent();
         writeAssembly("! if condition\n");
+        //writeAssembly("! if count %s\n", iString(sto.ifcounter-ifcounter));
+        writeAssembly("! if count %s\n", iString(sto.ifarray[sto.ifcounter]));
         // might need to fix
         // fix for bool: need to print offset if it is bool comparison
         if(sto.getType().isBool()){
@@ -1329,7 +1358,8 @@ public class AssemblyCodeGenerator {
         }
 
         writeAssembly(TWO_PARAM, CMP_OP, O0, G0);  // might need to fix
-        writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(ifcounter)));
+        //writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(ifcounter)));
+        writeAssembly(ONE_PARAM, "be  \t", String.format(BASIC_FIN, "else", iString(sto.ifarray[sto.ifcounter])));
         writeAssembly(NOP_OP);
         newline();
         funcDedent();
@@ -1338,13 +1368,15 @@ public class AssemblyCodeGenerator {
     public void writeBeforeElse(STO sto){
         funcIndent();
         increaseIndent();
-        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(sto.ifcounter)));
+        //writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(sto.ifcounter)));
+        writeAssembly(ONE_PARAM, BA_OP, String.format(BASIC_FIN, "endif", iString(sto.ifarray[sto.ifcounter])));
         writeAssembly(NOP_OP);
         newline();
         funcDedent();
         increaseIndent();
         writeAssembly("\t! else\n");
-        writeAssembly(BASIC_FIN_NL, "else", iString(sto.ifcounter));
+        //writeAssembly(BASIC_FIN_NL, "else", iString(sto.ifcounter));
+        writeAssembly(BASIC_FIN_NL, "else", iString(sto.ifarray[sto.ifcounter]));
         newline();
 
         
@@ -1353,10 +1385,16 @@ public class AssemblyCodeGenerator {
     }
     public void writeIfClose(STO sto) {
         funcIndent();
+        //writeAssembly("! if close count %s\n", iString(ifcounter--));
+        writeAssembly("! if close count %s\n", iString(sto.ifarray[sto.ifcounter]));
+        //sto.ifcounter = sto.ifcounter-ifcounter;
         decreaseIndent();
         writeAssembly("\t! endif\n");
-        writeAssembly(BASIC_FIN_NL, "endif", iString(sto.ifcounter));
+        //writeAssembly(BASIC_FIN_NL, "endif", iString(sto.ifcounter));
+        writeAssembly(BASIC_FIN_NL, "endif", iString(sto.ifarray[sto.ifcounter]));
+        sto.ifcounter--;
         funcDedent();
+
         increaseIndent();
         newline();
 
@@ -1459,7 +1497,8 @@ public class AssemblyCodeGenerator {
             //becomes weired when doing binaryexpr 103g
             //if (init.isGlobal() || init.isStatic() || (init.getSparcOffset() != 0)) {
             if (init.isGlobal() || init.isStatic() || init.getisParam() || (init.getSparcOffset() != 0)) {
-                if(init.isStatic() && init.isGlobal()){
+                //new82.rc 
+                if(init.isStatic() && !init.isGlobal()){
                     global = infunc + staticfuncname + init.getName();
                 }
                 writeAssembly(TWO_PARAM, SET_OP, global, L7);
@@ -1479,6 +1518,9 @@ public class AssemblyCodeGenerator {
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
         } 
         else {
+            if(init.isStatic() && !init.isGlobal()){
+                global = infunc + staticfuncname + init.getName();
+            }
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
             writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
@@ -1514,10 +1556,10 @@ public class AssemblyCodeGenerator {
             }else if(sto.getisArray() && init.getType().isInt() && sto.getType().isFloat()){
                 convertToFloat(sto, init, iString(0));
                 register = f0;
-            }else{
-                //its here because it is not needed for array 
-                //writeAssembly(TWO_PARAM, SET_OP, val, O0);
-            }
+            }else if(init.getName().equals("nullptr")){
+                sto.setisNullptr();
+                writeAssembly(TWO_PARAM, SET_OP, iString(0), L7);
+             } 
         }else if(init.getName().equals("nullptr")){
             sto.setisNullptr();
             writeAssembly(TWO_PARAM, SET_OP, iString(0), L7);
@@ -2373,7 +2415,34 @@ public class AssemblyCodeGenerator {
         //loopcounter--;
         funcDedent();
     }
+    public void writechecknew(STO sto){
+        funcIndent();
+        writeAssembly("! new(%s)\n", sto.getName());
+        writeAssembly(TWO_PARAM, MOV_OP, iString(1), O0);
+        writeAssembly(TWO_PARAM, SET_OP, iString(4), O1);
+        call("calloc");
 
+        setaddst(O0, iString(sto.getSparcOffset()));
+        funcDedent();   
+    }
+    public void writecheckdelete(STO sto){
+        funcIndent();
+        writeAssembly("! delete(%s)\n", sto.getName());
+        writeAssembly(TWO_PARAM, SET_OP, iString(sto.getSparcOffset()), L7);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", O0);
+        call(ptrCheckCall);
+        writeAssembly(TWO_PARAM, SET_OP,  iString(sto.getSparcOffset()), L7);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+        writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", O0);
+        call("free");
+        writeAssembly(TWO_PARAM, SET_OP,  iString(sto.getSparcOffset()), O1);
+        writeAssembly(THREE_PARAM, ADD_OP, FP, O1, O1);
+        writeAssembly(TWO_PARAM, ST_OP, G0, "[" + O1 + "]");
+        funcDedent();
+
+
+    }
     public String paramtypelist(STO sto){
         String param = "";
         //void if there is no parameter
@@ -2434,17 +2503,24 @@ public class AssemblyCodeGenerator {
 
         funcIndent();
         writeAssembly(NL);
-
+        String name = "";
         if (sto.getType() != null) {
             writeAssembly("! cout << " + sto.getName() + "\n");
             if (sto.isConst()) {
                 //for localstatic const int checks 
                 if(sto.isGlobal() || sto.isStatic()){
-                    writeAssembly(TWO_PARAM, SET_OP, sto.getName(), L7);
+                    if(sto.isStatic() && !sto.isGlobal()){
+                        name = infunc + staticfuncname + sto.getName();
+                    }else {
+                        name = sto.getName();
+                    }  
+                    writeAssembly(TWO_PARAM, SET_OP, name, L7);
                     writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
                     //check if this is correct
                     if(sto.getType().isFloat()){
                         writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", f0);
+                    }else if(sto.getType().isBool()){
+                       writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", O0);
                     }else {
                         writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", O1);
                     }
@@ -2499,7 +2575,7 @@ public class AssemblyCodeGenerator {
                 }
             }
             else if(sto.isStatic()){
-                String name = "";
+                
                 if(sto.isGlobal()){
                     //writeAssembly("! here \n");
                     name = sto.getName();
