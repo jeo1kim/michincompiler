@@ -502,14 +502,27 @@ public class AssemblyCodeGenerator {
             return;
         }
         else if(sto.isGlobal()){
-            writeAssembly(TWO_PARAM, SET_OP, sto.getName(), L7);
-            writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+            if(!sto.isStatic()){
+                //check func_param_test4.rc
+                //int ggg = 4;
+                writeAssembly(TWO_PARAM, SET_OP, sto.getName(), "%o"+iString(count));
+                writeAssembly(THREE_PARAM, ADD_OP, G0, "%o"+iString(count), "%o"+iString(count));
+            }else {
+                if(sto.isStatic() && (sto.getSparcOffset() == 0)){
+                    String name = infunc + staticfuncname + sto.getName();
+                    writeAssembly(TWO_PARAM, SET_OP, name, O0);
+                    writeAssembly(THREE_PARAM, ADD_OP, G0, O0, O0);
+                 } else {
+                    writeAssembly(TWO_PARAM, SET_OP, sto.getName(), L7);
+                    writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+                }
 
-            if(sto.getType().isFloat()){
-                writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
-            }
-            else{
-                writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%o"+iString(count));
+                if(sto.getType().isFloat()){
+                    writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%f"+iString(count));
+                }
+                else{
+                    writeAssembly(TWO_PARAM, LD_OP, "["+ L7+"]", "%o"+iString(count));
+                }
             }
         }
         else if(sto.isConst()){
@@ -532,11 +545,11 @@ public class AssemblyCodeGenerator {
             }
         }
         //static int x;
-        else if(sto.isStatic() && (sto.getSparcOffset() == 0)){
+        /*else if(sto.isStatic() && (sto.getSparcOffset() == 0)){
             String name = infunc + staticfuncname + sto.getName();
             writeAssembly(TWO_PARAM, SET_OP, name, O0);
             writeAssembly(THREE_PARAM, ADD_OP, G0, O0, O0);
-        }
+        }*/
         else {   
             if(originalparam.isRef()){
                 //writeAssembly("! heerrr\n");
@@ -845,34 +858,38 @@ public class AssemblyCodeGenerator {
                 newline();
                 return;
             }else{
-                //for cases such as == and !=
-                if (a.isConst() && (a.getSparcOffset() == 0)) {
+                                //for cases such as == and !=
+                if (a.isConst() && !a.getisConstSTO()) {
                     writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
                 } else {
                     writeCallStored(a, 0);
                 }
                 newline();
 
-                if (b.isConst() && (b.getSparcOffset() == 0)) {
+                if (b.isConst() && !a.getisConstSTO()) {
                     writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O1);
                 } else {
                     writeCallStored(b, 1);
                 }
             }
         } else {
-            if(a.isConst() && b.isConst() && (a.getSparcOffset() == 0) && (b.getSparcOffset() == 0)){
+            if(a.isConst() && b.isConst()){
                 //increase offset again because it is not stored inside register
                 increaseOffset();
                 result.setSparcOffset(getOffset());
                 return;
             }
 
-            if (a.getType().isInt() && b.getType().isFloat()) { //if a is int and b is float
+             if (a.getType().isInt() && b.getType().isFloat()) { //if a is int and b is float
 
-                writeCallStored(a, 0);
+                if (a.isConst() && !a.getisConstSTO()) {
+                    writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
+                } else {
+                    writeCallStored(a, 0);
+                }
                 convertToFloatBinary(a, 0);
 
-                if (b.isConst()) {
+                if (b.isConst() && !b.getisConstSTO()) {
                     writeConstFloat(b);
                 }
 
@@ -887,11 +904,17 @@ public class AssemblyCodeGenerator {
                 if (!a.isConst()) {
                     writeCallStored(a, 0);
                 }
-                writeCallStored(b, 1);
+                //writeCallStored(b, 1);
 
                 if (a.isConst()) {
                     writeConstFloat(a);
                 }
+                if (b.isConst() && !a.getisConstSTO()) {
+                    writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O1);
+                } else {
+                    writeCallStored(b, 1);
+                }
+                
                 convertToFloatBinary(b, 1);
 
                 iffloat = true;
@@ -919,13 +942,15 @@ public class AssemblyCodeGenerator {
             }
             else {
                 //writeAssembly("! /////////\n");
-                if(a.isConst() && (a.getSparcOffset() == 0)){
+                //does not work for 103g 74+x
+                //if(a.isConst() && (a.getSparcOffset() == 0)){
+                if(a.isConst() && !a.getisConstSTO() && !a.isGlobal()){
                     writeAssembly(TWO_PARAM, SET_OP, iString(a.getIntValue()), O0);
                 }else {
                     writeCallStored(a, 0);
                 }
                 //writeAssembly("! %s \n", iString(b.getSparcOffset()));
-                if(b.isConst() && (b.getSparcOffset() == 0)){
+                if(b.isConst() && !b.getisConstSTO() && !b.isGlobal()){
                     writeAssembly(TWO_PARAM, SET_OP, iString(b.getIntValue()), O1);
                 }else {
                     writeCallStored(b, 1);
@@ -933,7 +958,7 @@ public class AssemblyCodeGenerator {
             }
 
 
-        }            
+        }                       
 
         //System.err.println(a.getValue());
         //System.err.println(b.getValue());
@@ -1648,9 +1673,8 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
 
         //if(init.isRef() || init.getisArray()){
-        if(init.getisArray()){
+if(init.getisArray()){
             writeAssembly("! return " + init.getName() + ";\n");
-
             writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
             writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", L7);
@@ -1660,23 +1684,47 @@ public class AssemblyCodeGenerator {
                  writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
             }
         }
+        else if(init.isGlobal()){
+            writeAssembly("! return " + init.getName() + ";\n");
+            writeAssembly(TWO_PARAM, SET_OP, init.getName(), L7);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
+        }
+        //else if(init.isStatic() || init.isGlobal()){
+        //check funcTest2.rc
+        else if(init.isStatic()){
+            writeAssembly("! return " + init.getName() + ";\n");
+            String name = infunc + staticfuncname + init.getName();
+            //forgot in which case this was used
+            /*if((init.getSparcOffset() == 0)){
+                writeAssembly(TWO_PARAM, SET_OP, name, I0);
+                writeAssembly(THREE_PARAM, ADD_OP, G0, I0, I0);
+            }*/
+            writeAssembly(TWO_PARAM, SET_OP, name, L7);
+            writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
+
+        } 
         else if (init.isConst()) {
-            writeAssembly("! return " + val + ";\n");
-            if (init.getType().isFloat()) {
+            //check funcTest2.rc
+            if(init.getSparcOffset() != 0){
+                writeAssembly("! return " + init.getName() + ";\n");
+                writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
+                writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
+                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
+            }
+            else if (init.getType().isFloat()) {
+                writeAssembly("! return " + val + ";\n");
                 writeConstFloatFuncCall(init, 0);
             } else {
+                writeAssembly("! return " + val + ";\n");
                 writeAssembly(TWO_PARAM, SET_OP, val, register);
             }
             //its used when init is constant int and return type is float 
             if(((FuncSTO)func).getReturnType().isFloat() && !init.getType().isFloat()){
                 convertToFloat(func, init, I0);
             }
-        }else if(init.isStatic() || init.isGlobal()){
-            writeAssembly("! return " + init.getName() + ";\n");
-            String name = infunc + staticfuncname + init.getName();
-            writeAssembly(TWO_PARAM, SET_OP, name, I0);
-            writeAssembly(THREE_PARAM, ADD_OP, G0, I0, I0);
-        } 
+        }
         else if(!init.getType().isVoid()){ //dont print this line if init type is void e.g return; 
             writeAssembly("! return " + init.getName() + ";\n");
             writeAssembly(TWO_PARAM, SET_OP, global, L7);
@@ -1692,7 +1740,9 @@ public class AssemblyCodeGenerator {
             }else{
                  writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
             }
-
+            if(((FuncSTO)func).getReturnType().isFloat() && !init.getType().isFloat()){
+                convertToFloat(func, init, I0);
+            }
         }
 
         String param = paramtypelist(func);
@@ -1720,7 +1770,8 @@ public class AssemblyCodeGenerator {
         }
         writeAssembly(TWO_PARAM, SET_OP, iString(size), O1);
         call(arrCheckCall);
-        if(sto.isGlobal()){
+        //for unititGlobalVars.rc set is all 4
+        if(sto.isGlobal() && (sto.getValue() != null)){
             writeAssembly(TWO_PARAM, SET_OP, iString(sto.getType().getSize()*4), O1);
         }else {
             writeAssembly(TWO_PARAM, SET_OP, "4", O1);
@@ -2340,7 +2391,21 @@ public class AssemblyCodeGenerator {
         if (sto.getType() != null) {
             writeAssembly("! cout << " + sto.getName() + "\n");
             if (sto.isConst()) {
-                if(sto.getType().isFloat()){
+                //for localstatic const int checks 
+                if(sto.isGlobal() || sto.isStatic()){
+                    writeAssembly(TWO_PARAM, SET_OP, sto.getName(), L7);
+                    writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+                    //check if this is correct
+                    if(sto.getType().isFloat()){
+                        writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", f0);
+                    }else {
+                        writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", O1);
+                    }
+                }
+                else if(sto.getisConstSTO()){
+                    setAddLoad(sto);
+                }
+                else if(sto.getType().isFloat()){
                     writeConstFloatFuncCall(sto, 0);
                 }else if(sto.getType().isBool()){
                     writeAssembly(TWO_PARAM, SET_OP, stoValue(sto), O0);
@@ -2352,15 +2417,16 @@ public class AssemblyCodeGenerator {
             }
             //typecast_test10
            if(sto.isRef() || sto.getType().isPointer() || sto.getisPointer()){
-                //writeAssembly("! chereere \n"); 
+                 //writeAssembly("! chereere \n"); 
                 //typecast_test10
                 //need to check for other tests if all *a pointers are 0??
                 //*(int*)&gf is 1
-                if(sto.getType().isBool()){
+                //float f0 |floatParamRefTest.rc
+                if(sto.getType().isBool()|| sto.getType().isFloat()){
                      writeCallStored(sto, 0); 
                 }
                 else{
-                    writeCallStored(sto, 1); 
+                      writeCallStored(sto, 1); 
                 }
             }
              //203g 0 209q 1
@@ -2385,7 +2451,18 @@ public class AssemblyCodeGenerator {
                     writeCallStored(sto, 1); 
                 }
             }
+            else if(sto.isStatic()){
+                String name = infunc + staticfuncname + sto.getName();
+                writeAssembly(TWO_PARAM, SET_OP, name, L7);
+                writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+                if(sto.getType().isFloat()){
+                    writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", f0);
+                }else {
+                    writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", O1);
+                }
+            }
             else{
+                //writeAssembly("! here \n");
                 setAddLoad(sto);
             }
         } else if (sto.getType() == null) {

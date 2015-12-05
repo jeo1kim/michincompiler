@@ -42,6 +42,7 @@ abstract class STO
 	private boolean m_isparam = false;
 	private boolean m_arraycon = false;
 	private boolean m_isNullptr = false;
+	private boolean m_isconststo = false;
 
 	public boolean isStructVar(){
 		return inStruct;
@@ -135,6 +136,13 @@ abstract class STO
 	public void setisNullptr(){
 		m_isNullptr = true;
 	}
+	public boolean getisConstSTO(){
+		return m_isconststo;
+	}
+	public void setisConstSTO(){
+		m_isconststo = true;
+	}
+		
 	//----------------------------------------------------------------
 	//
 	//----------------------------------------------------------------
