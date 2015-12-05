@@ -505,8 +505,15 @@ public class AssemblyCodeGenerator {
             if(!sto.isStatic()){
                 //check func_param_test4.rc
                 //int ggg = 4;
-                writeAssembly(TWO_PARAM, SET_OP, sto.getName(), "%o"+iString(count));
-                writeAssembly(THREE_PARAM, ADD_OP, G0, "%o"+iString(count), "%o"+iString(count));
+                if(originalparam.isRef()){
+                    writeAssembly(TWO_PARAM, SET_OP, sto.getName(), "%o"+iString(count));
+                    writeAssembly(THREE_PARAM, ADD_OP, G0, "%o"+iString(count), "%o"+iString(count));
+                }
+                else {
+                    writeAssembly(TWO_PARAM, SET_OP, sto.getName(), L7);
+                    writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+                    writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", "%o"+iString(count));
+                }
             }else {
                 if(sto.isStatic() && (sto.getSparcOffset() == 0)){
                     String name = infunc + staticfuncname + sto.getName();
@@ -525,7 +532,7 @@ public class AssemblyCodeGenerator {
                 }
             }
         }
-        else if(sto.isConst()){
+        else if(sto.isConst() && !sto.getisConstSTO()){
             if(sto.getType().isFloat()){
                 writeConstFloatFuncCall(sto, count);
                 //i think this was for global?? can't remember
@@ -1444,6 +1451,9 @@ public class AssemblyCodeGenerator {
             //becomes weired when doing binaryexpr 103g
             //if (init.isGlobal() || init.isStatic() || (init.getSparcOffset() != 0)) {
             if (init.isGlobal() || init.isStatic() || init.getisParam() || (init.getSparcOffset() != 0)) {
+                if(init.isStatic() && init.isGlobal()){
+                    global = infunc + staticfuncname + init.getName();
+                }
                 writeAssembly(TWO_PARAM, SET_OP, global, L7);
                 writeAssembly(THREE_PARAM, ADD_OP, globalreg, L7, L7);
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
@@ -1673,7 +1683,7 @@ public class AssemblyCodeGenerator {
         writeAssembly(NL);
 
         //if(init.isRef() || init.getisArray()){
-if(init.getisArray()){
+        if(init.getisArray()){
             writeAssembly("! return " + init.getName() + ";\n");
             writeAssembly(TWO_PARAM, SET_OP, iString(init.getSparcOffset()), L7);
             writeAssembly(THREE_PARAM, ADD_OP, FP, L7, L7);
@@ -1696,13 +1706,15 @@ if(init.getisArray()){
             writeAssembly("! return " + init.getName() + ";\n");
             String name = infunc + staticfuncname + init.getName();
             //forgot in which case this was used
-            /*if((init.getSparcOffset() == 0)){
+            //used when function was ref?306a
+            if(func.isRef()){
                 writeAssembly(TWO_PARAM, SET_OP, name, I0);
                 writeAssembly(THREE_PARAM, ADD_OP, G0, I0, I0);
-            }*/
-            writeAssembly(TWO_PARAM, SET_OP, name, L7);
-            writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
-            writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
+            }else {
+                writeAssembly(TWO_PARAM, SET_OP, name, L7);
+                writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
+                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", I0);
+            }
 
         } 
         else if (init.isConst()) {
