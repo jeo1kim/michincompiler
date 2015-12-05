@@ -1773,6 +1773,9 @@ public class AssemblyCodeGenerator {
         int tempsize = size*4;
         funcIndent();
         writeAssembly("! %s[%s]\n", sto.getName(), expr.getName());
+        //writeAssembly("! %s %s \n", iString(sto.getType().getSize()), iString(sto.getType().getBaseType().getSize()));
+        //writeAssembly("! %s %s \n", sto.getType().getName(), sto.getType().getBaseType().getName());
+        //writeAssembly("! %s %s \n", sto.getType().getNextType().getName(), sto.getType().getBaseType().getName());
         if(expr.isConst()){
             //System.out.print("int inside val: "+iString(expr.getIntValue()));
             writeAssembly(TWO_PARAM, SET_OP, iString(expr.getIntValue()), O0);
@@ -1783,7 +1786,8 @@ public class AssemblyCodeGenerator {
         writeAssembly(TWO_PARAM, SET_OP, iString(size), O1);
         call(arrCheckCall);
         //for unititGlobalVars.rc set is all 4
-        if(sto.isGlobal() && (sto.getValue() != null)){
+        //210b.rc
+        if(sto.isGlobal() && (sto.getType().getNextType() != sto.getType().getBaseType())){
             writeAssembly(TWO_PARAM, SET_OP, iString(sto.getType().getSize()*4), O1);
         }else {
             writeAssembly(TWO_PARAM, SET_OP, "4", O1);
