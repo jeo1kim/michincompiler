@@ -927,13 +927,14 @@ public class AssemblyCodeGenerator {
                 iffloat = true;
 
             } else if (a.getType().isFloat() && b.getType().isFloat()) { //if both is float
-
+                //writeAssembly("! /////////\n");
                 if (a.isConst() && !b.isConst()) {
                     writeConstFloat(a);
                     writeCallStored(b, 1);
                 }
-                if (!a.isConst() && b.isConst()) {
+                else if (!a.isConst() && b.isConst()) {
                     writeCallStored(a, 0);
+                    //floatreg incmented in writeconstfloat
                     floatreg++;
                     writeConstFloat(b);
                 } else if (!a.isConst() && !b.isConst()) {
@@ -1748,9 +1749,10 @@ public class AssemblyCodeGenerator {
             //if(init.isExpr()){ //if the value was modified e.g went to binary 
             //shouldnt go in when it return x + y and x an y is from parameter
             //isfunc test 209a
-            //if(init.isRef() || init.getisArray()){
-            //    writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", register);
-            //}
+            //in funccall_param_simple.rc is needed when func(&x) return x;
+            if(init.isRef()){
+                writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", L7);
+            }
             if(init.getType().isFloat()){
                 writeAssembly(TWO_PARAM, LD_OP, "[" + L7 + "]", f0);
             }else{
@@ -2054,6 +2056,24 @@ public class AssemblyCodeGenerator {
             }
         }
         sectionAlign(TEXT_SEC, iString(stotype.getSize())); // SECTION and ALIGN
+
+        /*if (init != null && sto.isGlobal()) {
+            if (sto.getType().isFloat() && init.getType().isInt()) {
+                //sectionAlign(TEXT_SEC, iString(stotype.getSize()));
+                writeGlobalAuto(sto, init);
+
+            } else if (init.isStatic()) {
+                sectionAlign(TEXT_SEC, iString(stotype.getSize()));
+                writeGlobalAuto(sto, init);
+
+            }
+            else if(!init.isConst()){
+                sectionAlign(TEXT_SEC, iString(stotype.getSize()));
+                writeGlobalAuto(sto, init);
+
+            }
+        }*/
+
         decreaseIndent();
     }
 
@@ -2472,12 +2492,22 @@ public class AssemblyCodeGenerator {
                 }
             }
             else if(sto.isStatic()){
-                String name = infunc + staticfuncname + sto.getName();
+                String name = "";
+                if(sto.isGlobal()){
+                    //writeAssembly("! here \n");
+                    name = sto.getName();
+                }else {
+                    name = infunc + staticfuncname + sto.getName();
+                }
+                
                 writeAssembly(TWO_PARAM, SET_OP, name, L7);
                 writeAssembly(THREE_PARAM, ADD_OP, G0, L7, L7);
                 if(sto.getType().isFloat()){
                     writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", f0);
-                }else {
+                }else if(sto.getType().isBool()){
+                    writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", O0);
+                }
+                else{
                     writeAssembly(TWO_PARAM, LD_OP, "["+L7+"]", O1);
                 }
             }
